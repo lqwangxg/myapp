@@ -1,6 +1,5 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -27,6 +26,11 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+}
+
+type Config struct {
+	global_params []string
+	spec_chars    []map[string]string
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -75,8 +79,19 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+	config := &Config{
+		global_params: viper.GetStringSlice("global_params"),
+		spec_chars:    make([]map[string]string, 0),
+	}
+	fmt.Println(config)
 	configMap := viper.AllSettings()
-	for key, value := range(configMap) {
+	for key, value := range configMap {
 		fmt.Println(key, value)
+		// for _, v := range value.([]interface) {
+		// 	config.spec_chars = append(config.spec_chars, v)
+		// }
+		// if key == "spec_chars" {
+		// 	config.spec_chars = append(config.spec_chars)
+		// }
 	}
 }

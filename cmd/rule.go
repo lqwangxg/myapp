@@ -7,6 +7,7 @@ import (
 	"fmt"
 	//"context"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	//"github.com/redis/go-redis/v9"
 )
 
@@ -25,11 +26,33 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("rule called")
 		fmt.Printf("origin flag: ruleName=%s,  ruleStr=%s \n", ruleName, ruleStr)
-		//ReadYaml()
+		ReadYaml()
 		//setValue(ruleName, ruleStr + " ===>.suffix")
 		//newRule := getValue(ruleName)
 		//fmt.Printf("after setValue ruleName=%s,  old-ruleStr=%s, new-ruleStr \n", ruleName, ruleStr,newRule)
 	},
+}
+
+func ReadYaml() {
+	viper.SetConfigType("yaml")
+	viper.SetConfigType("config/.myapp.yaml")
+	//viper.SetConfigFile("config/rules/html-input.yaml")
+	fmt.Printf("Using config: %s\n", viper.ConfigFileUsed())
+	viper.ReadInConfig()
+
+	if viper.IsSet("config.global_params") {
+		global_params := viper.Get("config.global_params") //.([]string)
+		fmt.Println("config.global_params:", global_params)
+	} else {
+		fmt.Println(" config.global_params not set.")
+	}
+	if viper.IsSet("config.spec_chars") {
+		//params := global_params.([]map[string]string)
+		spec_chars := viper.Get("config.spec_chars") //.([]map[string]string)
+		fmt.Println("config.spec_chars:", spec_chars)
+	} else {
+		fmt.Println(" config.spec_chars not set.")
+	}
 }
 
 // var client = redis.NewClient(&redis.Options{
@@ -57,6 +80,6 @@ to quickly create a Cobra application.`,
 
 func init() {
 	regexCmd.AddCommand(ruleCmd)
-	ruleCmd.Flags().StringVarP(&ruleName, "ruleName", "", "", "regex replace pattern name")
-	ruleCmd.Flags().StringVarP(&ruleStr, "ruleStr", "", "", "regex replace rule")
+	ruleCmd.Flags().StringVar(&ruleName, "ruleName", "", "regex replace pattern name")
+	ruleCmd.Flags().StringVar(&ruleStr, "ruleStr", "", "regex replace rule")
 }
