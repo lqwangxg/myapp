@@ -6,9 +6,12 @@ package cmd
 
 import (
 	"fmt"
-
+	//"context"
 	"github.com/spf13/cobra"
+	//"github.com/redis/go-redis/v9"
 )
+
+var ruleName, ruleStr string
 
 // ruleCmd represents the rule command
 var ruleCmd = &cobra.Command{
@@ -22,19 +25,38 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("rule called")
+		fmt.Printf("origin flag: ruleName=%s,  rule=%s \n", ruleName, ruleStr)
+		//setValue(ruleName, ruleStr + " ===>.suffix")
+		//newRule := getValue(ruleName)
+		//fmt.Printf("after setValue ruleName=%s,  old-ruleStr=%s, new-ruleStr \n", ruleName, ruleStr,newRule)
 	},
 }
 
+// var client = redis.NewClient(&redis.Options{
+// 	Addr:	  "localhost:6379",
+// 	Password: "", // no password set
+// 	DB:		  0,  // use default DB
+// });
+// func getValue(key string) string {
+// 	ctx := context.Background()
+// 	val, err := client.Get(ctx, key).Result()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Printf("getValue: key=%s,  rule=%s \n", key, val)
+// 	return val
+// }
+// func setValue(key string, value string) {
+// 	ctx := context.Background()
+// 	err := client.Set(ctx, key, value, 0).Err()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Printf("setValue: key=%s,  rule=%s \n", key, value)
+// }
+
 func init() {
 	regexCmd.AddCommand(ruleCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// ruleCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// ruleCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	ruleCmd.Flags().StringVarP(&ruleName, "name","n","", "regex replace pattern name")
+	ruleCmd.Flags().StringVarP(&ruleStr, "rule","r","", "regex replace rule")
 }

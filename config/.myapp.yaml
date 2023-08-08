@@ -1,0 +1,7 @@
+config:
+  spec_chars:
+    - { key: '\n', value: '乚' }
+    - { key: '\t', value: '亠' }
+
+  global_params:
+    - 'title=[\s"]*(?<title>.+?)[\s"]*'

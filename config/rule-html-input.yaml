@@ -1,0 +1,40 @@
+rules:
+  - name: button-size
+    group: html-input
+    range:
+      from: '\<html:button'
+      to: '\/?\>'
+
+    params:
+      - 'text=[\s"]*(?<text>.+?)[\s"]*'
+      - 'width:[\s"]*(?<width>.+?)px'
+      - 'maxlength=[\s"]*(?<maxlength>\d+?)[\s"]*'
+      - 'size=[\s"]*(?<size>\d+?)[\s"]*'
+      
+    processes:
+      - ${text_width} = length(${text}) * 10 + 40
+    skipwhen:
+      - ${size} < ${maxlength}
+    action: 
+      pattern: 'width:[\s"]*(?<width>\d+)'
+      replace: 'width: ${text_width}'
+
+  - name: text-size
+    group: html-input
+    range:
+      from: '\<html:button'
+      to: '\/?\>'
+
+    params:
+      - 'text=[\s"]*(?<text>.+?)[\s"]*'
+      - 'width:[\s"]*(?<width>.+?)px'
+      - 'maxlength=[\s"]*(?<maxlength>\d+?)[\s"]*'
+      - 'size=[\s"]*(?<size>\d+?)[\s"]*'
+      
+    processes:
+      - ${text_width} = length(${text}) * 10 + 40
+    skipwhen:
+      - ${size} < ${maxlength}
+    action: 
+      pattern: 'width:[\s"]*(?<width>\d+)'
+      replace: 'width: ${text_width}'
