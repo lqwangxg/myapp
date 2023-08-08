@@ -1,6 +1,5 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -25,7 +24,8 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("rule called")
-		fmt.Printf("origin flag: ruleName=%s,  rule=%s \n", ruleName, ruleStr)
+		fmt.Printf("origin flag: ruleName=%s,  ruleStr=%s \n", ruleName, ruleStr)
+		//ReadYaml()
 		//setValue(ruleName, ruleStr + " ===>.suffix")
 		//newRule := getValue(ruleName)
 		//fmt.Printf("after setValue ruleName=%s,  old-ruleStr=%s, new-ruleStr \n", ruleName, ruleStr,newRule)
@@ -57,6 +57,6 @@ to quickly create a Cobra application.`,
 
 func init() {
 	regexCmd.AddCommand(ruleCmd)
-	ruleCmd.Flags().StringVarP(&ruleName, "name","n","", "regex replace pattern name")
-	ruleCmd.Flags().StringVarP(&ruleStr, "rule","r","", "regex replace rule")
+	ruleCmd.Flags().StringVarP(&ruleName, "ruleName", "", "", "regex replace pattern name")
+	ruleCmd.Flags().StringVarP(&ruleStr, "ruleStr", "", "", "regex replace rule")
 }
