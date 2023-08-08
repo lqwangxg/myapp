@@ -54,6 +54,22 @@ func MatchText(pattern string, content string) {
 
     fmt.Println(r.Match([]byte(content)))
 
+	//FindStringSubmatch
+    //格納されるデータはスライスで入っているので、一つ一つ取り出すことも可能。
+    //indexだけ取り出したいなど
+    //スライスで取得される
+    fss := r.FindStringSubmatch("/index/test")
+    fmt.Println(fss, fss[0], fss[1], fss[2], len(fss))
+    //>>[/index/test index test] /index/test index test 3
+    //スライスで取り出せる
+
+
+    //改行がある場合を検知する場合^ $ではなく、\A \zを使う
+    //セキュリティ上望ましい。
+    r3:= regexp.MustCompile(`\A/(index|detail|create)/([a-zA-Z0-9]+)\z`)
+    fs3 := r3.FindString("/index/test")
+    fmt.Println(fs3)//len(fs3)
+
 }
 
 func ReplaceText(pattern string, content string, replacement string) {
