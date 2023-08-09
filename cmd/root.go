@@ -12,6 +12,7 @@ import (
 )
 
 var cfgFile string
+var config *AppConfig
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -26,11 +27,6 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
-}
-
-type Config struct {
-	global_params []string
-	spec_chars    []map[string]string
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -79,19 +75,12 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
-	config := &Config{
-		global_params: viper.GetStringSlice("global_params"),
-		spec_chars:    make([]map[string]string, 0),
+	//config.echars = viper.GetStringMapString("echars")
+	//config.pparams = viper.GetStringSlice("pparams")
+	config = &AppConfig{
+		echars:  viper.GetStringMapString("echars"),
+		pparams: viper.GetStringSlice("pparams"),
 	}
+
 	fmt.Println(config)
-	configMap := viper.AllSettings()
-	for key, value := range configMap {
-		fmt.Println(key, value)
-		// for _, v := range value.([]interface) {
-		// 	config.spec_chars = append(config.spec_chars, v)
-		// }
-		// if key == "spec_chars" {
-		// 	config.spec_chars = append(config.spec_chars)
-		// }
-	}
 }

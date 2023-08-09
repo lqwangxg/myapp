@@ -1,7 +1,9 @@
-config:
-  spec_chars:
-    - { key: '\n', value: '乚' }
-    - { key: '\t', value: '亠' }
+# begin: replace these chars key -> val
+# end  : restore these chars val -> key  
+echars:
+  '\n': '乚'
+  '\t': '亠'
 
-  global_params:
-    - 'title=[\s"]*(?<title>.+?)[\s"]*'
+# get params by match input contents.
+pparams:
+  - 'title=[\s"]*(?<title>.+?)[\s"]*'
