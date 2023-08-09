@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 
 	"github.com/spf13/cobra"
 )
@@ -70,31 +69,9 @@ func MatchDiretory(pattern, dirPath, suffix string) {
 }
 func MatchText(pattern, content string) {
 	content = beforeMatch(content)
-	doMatch(pattern, content)
-	//content = afterMatch(content)
-}
-func doMatch(pattern, content string) {
-	r := regexp.MustCompile(pattern)
-	groupNames := r.SubexpNames()
-	matches := r.FindAllStringSubmatch(content, -1)
-	matchIdxes := r.FindAllStringSubmatchIndex(content, -1)
-	for i, m := range matchIdxes {
-		log.Printf("[%d]: %v", i, m)
-
-	}
-
-	for i, m := range matches {
-		//slice :=matchIdxes[i]
-		log.Printf("[%d]: spos:%d %s", i, m)
-		for _, n := range groupNames {
-			if n != "" {
-				lastIndex := r.SubexpIndex(n)
-				log.Printf("lastIndex=%d, group[%s]: %s", lastIndex, n, m[lastIndex])
-			}
-		}
-	}
-
-	// fmt.Println(r.FindAllStringSubmatchIndex(content, -1))
+	matches := Matches(pattern, content)
+	matches.restore()
+	matches.Log()
 }
 
 // func ReplaceText(pattern string, content string, replacement string) {
