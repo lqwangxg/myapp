@@ -11,9 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-var config *AppConfig
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "myapp",
@@ -45,7 +42,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "config/.myapp.yaml", "config file (default is $HOME/.myapp.yaml)")
+	rootCmd.PersistentFlags().StringVar(&flags.configFile, "config", "", "config file (default is $HOME/.myapp.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -55,9 +52,9 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	//fmt.Println("root initConfig called ", cfgFile)
-	if cfgFile != "" {
+	if flags.configFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(flags.configFile)
 	} else {
 		// Find home directory.
 		home, err := os.UserHomeDir()

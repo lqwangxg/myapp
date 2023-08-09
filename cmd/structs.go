@@ -1,5 +1,14 @@
 package cmd
 
+type FlagConfig struct {
+	name       string
+	configFile string
+	pattern    string
+	destFile   string
+	destDir    string
+	suffix     string
+}
+
 type AppConfig struct {
 	echars  map[string]string
 	pparams []string

@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var name, textfile, directory, suffix string
-
 // replaceCmd represents the replaceTF command
 var replaceCmd = &cobra.Command{
 	Use:   "replace",
@@ -19,23 +17,19 @@ var replaceCmd = &cobra.Command{
 	      pattern name connects to a json or configMap which includes rules of pattern/replacement/skipRules.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex replace called")
-		fmt.Printf("name=%s,  textfile=%s, directory=%s, suffix=%s \n", name, textfile, directory, suffix)
-		if name == "" {
-			fmt.Printf("--name=%s is required.", name)
+		fmt.Printf("name=%s,  textfile=%s, directory=%s, suffix=%s \n", flags.name, flags.destFile, flags.destDir, flags.suffix)
+		if flags.name == "" {
+			fmt.Printf("--name=%s is required.", flags.name)
 		}
-		if textfile == "" && directory == "" {
-			fmt.Printf("--textfile=%s and --directory=%s can't be empty neither.", textfile, directory)
+		if flags.destFile == "" && flags.destDir == "" {
+			fmt.Printf("--textfile=%s and --directory=%s can't be empty neither.", flags.destFile, flags.destDir)
 		}
-		// if(textfile !=""){
-		// }
 	},
 }
 
 func init() {
 	regexCmd.AddCommand(replaceCmd)
 
-	replaceCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "regex replace pattern name")
-	replaceCmd.PersistentFlags().StringVarP(&textfile, "destFile", "f", "", "replace destination text file path")
-	replaceCmd.PersistentFlags().StringVarP(&directory, "destDir", "d", "", "replace destination directory")
-	replaceCmd.PersistentFlags().StringVarP(&suffix, "suffix", "s", "", "replace destination file suffix, default empty")
+	replaceCmd.PersistentFlags().StringVarP(&flags.name, "name", "n", "", "regex replace pattern name")
+	replaceCmd.PersistentFlags().StringVarP(&flags.suffix, "suffix", "s", "", "replace destination file suffix, default empty")
 }
