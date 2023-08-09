@@ -2,6 +2,7 @@
 # end  : restore these chars val -> key  
 echars:
   '\n': '乚'
+  '\r': '刂'
   '\t': '亠'
 
 # get params by match input contents.

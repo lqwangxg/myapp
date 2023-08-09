@@ -10,6 +10,27 @@ type FlagConfig struct {
 	suffix     string
 }
 
+type RegexMatches struct {
+	Pattern    string
+	GroupNames []string
+	Matches    []RegexMatch
+}
+type RegexMatch struct {
+	Value   string
+	Groupes []RegexGroup
+	Indexes []RegexMatchIndex
+}
+type RegexGroup struct {
+	Index int
+	Name  string
+	Value string
+}
+type RegexMatchIndex struct {
+	StartIndex int
+	EndIndex   int
+	Length     int //=EndIndex-StartIndex
+}
+
 type AppConfig struct {
 	echars  map[string]string
 	pparams []string

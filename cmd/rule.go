@@ -11,7 +11,7 @@ import (
 	//"github.com/redis/go-redis/v9"
 )
 
-var ruleName, ruleStr string
+//var ruleName, ruleStr string
 
 // ruleCmd represents the rule command
 var ruleCmd = &cobra.Command{
@@ -25,7 +25,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("rule called")
-		fmt.Printf("origin flag: ruleName=%s,  ruleStr=%s \n", ruleName, ruleStr)
+		//fmt.Printf("origin flag: ruleName=%s,  ruleStr=%s \n", ruleName, ruleStr)
 		ReadYaml()
 		//setValue(ruleName, ruleStr + " ===>.suffix")
 		//newRule := getValue(ruleName)
@@ -35,24 +35,24 @@ to quickly create a Cobra application.`,
 
 func ReadYaml() {
 	viper.SetConfigType("yaml")
-	viper.SetConfigType("config/.myapp.yaml")
+	viper.SetConfigType("rule/html-input.yaml")
 	//viper.SetConfigFile("config/rules/html-input.yaml")
 	fmt.Printf("Using config: %s\n", viper.ConfigFileUsed())
 	viper.ReadInConfig()
 
-	if viper.IsSet("config.global_params") {
-		global_params := viper.Get("config.global_params") //.([]string)
-		fmt.Println("config.global_params:", global_params)
-	} else {
-		fmt.Println(" config.global_params not set.")
-	}
-	if viper.IsSet("config.spec_chars") {
-		//params := global_params.([]map[string]string)
-		spec_chars := viper.Get("config.spec_chars") //.([]map[string]string)
-		fmt.Println("config.spec_chars:", spec_chars)
-	} else {
-		fmt.Println(" config.spec_chars not set.")
-	}
+	// if viper.IsSet("config.global_params") {
+	// 	global_params := viper.Get("config.global_params") //.([]string)
+	// 	fmt.Println("config.global_params:", global_params)
+	// } else {
+	// 	fmt.Println(" config.global_params not set.")
+	// }
+	// if viper.IsSet("config.spec_chars") {
+	// 	//params := global_params.([]map[string]string)
+	// 	spec_chars := viper.Get("config.spec_chars") //.([]map[string]string)
+	// 	fmt.Println("config.spec_chars:", spec_chars)
+	// } else {
+	// 	fmt.Println(" config.spec_chars not set.")
+	// }
 }
 
 // var client = redis.NewClient(&redis.Options{
@@ -80,6 +80,4 @@ func ReadYaml() {
 
 func init() {
 	regexCmd.AddCommand(ruleCmd)
-	ruleCmd.Flags().StringVar(&ruleName, "ruleName", "", "regex replace pattern name")
-	ruleCmd.Flags().StringVar(&ruleStr, "ruleStr", "", "regex replace rule")
 }

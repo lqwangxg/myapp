@@ -29,7 +29,4 @@ var replaceCmd = &cobra.Command{
 
 func init() {
 	regexCmd.AddCommand(replaceCmd)
-
-	replaceCmd.PersistentFlags().StringVarP(&flags.name, "name", "n", "", "regex replace pattern name")
-	replaceCmd.PersistentFlags().StringVarP(&flags.suffix, "suffix", "s", "", "replace destination file suffix, default empty")
 }

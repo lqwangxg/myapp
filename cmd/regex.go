@@ -1,6 +1,5 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -28,13 +27,11 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(regexCmd)
 
-	// Here you will define your flags and configuration settings.
+	regexCmd.PersistentFlags().StringVarP(&flags.destFile, "destFile", "f", "", "replace destination text file path")
+	regexCmd.PersistentFlags().StringVarP(&flags.destDir, "destDir", "d", "", "replace destination directory")
+	regexCmd.PersistentFlags().StringVarP(&flags.pattern, "pattern", "p", "", "regex pattern string")
+	regexCmd.PersistentFlags().StringVarP(&flags.origin, "content", "c", "", "input content string")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// regexCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// regexCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	regexCmd.PersistentFlags().StringVarP(&flags.name, "name", "n", "", "regex replace pattern name")
+	regexCmd.PersistentFlags().StringVarP(&flags.suffix, "suffix", "s", "", "replace destination file suffix, default empty")
 }
