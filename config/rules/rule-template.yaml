@@ -1,14 +1,14 @@
 # rule-name
-name: button-size
+name: # required
 # rule-group
-group: html-input
+group: #optional
 
 # before replace process: check full content skip or do.
 # priority descend: skip_ifany, skip_when, do_ifany, do_when
 # if any true return skip/do;
 # optional: if groupname is included in pattern, 
 #  { match.group.name: match.group.nalue } will be saved in ${full_params_map}
-full_patterns :
+full_patterns : #optional
   skip_ifany: [""]
   skip_when: [""]
   do_ifany: [""]

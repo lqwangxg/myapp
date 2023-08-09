@@ -31,19 +31,11 @@ var replaceCmd = &cobra.Command{
 	},
 }
 
-// func replaceFile(name string, textfile string) {
-
-// }
-
-// func replaceDirectory(name string, directory string) {
-
-// }
-
 func init() {
 	regexCmd.AddCommand(replaceCmd)
 
-	replaceCmd.Flags().StringVarP(&name, "name", "n", "", "regex replace pattern name")
-	replaceCmd.Flags().StringVarP(&textfile, "destFile", "f", "", "replace destination text file path")
-	replaceCmd.Flags().StringVarP(&directory, "destDir", "d", "", "replace destination directory")
-	replaceCmd.Flags().StringVarP(&suffix, "suffix", "s", "", "replace destination file suffix, default empty")
+	replaceCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "regex replace pattern name")
+	replaceCmd.PersistentFlags().StringVarP(&textfile, "destFile", "f", "", "replace destination text file path")
+	replaceCmd.PersistentFlags().StringVarP(&directory, "destDir", "d", "", "replace destination directory")
+	replaceCmd.PersistentFlags().StringVarP(&suffix, "suffix", "s", "", "replace destination file suffix, default empty")
 }
