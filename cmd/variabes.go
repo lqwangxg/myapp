@@ -1,4 +1,4 @@
 package cmd
 
-var config *AppConfig
+var config AppConfig
 var flags FlagConfig

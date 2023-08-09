@@ -4,7 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -65,14 +65,10 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		config = AppConfig{
+			echars:  viper.GetStringMapString("echars"),
+			pparams: viper.GetStringSlice("pparams"),
+		}
+		log.Printf("Using config file:%s, content:%s", viper.ConfigFileUsed(), config)
 	}
-	//config.echars = viper.GetStringMapString("echars")
-	//config.pparams = viper.GetStringSlice("pparams")
-	config = &AppConfig{
-		echars:  viper.GetStringMapString("echars"),
-		pparams: viper.GetStringSlice("pparams"),
-	}
-
-	fmt.Println(config)
 }
