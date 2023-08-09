@@ -71,7 +71,7 @@ func MatchText(pattern, content string) {
 	content = beforeMatch(content)
 	matches := Matches(pattern, content)
 	matches.restore()
-	matches.Log()
+	matches.log()
 }
 
 // func ReplaceText(pattern string, content string, replacement string) {

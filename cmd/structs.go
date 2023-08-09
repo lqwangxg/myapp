@@ -1,5 +1,7 @@
 package cmd
 
+import "regexp"
+
 type FlagConfig struct {
 	name       string
 	configFile string
@@ -9,11 +11,11 @@ type FlagConfig struct {
 	destDir    string
 	suffix     string
 }
-
 type RegexMatchResult struct {
 	Pattern    string
 	GroupNames []string
 	Matches    []RegexMatch
+	r          *regexp.Regexp
 }
 type RegexMatch struct {
 	Index    int
@@ -30,28 +32,27 @@ type RegexGroup struct {
 type RegexMatchIndex struct {
 	Start int
 	End   int
-	//Length int //=EndIndex-StartIndex
 }
 
 type AppConfig struct {
 	echars  map[string]string
 	pparams []string
 }
-type RuleConfig struct {
-	name                 string
-	group                string
-	full_patterns        CheckPatternConfig
-	range_pattern        string
-	range_patterns       CheckPatternConfig
-	range_params_pattern []string
-	match_pattern        string
-	match_patterns       CheckPatternConfig
-	match_formulas       []string
-	match_evals          CheckPatternConfig
+type ReplaceRuleConfig struct {
+	Name                 string             `yaml:"name"`
+	Group                string             `yaml:"group"`
+	Full_patterns        CheckPatternConfig `yaml:"full_patterns"`
+	Range_pattern        string             `yaml:"range_pattern"`
+	Range_params_pattern []string           `yaml:"range_params_pattern"`
+	Range_patterns       CheckPatternConfig `yaml:"range_patterns"`
+	Match_pattern        string             `yaml:"match_pattern"`
+	Match_patterns       CheckPatternConfig `yaml:"match_patterns"`
+	Match_formulas       []string           `yaml:"match_formulas"`
+	Match_evals          CheckPatternConfig `yaml:"match_evals"`
 }
 type CheckPatternConfig struct {
-	skip_ifany []string
-	skip_when  []string
-	do_ifany   []string
-	do_when    []string
+	Skip_ifany []string `yaml:"skip_ifany"`
+	Skip_when  []string `yaml:"skip_when"`
+	Do_ifany   []string `yaml:"do_ifany"`
+	Do_when    []string `yaml:"do_when"`
 }
