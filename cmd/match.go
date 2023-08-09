@@ -5,6 +5,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"regexp"
 
 	"github.com/spf13/cobra"
@@ -17,19 +19,69 @@ var matchCmd = &cobra.Command{
 	Long:  ` match string by regrep pattern, and replace string if parameter --replace is set.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex match called")
+		pattern := flags.pattern
+		if pattern == "" {
+			return
+		}
+		if flags.origin != "" {
+			MatchText(pattern, flags.origin)
+		}
+		if flags.destFile != "" {
+			MatchFile(pattern, flags.destFile, flags.suffix)
+		}
 
-		pattern, _ := cmd.Flags().GetString("pattern")
-		content, _ := cmd.Flags().GetString("content")
-		replace, _ := cmd.Flags().GetString("replace")
-
-		fmt.Printf("args=%v, args.length=%d pattern=%s,  content=%s, replace=%s \n", args, len(args), pattern, content, replace)
+		if flags.origin == "" {
+			if flags.destFile != "" {
+				if buffer, err := ReadAll(flags.destFile); err != nil {
+					flags.origin = buffer
+				}
+			}
+		}
+		content := flags.origin
+		if content == "" {
+			return
+		}
+		fmt.Printf("args=%v, args.length=%d pattern=%s,  content=%s \n", args, len(args), pattern, content)
 
 		MatchText(pattern, content)
 		//ReplaceText(pattern, content, replace)
 	},
 }
 
-func MatchText(pattern string, content string) {
+func MatchFile(pattern, filePath, suffix string) {
+	// exit if file not exists
+	if !IsExists(filePath) {
+		return
+	}
+
+	if buffer, err := ReadAll(filePath); err != nil {
+		MatchText(pattern, buffer)
+	}
+}
+
+func MatchDiretory(pattern, dirPath, suffix string) {
+	if !IsExists(dirPath) {
+		log.Printf("dirPath is not found. dirPath=%s", dirPath)
+		return
+	}
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	for _, file := range files {
+		ok, err := IsDir(file.Name())
+		if err == nil {
+			if ok {
+				MatchDiretory(pattern, file.Name(), suffix)
+			} else {
+				MatchFile(pattern, file.Name(), suffix)
+			}
+		}
+	}
+}
+func MatchText(pattern, content string) {
 
 	match, _ := regexp.MatchString(pattern, content)
 	fmt.Println(match)
@@ -111,5 +163,5 @@ func init() {
 	matchCmd.PersistentFlags().StringVarP(&flags.destFile, "destFile", "f", "", "replace destination text file path")
 	matchCmd.PersistentFlags().StringVarP(&flags.destDir, "destDir", "d", "", "replace destination directory")
 	matchCmd.PersistentFlags().StringVarP(&flags.pattern, "pattern", "p", "", "regex pattern string")
-	matchCmd.Flags().StringP("content", "c", "", "input content string")
+	matchCmd.PersistentFlags().StringVarP(&flags.origin, "content", "c", "", "input content string")
 }

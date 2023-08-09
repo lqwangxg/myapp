@@ -4,6 +4,7 @@ type FlagConfig struct {
 	name       string
 	configFile string
 	pattern    string
+	origin     string
 	destFile   string
 	destDir    string
 	suffix     string
