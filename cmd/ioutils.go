@@ -21,17 +21,6 @@ func IsDir(path string) (bool, error) {
 	return fileInfo.IsDir(), err
 }
 
-// func main() {
-// 	files, err := os.ReadDir(".")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	for _, file := range files {
-// 		log.Println(file.Name())
-// 	}
-// }
-
 func ReadAll(filePath string) (string, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -44,6 +33,5 @@ func ReadAll(filePath string) (string, error) {
 		return "", err
 	}
 
-	//fmt.Println(string(content))
 	return string(content), nil
 }

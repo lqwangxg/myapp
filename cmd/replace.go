@@ -6,10 +6,15 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"regexp"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var rules = make(map[string]ReplaceRuleConfig)
 
 // replaceCmd represents the replaceTF command
 var replaceCmd = &cobra.Command{
@@ -26,20 +31,54 @@ var replaceCmd = &cobra.Command{
 		if flags.destFile == "" && flags.destDir == "" {
 			fmt.Printf("--textfile=%s and --directory=%s can't be empty neither.", flags.destFile, flags.destDir)
 		}
-		findRule(flags.name)
+
+		for _, dir := range config.RuleDirs {
+			loadRules(dir, rules)
+		}
+		rslog(rules)
 	},
 }
 
-func findRule(ruleFile string) (ReplaceRuleConfig, error) {
-	viper.AddConfigPath("rules")
-	viper.SetConfigType("yaml")
-	viper.SetConfigName(ruleFile)
+func rslog(rs map[string]ReplaceRuleConfig) {
+	for key, rule := range rs {
+		log.Printf("key:%s, rule.name: %s , rule.pattern:%s", key, rule.Name, rule.Match_pattern)
+	}
+}
+func loadRules(dirPath string, rules map[string]ReplaceRuleConfig) {
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	r := regexp.MustCompile(`\w+\.(yaml|yml)$`)
+	for _, file := range files {
+		fullPath := filepath.Join(dirPath, file.Name())
+		isdir, err := IsDir(fullPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if isdir {
+			loadRules(fullPath, rules)
+			continue
+		}
+		//skip ifnot yaml or yml
+		if !r.MatchString(fullPath) {
+			continue
+		}
+		if rule, err := loadRule(fullPath); err == nil {
+			rule.Key = fullPath
+			rules[rule.Key] = rule
+		}
+	}
+}
+func loadRule(ruleFile string) (ReplaceRuleConfig, error) {
+	viper.SetConfigFile(ruleFile)
 
 	var rule ReplaceRuleConfig
 	err := viper.ReadInConfig()
 	if err == nil {
 		viper.Unmarshal(&rule)
-		log.Printf("Using ruleFile:%s, content:%s", viper.ConfigFileUsed(), rule)
+		//log.Printf("Using ruleFile:%s, content:%s", viper.ConfigFileUsed(), rule)
 	} else {
 		log.Fatal(err)
 	}

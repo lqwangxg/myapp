@@ -6,7 +6,7 @@ import (
 
 func beforeMatch(content string) string {
 	ret := content
-	for key, val := range config.echars {
+	for key, val := range config.EChars {
 		ret = replaceText(ret, key, val)
 	}
 	return ret
@@ -14,7 +14,7 @@ func beforeMatch(content string) string {
 
 func afterMatch(content string) string {
 	ret := content
-	for key, val := range config.echars {
+	for key, val := range config.EChars {
 		ret = replaceText(ret, val, key)
 	}
 	return ret

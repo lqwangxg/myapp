@@ -65,10 +65,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		config = AppConfig{
-			echars:  viper.GetStringMapString("echars"),
-			pparams: viper.GetStringSlice("pparams"),
-		}
+		viper.Unmarshal(&config)
 		log.Printf("Using config file:%s, content:%s", viper.ConfigFileUsed(), config)
 	}
 }

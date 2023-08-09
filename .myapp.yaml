@@ -4,7 +4,8 @@ echars:
   '\n': '乚'
   '\r': '刂'
   '\t': '亠'
-
+ruledirs: 
+  - rules
 # get params by match input contents.
-pparams:
+params:
   - 'title=[\s"]*(?<title>.+?)[\s"]*'

@@ -35,8 +35,9 @@ type RegexMatchIndex struct {
 }
 
 type AppConfig struct {
-	echars  map[string]string
-	pparams []string
+	EChars   map[string]string `yaml:"echars"`
+	RuleDirs []string          `yaml:"ruledirs"`
+	Params   []string          `yaml:"params"`
 }
 type ReplaceRuleConfig struct {
 	Name                 string             `yaml:"name"`
@@ -49,6 +50,7 @@ type ReplaceRuleConfig struct {
 	Match_patterns       CheckPatternConfig `yaml:"match_patterns"`
 	Match_formulas       []string           `yaml:"match_formulas"`
 	Match_evals          CheckPatternConfig `yaml:"match_evals"`
+	Key                  string
 }
 type CheckPatternConfig struct {
 	Skip_ifany []string `yaml:"skip_ifany"`
