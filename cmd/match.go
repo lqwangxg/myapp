@@ -68,10 +68,11 @@ func MatchDiretory(pattern, dirPath, suffix string) {
 	}
 }
 func MatchText(pattern, content string) {
-	content = beforeMatch(content)
-	matches := Matches(pattern, content)
-	matches.restore()
-	matches.log()
+	rs := CreateRegexFactory(pattern, content)
+	rs.ExecuteMatches()
+	rs.SplitMatch()
+	log.Print(rs.ToString())
+	rs.log()
 }
 
 // func ReplaceText(pattern string, content string, replacement string) {

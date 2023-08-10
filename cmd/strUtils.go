@@ -4,23 +4,30 @@ import (
 	"regexp"
 )
 
-func beforeMatch(content string) string {
-	ret := content
+func (cfg *AppConfig) Parse(content *string) string {
 	for key, val := range config.EChars {
-		ret = replaceText(ret, key, val)
+		encode(content, key, val)
 	}
-	return ret
+	return *content
 }
 
-func afterMatch(content string) string {
-	ret := content
+func (cfg *AppConfig) Restore(content *string) string {
 	for key, val := range config.EChars {
-		ret = replaceText(ret, val, key)
+		ckey := key
+		switch key {
+		case "\\n":
+			ckey = "\n"
+		case "\\r":
+			ckey = "\r"
+		case "\\t":
+			ckey = "\t"
+		}
+		encode(content, val, ckey)
 	}
-	return ret
+	return *content
 }
 
-func replaceText(input, pattern, replacement string) string {
-	r, _ := regexp.Compile(pattern)
-	return r.ReplaceAllString(input, replacement)
+func encode(input *string, fchar, tchar string) {
+	r, _ := regexp.Compile(fchar)
+	*input = r.ReplaceAllString(*input, tchar)
 }

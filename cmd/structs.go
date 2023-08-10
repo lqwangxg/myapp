@@ -11,11 +11,19 @@ type FlagConfig struct {
 	destDir    string
 	suffix     string
 }
-type RegexMatchResult struct {
+type RegexFactory struct {
 	Pattern    string
 	GroupNames []string
 	Matches    []RegexMatch
 	r          *regexp.Regexp
+	content    string //match input string
+	Ranges     []RegexRange
+}
+
+type RegexRange struct {
+	Value      string
+	IsMatch    bool
+	MatchIndex int
 }
 type RegexMatch struct {
 	Index    int

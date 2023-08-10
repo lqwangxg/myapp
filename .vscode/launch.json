@@ -11,7 +11,9 @@
             "mode": "auto",
             "program": "${workspaceFolder}",
             "cwd": "${workspaceFolder}",
-            "args": ["regex", "replace","-n","html-input", "-p","\\<html:(?P<type>button).*?\/?\\>","-f", "C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main\\public\\pages\\jsp\\c01\\C01W001P01.jsp", "--config", ".myapp.yaml"]
+            //
+            //    "args": ["regex", "replace","-n","html-input", "-p","\\<html:(?P<type>button).*?\/?\\>","-f", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
+            "args": ["regex", "match","-n","html-input", "-p","\\<html:(?P<type>button).*?\/?\\>","-f", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
         }
     ]
 }

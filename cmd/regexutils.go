@@ -3,25 +3,33 @@ package cmd
 import (
 	"log"
 	"regexp"
+
+	"golang.org/x/exp/slices"
 )
 
 // var regex regexp.Regexp
-func Matches(pattern, content string) *RegexMatchResult {
-
+func CreateRegexFactory(pattern string, content string) *RegexFactory {
 	r := regexp.MustCompile(pattern)
-	var matchResult = &RegexMatchResult{
+	c := content
+	config.Parse(&c)
+	return &RegexFactory{
 		Pattern:    pattern,
 		GroupNames: r.SubexpNames(),
 		r:          r,
+		content:    c,
 	}
+}
 
-	sMatches := r.FindAllStringSubmatch(content, -1)
-	positions := r.FindAllStringSubmatchIndex(content, -1)
+// var regex regexp.Regexp
+func (result *RegexFactory) ExecuteMatches() *RegexFactory {
+	r := result.r
+	sMatches := r.FindAllStringSubmatch(result.content, -1)
+	positions := r.FindAllStringSubmatchIndex(result.content, -1)
 
 	for i, smatch := range sMatches {
 		position := positions[i]
 		groups := make([]RegexGroup, 0)
-		for x, groupName := range matchResult.GroupNames {
+		for x, groupName := range result.GroupNames {
 			//from match 0 ~ count - 1
 			groupIndex := r.SubexpIndex(groupName)
 			if groupName == "" {
@@ -49,37 +57,39 @@ func Matches(pattern, content string) *RegexMatchResult {
 			Groups: groups,
 			Value:  smatch[0],
 		}
-		matchResult.Matches = append(matchResult.Matches, match)
-
+		result.Matches = append(result.Matches, match)
 	}
-	return matchResult
+	return result
 }
 
-func (matches *RegexMatchResult) ReplaceMatches(src string) (string, bool) {
-	r := matches.r
-	new_src := r.ReplaceAllStringFunc(src, callback)
-	return new_src, new_src != src
-}
+// func (matches *RegexResult) ReplaceMatches(src string) (string, bool) {
+// 	r := matches.r
+// 	new_src := r.ReplaceAllStringFunc(src, callback)
+// 	return new_src, new_src != src
+// }
 
-func callback(matchValue string) string {
+// func callback(matchValue string) string {
 
-	return matchValue
-}
+// 	return matchValue
+// }
 
-func (matches *RegexMatchResult) restore() {
-	for _, match := range matches.Matches {
-		match.Value = afterMatch(match.Value)
-		for _, group := range match.Groups {
-			group.Value = afterMatch(group.Value)
-		}
+func (matches *RegexFactory) GetMatches(index int) (bool, *RegexMatch) {
+	idx := slices.IndexFunc(matches.Matches, func(m RegexMatch) bool { return m.Index == index })
+	item := &RegexMatch{}
+	if idx != -1 {
+		return true, &matches.Matches[idx]
 	}
+	return false, item
 }
 
-func (matches *RegexMatchResult) log() {
+func (matches *RegexFactory) log() {
 	log.Printf("pattern:%s, group.count:%d, group.names:%v",
 		matches.Pattern, len(matches.GroupNames), matches.GroupNames)
 	for _, match := range matches.Matches {
 		match.log()
+	}
+	for _, rg := range matches.Ranges {
+		rg.log()
 	}
 }
 
@@ -94,4 +104,7 @@ func (match *RegexMatch) log() {
 func (group *RegexGroup) log() {
 	log.Printf("\tgroup[%d].pos(%d,%d), group.name=%s, group.value=%s", group.Index,
 		group.Position.Start, group.Position.End, group.Name, group.Value)
+}
+func (rg *RegexRange) log() {
+	log.Printf("\r range.isMatch=%v, MatchIndex:[%d], range.value=%s", rg.IsMatch, rg.MatchIndex, rg.Value)
 }
