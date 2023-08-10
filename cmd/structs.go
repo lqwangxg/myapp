@@ -42,19 +42,19 @@ type AppConfig struct {
 type ReplaceRuleConfig struct {
 	Name                 string             `yaml:"name"`
 	Group                string             `yaml:"group"`
-	Full_patterns        CheckPatternConfig `yaml:"full_patterns"`
+	FullPatterns         CheckPatternConfig `yaml:"full_patterns"`
 	Range_pattern        string             `yaml:"range_pattern"`
 	Range_params_pattern []string           `yaml:"range_params_pattern"`
-	Range_patterns       CheckPatternConfig `yaml:"range_patterns"`
+	RangePatterns        CheckPatternConfig `yaml:"range_patterns"`
 	Match_pattern        string             `yaml:"match_pattern"`
-	Match_patterns       CheckPatternConfig `yaml:"match_patterns"`
+	MatchPatterns        CheckPatternConfig `yaml:"match_patterns"`
 	Match_formulas       []string           `yaml:"match_formulas"`
 	Match_evals          CheckPatternConfig `yaml:"match_evals"`
 	Key                  string
 }
 type CheckPatternConfig struct {
-	Skip_ifany []string `yaml:"skip_ifany"`
-	Skip_when  []string `yaml:"skip_when"`
-	Do_ifany   []string `yaml:"do_ifany"`
-	Do_when    []string `yaml:"do_when"`
+	SkipIfany []string `yaml:"skip_ifany"`
+	SkipWhen  []string `yaml:"skip_when"`
+	DoIfany   []string `yaml:"do_ifany"`
+	DoWhen    []string `yaml:"do_when"`
 }
