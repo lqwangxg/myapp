@@ -11,23 +11,23 @@ import (
  * is skip check
  */
 func (rule *ReplaceRuleConfig) IsFullSkip(src string) bool {
-	return rule.FullPatterns.IsSkip(src)
+	return rule.FullCheckPatterns.IsSkip(src)
 }
 func (rule *ReplaceRuleConfig) IsFullDest(src string) bool {
-	return rule.FullPatterns.IsDest(src)
+	return rule.FullCheckPatterns.IsDest(src)
 }
 func (rule *ReplaceRuleConfig) IsRangeSkip(src string) bool {
-	return rule.RangePatterns.IsSkip(src)
+	return rule.RangeCheckPatterns.IsSkip(src)
 }
 func (rule *ReplaceRuleConfig) IsRangeDest(src string) bool {
-	return rule.RangePatterns.IsDest(src)
+	return rule.RangeCheckPatterns.IsDest(src)
 }
 
 func (rule *ReplaceRuleConfig) IsMatchSkip(src string) bool {
-	return rule.MatchPatterns.IsSkip(src)
+	return rule.MatchCheckPatterns.IsSkip(src)
 }
 func (rule *ReplaceRuleConfig) IsMatchDest(src string) bool {
-	return rule.MatchPatterns.IsDest(src)
+	return rule.MatchCheckPatterns.IsDest(src)
 }
 
 /*

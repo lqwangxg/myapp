@@ -3,21 +3,25 @@ package cmd
 import "regexp"
 
 type FlagConfig struct {
-	name       string
-	configFile string
-	pattern    string
-	origin     string
-	destFile   string
-	destDir    string
-	suffix     string
+	Name       string
+	ConfigFile string
+	Pattern    string
+	Content    string
+	DestFile   string
+	DestDir    string
+	Suffix     string
+}
+type Context struct {
+	Params map[string]string
 }
 type RegexFactory struct {
 	Pattern    string
 	GroupNames []string
 	Matches    []RegexMatch
-	r          *regexp.Regexp
-	content    string //match input string
+	Regex      *regexp.Regexp
+	Content    string //match input string
 	Ranges     []RegexRange
+	Params     map[string]string
 }
 
 type RegexRange struct {
@@ -48,17 +52,17 @@ type AppConfig struct {
 	Params   []string          `yaml:"params"`
 }
 type ReplaceRuleConfig struct {
-	Name                 string             `yaml:"name"`
-	Group                string             `yaml:"group"`
-	FullPatterns         CheckPatternConfig `yaml:"full_patterns"`
-	Range_pattern        string             `yaml:"range_pattern"`
-	Range_params_pattern []string           `yaml:"range_params_pattern"`
-	RangePatterns        CheckPatternConfig `yaml:"range_patterns"`
-	Match_pattern        string             `yaml:"match_pattern"`
-	MatchPatterns        CheckPatternConfig `yaml:"match_patterns"`
-	Match_formulas       []string           `yaml:"match_formulas"`
-	Match_evals          CheckPatternConfig `yaml:"match_evals"`
-	Key                  string
+	Name               string             `yaml:"name"`
+	Group              string             `yaml:"group"`
+	FullCheckPatterns  CheckPatternConfig `yaml:"full_patterns"`
+	RangePattern       string             `yaml:"range_pattern"`
+	RangeParamsPattern []string           `yaml:"range_params_pattern"`
+	RangeCheckPatterns CheckPatternConfig `yaml:"range_patterns"`
+	MatchPattern       string             `yaml:"match_pattern"`
+	MatchCheckPatterns CheckPatternConfig `yaml:"match_patterns"`
+	MatchFormulas      []string           `yaml:"match_formulas"`
+	MatchCheckEvals    CheckPatternConfig `yaml:"match_evals"`
+	Key                string
 }
 type CheckPatternConfig struct {
 	SkipIfany []string `yaml:"skip_ifany"`

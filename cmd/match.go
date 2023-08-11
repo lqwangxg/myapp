@@ -18,18 +18,18 @@ var matchCmd = &cobra.Command{
 	Long:  ` match string by regrep pattern, and replace string if parameter --replace is set.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex match called")
-		pattern := flags.pattern
+		pattern := flags.Pattern
 		if pattern == "" {
 			return
 		}
-		if flags.origin != "" {
-			MatchText(pattern, flags.origin)
+		if flags.Content != "" {
+			MatchText(pattern, flags.Content)
 		}
-		if flags.destFile != "" {
-			MatchFile(pattern, flags.destFile, flags.suffix)
+		if flags.DestFile != "" {
+			MatchFile(pattern, flags.DestFile, flags.Suffix)
 		}
-		if flags.destDir != "" {
-			MatchDiretory(pattern, flags.destFile, flags.suffix)
+		if flags.DestDir != "" {
+			MatchDiretory(pattern, flags.DestFile, flags.Suffix)
 		}
 	},
 }
@@ -70,45 +70,10 @@ func MatchDiretory(pattern, dirPath, suffix string) {
 func MatchText(pattern, content string) {
 	rs := CreateRegexFactory(pattern, content)
 	rs.ExecuteMatches()
-	rs.SplitMatch()
-	log.Print(rs.ToString())
-	rs.log()
+	//rs.SplitMatch()
+	//log.Print(rs.ToString())
+	//rs.log()
 }
-
-// func ReplaceText(pattern string, content string, replacement string) {
-
-// 	match, _ := regexp.MatchString(pattern, content)
-// 	fmt.Println(match)
-
-// 	// r, _ := regexp.Compile(pattern)
-
-// 	// fmt.Println(r.MatchString(content))
-
-// 	// fmt.Println(r.FindString(content))
-
-// 	// fmt.Println(r.FindStringIndex(content))
-
-// 	// fmt.Println(r.FindStringSubmatch(content))
-
-// 	// fmt.Println(r.FindStringSubmatchIndex(content))
-
-// 	// fmt.Println(r.FindAllString(content, -1))
-
-// 	// fmt.Println(r.FindAllStringSubmatchIndex(content, -1))
-
-// 	// fmt.Println(r.FindAllString(content, 2))
-
-// 	// fmt.Println(r.Match([]byte(content)))
-
-// 	r := regexp.MustCompile(pattern)
-// 	fmt.Println(r)
-
-// 	fmt.Println(r.ReplaceAllString(content, replacement))
-
-// 	in := []byte(content)
-// 	out := r.ReplaceAllFunc(in, bytes.ToUpper)
-// 	fmt.Println(string(out))
-// }
 
 func init() {
 	regexCmd.AddCommand(matchCmd)

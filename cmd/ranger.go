@@ -9,21 +9,20 @@ import (
  */
 func (rs *RegexFactory) SplitMatch() {
 	cpos := 0
-	epos := len(rs.content)
+	epos := len(rs.Content)
 	rs.Ranges = rs.Ranges[:cap(rs.Ranges)]
-	//ranges := make([]RegexRange, 0)
 	for _, match := range rs.Matches {
 		if cpos < epos && cpos < match.Position.Start {
 			//append string before match
 			h := &RegexRange{
-				Value:   rs.content[cpos:match.Position.Start],
+				Value:   rs.Content[cpos:match.Position.Start],
 				IsMatch: false,
 			}
 			rs.Ranges = append(rs.Ranges, *h)
 		}
 		// append match.value
 		m := &RegexRange{
-			Value:      rs.content[match.Position.Start:match.Position.End],
+			Value:      rs.Content[match.Position.Start:match.Position.End],
 			IsMatch:    true,
 			MatchIndex: match.Index,
 		}
@@ -33,7 +32,7 @@ func (rs *RegexFactory) SplitMatch() {
 	if cpos < epos {
 		//append last string
 		f := &RegexRange{
-			Value:   rs.content[cpos:epos],
+			Value:   rs.Content[cpos:epos],
 			IsMatch: false,
 		}
 		rs.Ranges = append(rs.Ranges, *f)
@@ -41,7 +40,7 @@ func (rs *RegexFactory) SplitMatch() {
 }
 
 func (rs *RegexFactory) Restore() {
-	config.Restore(&rs.content)
+	config.Restore(&rs.Content)
 	//match restore
 	for i, m := range rs.Matches {
 		config.Restore(&rs.Matches[i].Value)

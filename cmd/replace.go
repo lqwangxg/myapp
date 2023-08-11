@@ -24,12 +24,12 @@ var replaceCmd = &cobra.Command{
 	      pattern name connects to a json or configMap which includes rules of pattern/replacement/skipRules.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex replace called")
-		fmt.Printf("name=%s,  textfile=%s, directory=%s, suffix=%s \n", flags.name, flags.destFile, flags.destDir, flags.suffix)
-		if flags.name == "" {
-			fmt.Printf("--name=%s is required.", flags.name)
+		fmt.Printf("name=%s,  textfile=%s, directory=%s, suffix=%s \n", flags.Name, flags.DestFile, flags.DestDir, flags.Suffix)
+		if flags.Name == "" {
+			fmt.Printf("--name=%s is required.", flags.Name)
 		}
-		if flags.destFile == "" && flags.destDir == "" {
-			fmt.Printf("--textfile=%s and --directory=%s can't be empty neither.", flags.destFile, flags.destDir)
+		if flags.DestFile == "" && flags.DestDir == "" {
+			fmt.Printf("--textfile=%s and --directory=%s can't be empty neither.", flags.DestFile, flags.DestDir)
 		}
 
 		for _, dir := range config.RuleDirs {
@@ -41,7 +41,7 @@ var replaceCmd = &cobra.Command{
 
 func rslog(rs map[string]ReplaceRuleConfig) {
 	for key, rule := range rs {
-		log.Printf("key:%s, rule.name: %s , rule.pattern:%s", key, rule.Name, rule.Match_pattern)
+		log.Printf("key:%s, rule.name: %s , rule.pattern:%s", key, rule.Name, rule.MatchPattern)
 	}
 }
 func loadRules(dirPath string, rules map[string]ReplaceRuleConfig) {

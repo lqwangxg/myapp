@@ -27,11 +27,11 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(regexCmd)
 
-	regexCmd.PersistentFlags().StringVarP(&flags.destFile, "destFile", "f", "", "replace destination text file path")
-	regexCmd.PersistentFlags().StringVarP(&flags.destDir, "destDir", "d", "", "replace destination directory")
-	regexCmd.PersistentFlags().StringVarP(&flags.pattern, "pattern", "p", "", "regex pattern string")
-	regexCmd.PersistentFlags().StringVarP(&flags.origin, "content", "c", "", "input content string")
+	regexCmd.PersistentFlags().StringVarP(&flags.DestFile, "destFile", "f", "", "replace destination text file path")
+	regexCmd.PersistentFlags().StringVarP(&flags.DestDir, "destDir", "d", "", "replace destination directory")
+	regexCmd.PersistentFlags().StringVarP(&flags.Pattern, "pattern", "p", "", "regex pattern string")
+	regexCmd.PersistentFlags().StringVarP(&flags.Content, "content", "c", "", "input content string")
 
-	regexCmd.PersistentFlags().StringVarP(&flags.name, "name", "n", "", "regex replace pattern name")
-	regexCmd.PersistentFlags().StringVarP(&flags.suffix, "suffix", "s", "", "replace destination file suffix, default empty")
+	regexCmd.PersistentFlags().StringVarP(&flags.Name, "name", "n", "", "regex replace pattern name")
+	regexCmd.PersistentFlags().StringVarP(&flags.Suffix, "suffix", "s", "", "replace destination file suffix, default empty")
 }

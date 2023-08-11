@@ -10,21 +10,19 @@ import (
 // var regex regexp.Regexp
 func CreateRegexFactory(pattern string, content string) *RegexFactory {
 	r := regexp.MustCompile(pattern)
-	//c := content
-	//config.Transform(&content)
 	return &RegexFactory{
 		Pattern:    pattern,
 		GroupNames: r.SubexpNames(),
-		r:          r,
-		content:    config.Transform(&content),
+		Regex:      r,
+		Content:    config.Transform(&content),
 	}
 }
 
 // var regex regexp.Regexp
 func (result *RegexFactory) ExecuteMatches() *RegexFactory {
-	r := result.r
-	sMatches := r.FindAllStringSubmatch(result.content, -1)
-	positions := r.FindAllStringSubmatchIndex(result.content, -1)
+	r := result.Regex
+	sMatches := r.FindAllStringSubmatch(result.Content, -1)
+	positions := r.FindAllStringSubmatchIndex(result.Content, -1)
 
 	for i, smatch := range sMatches {
 		position := positions[i]
