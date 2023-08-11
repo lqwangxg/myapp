@@ -59,8 +59,6 @@ type RedisOption struct {
 	DB       int    `yaml:"db"`
 }
 
-//	RedisOption redis.Options
-
 type ReplaceRuleConfig struct {
 	Name               string             `yaml:"name"`
 	Group              string             `yaml:"group"`

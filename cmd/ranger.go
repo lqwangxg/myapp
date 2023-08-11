@@ -5,7 +5,6 @@ import (
 )
 
 func (rs *RegexFactory) Close() {
-	//config.Restore(&rs.input)
 	//match restore
 	for i, m := range rs.Matches {
 		config.Restore(&rs.Matches[i].Value)
