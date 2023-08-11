@@ -1,6 +1,8 @@
 package cmd
 
-import "strings"
+import (
+	"strings"
+)
 
 /*
  * is skip check
@@ -41,25 +43,17 @@ func (rs *RegexFactory) SplitMatch() {
 func (rs *RegexFactory) Restore() {
 	config.Restore(&rs.content)
 	//match restore
-	for _, m := range rs.Matches {
-		m.Restore()
+	for i, m := range rs.Matches {
+		config.Restore(&rs.Matches[i].Value)
+		for x := 0; x < len(m.Groups); x++ {
+			config.Restore(&rs.Matches[i].Groups[x].Value)
+		}
 	}
+
 	//range restore
-	for _, m := range rs.Ranges {
-		m.Restore()
+	for x := 0; x < len(rs.Ranges); x++ {
+		config.Restore(&rs.Ranges[x].Value)
 	}
-}
-func (m *RegexMatch) Restore() {
-	m.Value = config.Restore(&m.Value)
-	for _, g := range m.Groups {
-		g.Restore()
-	}
-}
-func (m *RegexGroup) Restore() {
-	m.Value = config.Restore(&m.Value)
-}
-func (m *RegexRange) Restore() {
-	m.Value = config.Restore(&m.Value)
 }
 
 func (rs *RegexFactory) ToString() string {

@@ -10,13 +10,13 @@ import (
 // var regex regexp.Regexp
 func CreateRegexFactory(pattern string, content string) *RegexFactory {
 	r := regexp.MustCompile(pattern)
-	c := content
-	config.Parse(&c)
+	//c := content
+	//config.Transform(&content)
 	return &RegexFactory{
 		Pattern:    pattern,
 		GroupNames: r.SubexpNames(),
 		r:          r,
-		content:    c,
+		content:    config.Transform(&content),
 	}
 }
 
