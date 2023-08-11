@@ -9,3 +9,12 @@ ruledirs:
 # get params by match input contents.
 params:
   - 'title=[\s"]*(?<title>.+?)[\s"]*'
+
+indent: "  " #space(2)
+prefix: ""
+
+redis:
+  enable: true 
+  addr: "localhost:6379"
+  password: ""
+  db: 0

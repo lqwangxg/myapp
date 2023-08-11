@@ -67,9 +67,12 @@ func MatchDiretory(pattern, dirPath, suffix string) {
 		}
 	}
 }
+
 func MatchText(pattern, content string) {
-	rs := CreateRegexFactory(pattern, content)
-	rs.ExecuteMatches()
+	rs := CreateRegexFactory(pattern)
+	rs.ExecuteMatches(content)
+	rs.Close()
+
 	//rs.SplitMatch()
 	//log.Print(rs.ToString())
 	//rs.log()

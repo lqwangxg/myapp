@@ -4,43 +4,8 @@ import (
 	"strings"
 )
 
-/*
- * is skip check
- */
-func (rs *RegexFactory) SplitMatch() {
-	cpos := 0
-	epos := len(rs.Content)
-	rs.Ranges = rs.Ranges[:cap(rs.Ranges)]
-	for _, match := range rs.Matches {
-		if cpos < epos && cpos < match.Position.Start {
-			//append string before match
-			h := &RegexRange{
-				Value:   rs.Content[cpos:match.Position.Start],
-				IsMatch: false,
-			}
-			rs.Ranges = append(rs.Ranges, *h)
-		}
-		// append match.value
-		m := &RegexRange{
-			Value:      rs.Content[match.Position.Start:match.Position.End],
-			IsMatch:    true,
-			MatchIndex: match.Index,
-		}
-		rs.Ranges = append(rs.Ranges, *m)
-		cpos = match.Position.End
-	}
-	if cpos < epos {
-		//append last string
-		f := &RegexRange{
-			Value:   rs.Content[cpos:epos],
-			IsMatch: false,
-		}
-		rs.Ranges = append(rs.Ranges, *f)
-	}
-}
-
-func (rs *RegexFactory) Restore() {
-	config.Restore(&rs.Content)
+func (rs *RegexFactory) Close() {
+	//config.Restore(&rs.input)
 	//match restore
 	for i, m := range rs.Matches {
 		config.Restore(&rs.Matches[i].Value)
@@ -48,16 +13,17 @@ func (rs *RegexFactory) Restore() {
 			config.Restore(&rs.Matches[i].Groups[x].Value)
 		}
 	}
-
 	//range restore
 	for x := 0; x < len(rs.Ranges); x++ {
 		config.Restore(&rs.Ranges[x].Value)
 	}
+	//save to cache
+	rs.ToCache()
 }
 
 func (rs *RegexFactory) ToString() string {
 	// restore before tostring.
-	rs.Restore()
+	rs.Close()
 
 	cs := make([]string, 0)
 	for _, m := range rs.Ranges {

@@ -55,29 +55,6 @@ func ReadYaml() {
 	// }
 }
 
-// var client = redis.NewClient(&redis.Options{
-// 	Addr:	  "localhost:6379",
-// 	Password: "", // no password set
-// 	DB:		  0,  // use default DB
-// });
-// func getValue(key string) string {
-// 	ctx := context.Background()
-// 	val, err := client.Get(ctx, key).Result()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Printf("getValue: key=%s,  rule=%s \n", key, val)
-// 	return val
-// }
-// func setValue(key string, value string) {
-// 	ctx := context.Background()
-// 	err := client.Set(ctx, key, value, 0).Err()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Printf("setValue: key=%s,  rule=%s \n", key, value)
-// }
-
 func init() {
 	regexCmd.AddCommand(ruleCmd)
 }

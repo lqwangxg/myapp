@@ -11,17 +11,15 @@ type FlagConfig struct {
 	DestDir    string
 	Suffix     string
 }
-type Context struct {
-	Params map[string]string
-}
+
 type RegexFactory struct {
 	Pattern    string
 	GroupNames []string
 	Matches    []RegexMatch
-	Regex      *regexp.Regexp
-	Content    string //match input string
 	Ranges     []RegexRange
 	Params     map[string]string
+	InputKey   string
+	regex      *regexp.Regexp
 }
 
 type RegexRange struct {
@@ -47,10 +45,22 @@ type RegexMatchIndex struct {
 }
 
 type AppConfig struct {
-	EChars   map[string]string `yaml:"echars"`
-	RuleDirs []string          `yaml:"ruledirs"`
-	Params   []string          `yaml:"params"`
+	EChars      map[string]string `yaml:"echars"`
+	RuleDirs    []string          `yaml:"ruledirs"`
+	Params      []string          `yaml:"params"`
+	Indent      string            `yaml:"indent"`
+	Prefix      string            `yaml:"prefix"`
+	RedisOption RedisOption       `mapstructure:"redis"`
 }
+type RedisOption struct {
+	Enable   bool   `yaml:"enable"`
+	Addr     string `yaml:"addr"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+}
+
+//	RedisOption redis.Options
+
 type ReplaceRuleConfig struct {
 	Name               string             `yaml:"name"`
 	Group              string             `yaml:"group"`
