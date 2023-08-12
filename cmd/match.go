@@ -69,10 +69,13 @@ func MatchDiretory(pattern, dirPath, suffix string) {
 }
 
 func MatchText(pattern, content string) {
-	rs := CreateRegexFactory(pattern)
-	rs.ExecuteMatches(content)
+	rs := NewRegex(pattern)
+	rs.ScanMatches(content)
 	rs.Close()
 
+	if flags.Template != "" {
+		log.Print(rs.ToString())
+	}
 	//rs.SplitMatch()
 	//log.Print(rs.ToString())
 	//rs.log()
@@ -80,4 +83,5 @@ func MatchText(pattern, content string) {
 
 func init() {
 	regexCmd.AddCommand(matchCmd)
+	TestReplaceMap()
 }

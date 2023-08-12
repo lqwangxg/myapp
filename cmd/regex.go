@@ -34,4 +34,6 @@ func init() {
 
 	regexCmd.PersistentFlags().StringVarP(&flags.Name, "name", "n", "", "regex replace pattern name")
 	regexCmd.PersistentFlags().StringVarP(&flags.Suffix, "suffix", "s", "", "replace destination file suffix, default empty")
+	regexCmd.PersistentFlags().StringVarP(&flags.Template, "template", "t", "", "export template")
+	regexCmd.PersistentFlags().StringVarP(&flags.TemplateFile, "TemplateFile", "", "", "export template")
 }

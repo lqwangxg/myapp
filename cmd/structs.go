@@ -3,23 +3,29 @@ package cmd
 import "regexp"
 
 type FlagConfig struct {
-	Name       string
-	ConfigFile string
-	Pattern    string
-	Content    string
-	DestFile   string
-	DestDir    string
-	Suffix     string
+	Name         string
+	ConfigFile   string
+	Pattern      string
+	Content      string
+	DestFile     string
+	DestDir      string
+	Suffix       string
+	Template     string
+	TemplateFile string
 }
 
-type RegexFactory struct {
+type Regex struct {
+	R        *regexp.Regexp
+	Result   RegexResult
+	CacheKey string
+	Cache    bool
+}
+type RegexResult struct {
 	Pattern    string
 	GroupNames []string
 	Matches    []RegexMatch
 	Ranges     []RegexRange
 	Params     map[string]string
-	InputKey   string
-	regex      *regexp.Regexp
 }
 
 type RegexRange struct {
@@ -32,6 +38,7 @@ type RegexMatch struct {
 	Value    string
 	Groups   []RegexGroup
 	Position RegexMatchIndex
+	Params   map[string]string
 }
 type RegexGroup struct {
 	Index    int

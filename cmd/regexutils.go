@@ -7,59 +7,52 @@ import (
 )
 
 // var regex regexp.Regexp
-func CreateRegexFactory(pattern string) *RegexFactory {
+func NewRegex(pattern string) *Regex {
+	return NewCacheRegex(pattern, config.RedisOption.Enable)
+}
+
+// var regex regexp.Regexp
+func NewCacheRegex(pattern string, cache bool) *Regex {
 	r := regexp.MustCompile(pattern)
-	return &RegexFactory{
-		Pattern:    pattern,
-		GroupNames: r.SubexpNames(),
-		regex:      r,
+	return &Regex{
+		R: r,
+		Result: RegexResult{
+			Pattern:    pattern,
+			GroupNames: r.SubexpNames(),
+		},
+		Cache: cache,
 	}
 }
 
 // get hashsum of (pattern + ": "+ input) to string.
-func (result *RegexFactory) Hashsum(input string) string {
+func (rs *Regex) Hashsum(input string) string {
 	h := sha1.New()
-	h.Write([]byte(result.Pattern + ": " + input))
+	h.Write([]byte(rs.Result.Pattern + ": " + input))
 	return hex.EncodeToString(h.Sum(nil))
+}
+func (rs *Regex) IsMatch(input string) bool {
+	return rs.R.MatchString(input)
 }
 
 // var regex regexp.Regexp
-func (rs *RegexFactory) ExecuteMatches(input string) *RegexFactory {
-	// reset inputkey from pattern+":"+input
-	rs.InputKey = rs.Hashsum(input)
+func (rs *Regex) ScanMatches(input string) {
 	// get from redis cache
-	if rs.FromCache() {
-		return rs
+	if rs.FromCache(input) {
+		return
 	}
 
 	//before match input, transfer special chars
 	config.Transform(&input)
-	r := rs.regex
-	sMatches := r.FindAllStringSubmatch(input, -1)
+	r := rs.R
+	if !r.MatchString(input) {
+		return
+	}
+	subMatches := r.FindAllStringSubmatch(input, -1)
 	positions := r.FindAllStringSubmatchIndex(input, -1)
 
-	for i, smatch := range sMatches {
+	for i, smatch := range subMatches {
 		position := positions[i]
 		groups := make([]RegexGroup, 0)
-		for x, groupName := range rs.GroupNames {
-			//from match 0 ~ count - 1
-			groupIndex := r.SubexpIndex(groupName)
-			if groupName == "" {
-				groupIndex = x
-			}
-
-			group := RegexGroup{
-				Index: x,
-				Name:  groupName,
-				Value: smatch[groupIndex],
-				Position: RegexMatchIndex{
-					Start: position[x*2+0],
-					End:   position[x*2+1],
-				},
-			}
-			groups = append(groups, group)
-		}
-
 		match := RegexMatch{
 			Index: i,
 			Position: RegexMatchIndex{
@@ -68,27 +61,50 @@ func (rs *RegexFactory) ExecuteMatches(input string) *RegexFactory {
 			},
 			Groups: groups,
 			Value:  smatch[0],
+			Params: make(map[string]string),
 		}
-		rs.Matches = append(rs.Matches, match)
+		for x, groupName := range rs.Result.GroupNames {
+			//from match 0 ~ count - 1
+			groupIndex := r.SubexpIndex(groupName)
+			if groupName == "" {
+				groupIndex = x
+			}
+			gname := groupName
+			if x == 0 {
+				gname = "match"
+			}
+			group := RegexGroup{
+				Index: x,
+				Name:  gname,
+				Value: smatch[groupIndex],
+				Position: RegexMatchIndex{
+					Start: position[x*2+0],
+					End:   position[x*2+1],
+				},
+			}
+			match.Params[gname] = group.Value
+			groups = append(groups, group)
+		}
+
+		rs.Result.Matches = append(rs.Result.Matches, match)
 	}
 	// split input by matches
-	rs.splitByMatches(input)
-	return rs
+	rs.SplitMatches(input)
 }
 
 // split input by matches
-func (rs *RegexFactory) splitByMatches(input string) {
+func (rs *Regex) SplitMatches(input string) []RegexRange {
 	cpos := 0
 	epos := len(input)
-	rs.Ranges = rs.Ranges[:cap(rs.Ranges)]
-	for _, match := range rs.Matches {
+	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
+	for _, match := range rs.Result.Matches {
 		if cpos < epos && cpos < match.Position.Start {
 			//append string before match
 			h := &RegexRange{
 				Value:   input[cpos:match.Position.Start],
 				IsMatch: false,
 			}
-			rs.Ranges = append(rs.Ranges, *h)
+			rs.Result.Ranges = append(rs.Result.Ranges, *h)
 		}
 		// append match.value
 		m := &RegexRange{
@@ -96,7 +112,7 @@ func (rs *RegexFactory) splitByMatches(input string) {
 			IsMatch:    true,
 			MatchIndex: match.Index,
 		}
-		rs.Ranges = append(rs.Ranges, *m)
+		rs.Result.Ranges = append(rs.Result.Ranges, *m)
 		cpos = match.Position.End
 	}
 	if cpos < epos {
@@ -105,18 +121,12 @@ func (rs *RegexFactory) splitByMatches(input string) {
 			Value:   input[cpos:epos],
 			IsMatch: false,
 		}
-		rs.Ranges = append(rs.Ranges, *f)
+		rs.Result.Ranges = append(rs.Result.Ranges, *f)
 	}
+	return rs.Result.Ranges
 }
 
-// func (matches *RegexResult) ReplaceMatches(src string) (string, bool) {
-// 	r := matches.r
-// 	new_src := r.ReplaceAllStringFunc(src, callback)
-// 	return new_src, new_src != src
-// }
-
 // func callback(matchValue string) string {
-
 // 	return matchValue
 // }
 

@@ -13,7 +13,7 @@
             "cwd": "${workspaceFolder}",
             //
             //    "args": ["regex", "replace","-n","html-input", "-p","\\<html:(?P<type>button).*?\/?\\>","-f", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
-            "args": ["regex", "match","-n","html-input", "-p","\\<html:(?P<type>button).*?\/?\\>","-f", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
+            "args": ["regex", "match","-n","html-input", "-p","\\<html:(?P<type>\\w+).*?\/?\\>","-f","-t","match:${match}, type:${type}", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
         }
     ]
 }

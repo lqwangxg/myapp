@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"log"
 	"regexp"
 )
 
@@ -35,4 +37,46 @@ func (cfg *AppConfig) Restore(content *string) string {
 func encode(input *string, fchar, tchar string) {
 	r, _ := regexp.Compile(fchar)
 	*input = r.ReplaceAllString(*input, tchar)
+}
+func (rs *Regex) ContainsGroupKey(key string) bool {
+	for _, m := range rs.Result.Matches {
+		for _, g := range m.Groups {
+			if g.Value == key {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func ReplaceTemplateByKeyValue(template string, key, value string) string {
+	pattern := fmt.Sprintf(`\$\{(?P<key>%s)\}`, key)
+	regex := NewCacheRegex(pattern, false)
+	regex.ScanMatches(template)
+	if !regex.ContainsGroupKey(key) {
+		return template
+	}
+	return regex.R.ReplaceAllString(template, value)
+}
+
+func ReplaceTemplate(template string, kvs map[string]string) string {
+	buffer := template
+	for key, val := range kvs {
+		buffer = ReplaceTemplateByKeyValue(buffer, key, val)
+	}
+	return buffer
+}
+
+func TestReplaceMap() {
+	input := "${t1}+${t2}=${t3}"
+	//key := "t1"
+	//val := "1000"
+	kvs := map[string]string{
+		"t1": "1000",
+		"t2": "1500",
+		"t3": "2000",
+	}
+	//result := ReplaceTemplateByKeyValue(input, key, val)
+	result := ReplaceTemplate(input, kvs)
+	log.Println(result)
 }

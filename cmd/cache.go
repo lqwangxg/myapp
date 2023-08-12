@@ -15,38 +15,40 @@ var client = redis.NewClient(&redis.Options{
 })
 
 // read from redis cache
-func (rs *RegexFactory) FromCache() bool {
+func (rs *Regex) FromCache(input string) bool {
 	// if redis disabled, return
-	if !config.RedisOption.Enable {
+	if !rs.Cache {
 		return false
 	}
 
-	val, err := client.Get(ctx, rs.InputKey).Result()
+	rs.CacheKey = rs.Hashsum(input)
+	val, err := client.Get(ctx, rs.CacheKey).Result()
 	if err == redis.Nil {
 		return false
 	} else if err != nil {
 		panic(err)
 	}
 	//var nrs RegexFactory
-	err = json.Unmarshal([]byte(val), rs)
+	err = json.Unmarshal([]byte(val), &rs.Result)
 	if err != nil {
 		panic(err)
 	}
+
 	return true
 }
 
 // save to redis as cache
-func (rs *RegexFactory) ToCache() {
+func (rs *Regex) ToCache() {
 	// if redis disabled, return
-	if !config.RedisOption.Enable {
+	if !rs.Cache {
 		return
 	}
 	//byteArray, err := json.Marshal(rs)
-	byteArray, err := json.MarshalIndent(rs, config.Prefix, config.Indent)
+	byteArray, err := json.MarshalIndent(rs.Result, config.Prefix, config.Indent)
 	if err != nil {
 		panic(err)
 	}
-	err = client.Set(ctx, rs.InputKey, byteArray, 0).Err()
+	err = client.Set(ctx, rs.CacheKey, byteArray, 0).Err()
 	if err != nil {
 		panic(err)
 	}
