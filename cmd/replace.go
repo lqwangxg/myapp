@@ -24,7 +24,7 @@ var replaceCmd = &cobra.Command{
 	      pattern name connects to a json or configMap which includes rules of pattern/replacement/skipRules.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex replace called")
-		fmt.Printf("name=%s,  textfile=%s, directory=%s, suffix=%s \n", flags.Name, flags.DestFile, flags.DestDir, flags.Suffix)
+		fmt.Printf("name=%s,  textfile=%s, directory=%s, suffix=%s \n", flags.Name, flags.DestFile, flags.DestDir, flags.IncludeSuffix)
 		if flags.Name == "" {
 			fmt.Printf("--name=%s is required.", flags.Name)
 		}

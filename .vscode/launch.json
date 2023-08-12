@@ -13,7 +13,15 @@
             "cwd": "${workspaceFolder}",
             //
             //    "args": ["regex", "replace","-n","html-input", "-p","\\<html:(?P<type>button).*?\/?\\>","-f", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
-            "args": ["regex", "match","-n","html-input", "-p","\\<html:(?P<type>\\w+).*?\/?\\>","-f","-t","match:${match}, type:${type}", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
+            "args": ["regex", "match",
+                    "-n","html-input", 
+                    "-p","if\\((?P<call>openMultiMessageDialog\\((?P<param>[^{]+)\\))\\s*\\)\\s*\\{(?P<process>[^}]+?)\\}",
+                    "-f","C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main\\public\\pages\\jsp\\d01\\D01W002P00.jsp",
+                    //"-d", "C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main",
+                    "--include-suffix","jsp|html",
+                    "-t","\ncall: ${call}\nparam: ${param}\nprocess: ${process}\nmatch.value: ${match.value}",
+                    "--config", ".myapp.yaml"
+                ]
         }
     ]
 }

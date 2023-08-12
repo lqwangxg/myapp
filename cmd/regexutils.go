@@ -19,6 +19,7 @@ func NewCacheRegex(pattern string, cache bool) *Regex {
 		Result: RegexResult{
 			Pattern:    pattern,
 			GroupNames: r.SubexpNames(),
+			Params:     make(map[string]string),
 		},
 		Cache: cache,
 	}
@@ -71,7 +72,7 @@ func (rs *Regex) ScanMatches(input string) {
 			}
 			gname := groupName
 			if x == 0 {
-				gname = "match"
+				gname = "match.value"
 			}
 			group := RegexGroup{
 				Index: x,

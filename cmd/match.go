@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -23,29 +24,43 @@ var matchCmd = &cobra.Command{
 			return
 		}
 		if flags.Content != "" {
-			MatchText(pattern, flags.Content)
+			rs := NewRegex(pattern)
+			rs.MatchText(flags.Content)
 		}
 		if flags.DestFile != "" {
-			MatchFile(pattern, flags.DestFile, flags.Suffix)
+			MatchFile(pattern, flags.DestFile)
 		}
 		if flags.DestDir != "" {
-			MatchDiretory(pattern, flags.DestFile, flags.Suffix)
+			MatchDiretory(pattern, flags.DestDir)
 		}
 	},
 }
 
-func MatchFile(pattern, filePath, suffix string) {
+func MatchFile(pattern, filePath string) {
 	// exit if file not exists
 	if !IsExists(filePath) {
 		return
 	}
-
+	if flags.IncludeSuffix != "" {
+		re := NewRegex(flags.IncludeSuffix)
+		if !re.IsMatch(filePath) {
+			return
+		}
+	}
+	if flags.ExcludeSuffix != "" {
+		re := NewRegex(flags.ExcludeSuffix)
+		if re.IsMatch(filePath) {
+			return
+		}
+	}
 	if buffer, err := ReadAll(filePath); err == nil {
-		MatchText(pattern, buffer)
+		rs := NewRegex(pattern)
+		rs.Result.Params["filePath"] = filePath
+		rs.MatchText(buffer)
 	}
 }
 
-func MatchDiretory(pattern, dirPath, suffix string) {
+func MatchDiretory(pattern, dirPath string) {
 	if !IsExists(dirPath) {
 		log.Printf("dirPath is not found. dirPath=%s", dirPath)
 		return
@@ -57,29 +72,47 @@ func MatchDiretory(pattern, dirPath, suffix string) {
 	}
 
 	for _, file := range files {
-		ok, err := IsDir(file.Name())
+		fullPath := filepath.Join(dirPath, file.Name())
+		ok, err := IsDir(fullPath)
 		if err == nil {
 			if ok {
-				MatchDiretory(pattern, file.Name(), suffix)
+				MatchDiretory(pattern, fullPath)
 			} else {
-				MatchFile(pattern, file.Name(), suffix)
+				MatchFile(pattern, fullPath)
 			}
 		}
 	}
 }
 
-func MatchText(pattern, content string) {
-	rs := NewRegex(pattern)
+func (rs *Regex) MatchText(content string) {
 	rs.ScanMatches(content)
 	rs.Close()
 
-	if flags.Template != "" {
-		log.Print(rs.ToString())
+	if value, ok := rs.Result.Params["filePath"]; ok {
+		log.Printf("filePath: %s", value)
 	}
-	//rs.SplitMatch()
-	//log.Print(rs.ToString())
-	//rs.log()
+	//export matches contents
+	if export := rs.ExportMatches(flags.Template); export != "" {
+		log.Printf("export: %s", export)
+	} else {
+		log.Printf("export: empty. no matches")
+	}
+
 }
+
+// func ReplaceText(pattern, content, matchTemplate string) {
+// 	rs := NewRegex(pattern)
+// 	rs.ScanMatches(content)
+// 	//rs.ExportMatches(matchTemplate)
+// 	rs.Close()
+
+// 	if flags.Template != "" {
+// 		log.Print(rs.ToString())
+// 	}
+// 	//rs.SplitMatch()
+// 	//log.Print(rs.ToString())
+// 	//rs.log()
+// }
 
 func init() {
 	regexCmd.AddCommand(matchCmd)

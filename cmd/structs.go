@@ -3,15 +3,16 @@ package cmd
 import "regexp"
 
 type FlagConfig struct {
-	Name         string
-	ConfigFile   string
-	Pattern      string
-	Content      string
-	DestFile     string
-	DestDir      string
-	Suffix       string
-	Template     string
-	TemplateFile string
+	Name          string
+	ConfigFile    string
+	Pattern       string
+	Content       string
+	DestFile      string
+	DestDir       string
+	IncludeSuffix string
+	ExcludeSuffix string
+	Template      string
+	TemplateFile  string
 }
 
 type Regex struct {

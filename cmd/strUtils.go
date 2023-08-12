@@ -40,8 +40,8 @@ func encode(input *string, fchar, tchar string) {
 }
 func (rs *Regex) ContainsGroupKey(key string) bool {
 	for _, m := range rs.Result.Matches {
-		for _, g := range m.Groups {
-			if g.Value == key {
+		for _, val := range m.Params {
+			if val == key {
 				return true
 			}
 		}
@@ -60,22 +60,21 @@ func ReplaceTemplateByKeyValue(template string, key, value string) string {
 }
 
 func ReplaceTemplate(template string, kvs map[string]string) string {
-	buffer := template
 	for key, val := range kvs {
-		buffer = ReplaceTemplateByKeyValue(buffer, key, val)
+		template = ReplaceTemplateByKeyValue(template, key, val)
 	}
-	return buffer
+	return template
 }
 
 func TestReplaceMap() {
 	input := "${t1}+${t2}=${t3}"
-	//key := "t1"
-	//val := "1000"
 	kvs := map[string]string{
 		"t1": "1000",
 		"t2": "1500",
-		"t3": "2000",
+		"t3": "2500",
 	}
+	//key := "t1"
+	//val := "1000"
 	//result := ReplaceTemplateByKeyValue(input, key, val)
 	result := ReplaceTemplate(input, kvs)
 	log.Println(result)
