@@ -26,13 +26,12 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(regexCmd)
-
+	regexCmd.PersistentFlags().StringVarP(&flags.RuleName, "name", "n", "", "regex rule name which used to find yaml file or cache.")
 	regexCmd.PersistentFlags().StringVarP(&flags.DestFile, "destFile", "f", "", "replace destination text file path")
 	regexCmd.PersistentFlags().StringVarP(&flags.DestDir, "destDir", "d", "", "replace destination directory")
 	regexCmd.PersistentFlags().StringVarP(&flags.Pattern, "pattern", "p", "", "regex pattern string")
 	regexCmd.PersistentFlags().StringVarP(&flags.Content, "content", "c", "", "input content string")
 
-	regexCmd.PersistentFlags().StringVarP(&flags.Name, "name", "n", "", "regex replace pattern name")
 	regexCmd.PersistentFlags().StringVarP(&flags.IncludeSuffix, "include-suffix", "", "", "include pattern of dest file, default empty for all files")
 	regexCmd.PersistentFlags().StringVarP(&flags.ExcludeSuffix, "exclude-suffix", "", "", "exclude pattern of dest file, default empty for all files")
 	regexCmd.PersistentFlags().StringVarP(&flags.Template, "template", "t", "", "export template")

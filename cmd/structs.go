@@ -3,7 +3,7 @@ package cmd
 import "regexp"
 
 type FlagConfig struct {
-	Name          string
+	RuleName      string
 	ConfigFile    string
 	Pattern       string
 	Content       string
@@ -14,12 +14,19 @@ type FlagConfig struct {
 	Template      string
 	TemplateFile  string
 }
+type RegexAction int
+
+const (
+	MatchAction RegexAction = iota
+	ReplaceAction
+)
 
 type Regex struct {
 	R        *regexp.Regexp
 	Result   RegexResult
 	CacheKey string
 	Cache    bool
+	Action   RegexAction
 }
 type RegexResult struct {
 	Pattern    string

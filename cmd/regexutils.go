@@ -3,7 +3,11 @@ package cmd
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"log"
+	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 // var regex regexp.Regexp
@@ -86,7 +90,6 @@ func (rs *Regex) ScanMatches(input string) {
 			match.Params[gname] = group.Value
 			groups = append(groups, group)
 		}
-
 		rs.Result.Matches = append(rs.Result.Matches, match)
 	}
 	// split input by matches
@@ -127,42 +130,90 @@ func (rs *Regex) SplitMatches(input string) []RegexRange {
 	return rs.Result.Ranges
 }
 
-// func callback(matchValue string) string {
-// 	return matchValue
-// }
+func (rs *Regex) ProcFile(filePath string) {
+	// exit if file not exists
+	if !IsExists(filePath) {
+		return
+	}
+	if flags.IncludeSuffix != "" {
+		re := NewRegex(flags.IncludeSuffix)
+		if !re.IsMatch(filePath) {
+			return
+		}
+	}
+	if flags.ExcludeSuffix != "" {
+		re := NewRegex(flags.ExcludeSuffix)
+		if re.IsMatch(filePath) {
+			return
+		}
+	}
+	if buffer, err := ReadAll(filePath); err == nil {
+		rs.Result.Params["filePath"] = filePath
+		if rs.Action == MatchAction {
+			rs.MatchText(buffer)
+		} else if rs.Action == ReplaceAction {
+			rs.ReplaceText(buffer)
+		}
+	}
+}
 
-// func (matches *RegexFactory) GetMatches(index int) (bool, *RegexMatch) {
-// 	idx := slices.IndexFunc(matches.Matches, func(m RegexMatch) bool { return m.Index == index })
-// 	item := &RegexMatch{}
-// 	if idx != -1 {
-// 		return true, &matches.Matches[idx]
-// 	}
-// 	return false, item
-// }
+func (rs *Regex) ProcDir(dirPath string) {
+	if !IsExists(dirPath) {
+		log.Printf("dirPath is not found. dirPath=%s", dirPath)
+		return
+	}
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
-// func (matches *RegexFactory) log() {
-// 	log.Printf("pattern:%s, group.count:%d, group.names:%v",
-// 		matches.Pattern, len(matches.GroupNames), matches.GroupNames)
-// 	for _, match := range matches.Matches {
-// 		match.log()
-// 	}
-// 	for _, rg := range matches.Ranges {
-// 		rg.log()
-// 	}
-// }
+	for _, file := range files {
+		fullPath := filepath.Join(dirPath, file.Name())
+		ok, err := IsDir(fullPath)
+		if err == nil {
+			if ok {
+				rs.ProcDir(fullPath)
+			} else {
+				rs.ProcFile(fullPath)
+			}
+		}
+	}
+}
 
-// func (match *RegexMatch) log() {
-// 	log.Printf("match[%d].pos(%d,%d), group.count:%d, match.value=%s", match.Index,
-// 		match.Position.Start, match.Position.End, len(match.Groups), match.Value)
-// 	for _, group := range match.Groups {
-// 		group.log()
-// 	}
-// }
+func (rs *Regex) MatchText(content string) string {
+	rs.ScanMatches(content)
+	export := rs.ExportMatches(flags.Template)
+	//=export log =============
+	if value, ok := rs.Result.Params["filePath"]; ok {
+		log.Printf("file: %s", value)
+	}
+	if export != "" {
+		log.Printf("%s", export)
+	} else {
+		log.Printf("no matches")
+	}
+	//=export log =============
+	rs.Close()
+	return export
+}
 
-// func (group *RegexGroup) log() {
-// 	log.Printf("\tgroup[%d].pos(%d,%d), group.name=%s, group.value=%s", group.Index,
-// 		group.Position.Start, group.Position.End, group.Name, group.Value)
-// }
-// func (rg *RegexRange) log() {
-// 	log.Printf("\r range.isMatch=%v, MatchIndex:[%d], range.value=%s", rg.IsMatch, rg.MatchIndex, rg.Value)
-// }
+func (rs *Regex) ReplaceText(content string) string {
+	rs.ScanMatches(content)
+	//=export log =============
+	var sb strings.Builder
+	for _, m := range rs.Result.Ranges {
+		if m.IsMatch {
+			mval := ReplaceTemplate(flags.Template, rs.Result.Params)
+			mval = ReplaceTemplate(mval, rs.Result.Matches[m.MatchIndex].Params)
+			sb.WriteString(mval)
+		} else {
+			sb.WriteString(m.Value)
+		}
+	}
+	newContent := sb.String()
+	config.Restore(&newContent)
+	//=export log =============
+	rs.Close()
+	return newContent
+}
