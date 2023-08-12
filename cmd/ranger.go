@@ -23,8 +23,9 @@ func (rs *Regex) Close() {
 func (rs *Regex) ExportMatches(template string) string {
 	var sb strings.Builder
 	for i := 0; i < len(rs.Result.Matches); i++ {
-		sb.WriteString(ReplaceTemplate(template, rs.Result.Matches[i].Params))
+		ReplaceTemplate(&template, rs.Result.Matches[i].Params)
 	}
+	sb.WriteString(template)
 	exports := sb.String()
 	config.Restore(&exports)
 	return exports

@@ -49,19 +49,19 @@ func (rs *Regex) ContainsGroupKey(key string) bool {
 	return false
 }
 
-func ReplaceTemplateByKeyValue(template string, key, value string) string {
+func ReplaceTemplateByKeyValue(template *string, key, value string) {
 	pattern := fmt.Sprintf(`\$\{(?P<key>%s)\}`, key)
 	regex := NewCacheRegex(pattern, false)
-	regex.ScanMatches(template)
+	regex.ScanMatches(*template)
 	if !regex.ContainsGroupKey(key) {
-		return template
+		return
 	}
-	return regex.R.ReplaceAllString(template, value)
+	*template = regex.R.ReplaceAllString(*template, value)
 }
 
-func ReplaceTemplate(template string, kvs map[string]string) string {
+func ReplaceTemplate(template *string, kvs map[string]string) *string {
 	for key, val := range kvs {
-		template = ReplaceTemplateByKeyValue(template, key, val)
+		ReplaceTemplateByKeyValue(template, key, val)
 	}
 	return template
 }
@@ -76,6 +76,6 @@ func TestReplaceMap() {
 	//key := "t1"
 	//val := "1000"
 	//result := ReplaceTemplateByKeyValue(input, key, val)
-	result := ReplaceTemplate(input, kvs)
+	result := ReplaceTemplate(&input, kvs)
 	log.Println(result)
 }

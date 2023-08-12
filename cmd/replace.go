@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rules = make(map[string]ReplaceRuleConfig)
+var rules = make(map[string]RuleConfig)
 
 // replaceCmd represents the replaceTF command
 var replaceCmd = &cobra.Command{
@@ -45,7 +45,7 @@ var replaceCmd = &cobra.Command{
 		rs := NewRegex(pattern)
 		rs.Action = ReplaceAction
 		if flags.Content != "" {
-			rs.ReplaceText(flags.Content)
+			rs.MatchText(flags.Content)
 		}
 		if flags.DestFile != "" {
 			rs.ProcFile(flags.DestFile)
@@ -57,12 +57,12 @@ var replaceCmd = &cobra.Command{
 	},
 }
 
-func rslog(rs map[string]ReplaceRuleConfig) {
+func rslog(rs map[string]RuleConfig) {
 	for key, rule := range rs {
 		log.Printf("key:%s, rule.name: %s , rule.pattern:%s", key, rule.Name, rule.MatchPattern)
 	}
 }
-func loadRules(dirPath string, rules map[string]ReplaceRuleConfig) {
+func loadRules(dirPath string, rules map[string]RuleConfig) {
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		log.Fatal(err)
@@ -89,10 +89,10 @@ func loadRules(dirPath string, rules map[string]ReplaceRuleConfig) {
 		}
 	}
 }
-func loadRule(ruleFile string) (ReplaceRuleConfig, error) {
+func loadRule(ruleFile string) (RuleConfig, error) {
 	viper.SetConfigFile(ruleFile)
 
-	var rule ReplaceRuleConfig
+	var rule RuleConfig
 	err := viper.ReadInConfig()
 	if err == nil {
 		viper.Unmarshal(&rule)

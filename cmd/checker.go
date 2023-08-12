@@ -10,23 +10,23 @@ import (
 /*
  * is skip check
  */
-func (rule *ReplaceRuleConfig) IsFullSkip(src string) bool {
+func (rule *RuleConfig) IsFullSkip(src string) bool {
 	return rule.FullCheckPatterns.IsSkip(src)
 }
-func (rule *ReplaceRuleConfig) IsFullDest(src string) bool {
+func (rule *RuleConfig) IsFullDest(src string) bool {
 	return rule.FullCheckPatterns.IsDest(src)
 }
-func (rule *ReplaceRuleConfig) IsRangeSkip(src string) bool {
+func (rule *RuleConfig) IsRangeSkip(src string) bool {
 	return rule.RangeCheckPatterns.IsSkip(src)
 }
-func (rule *ReplaceRuleConfig) IsRangeDest(src string) bool {
+func (rule *RuleConfig) IsRangeDest(src string) bool {
 	return rule.RangeCheckPatterns.IsDest(src)
 }
 
-func (rule *ReplaceRuleConfig) IsMatchSkip(src string) bool {
+func (rule *RuleConfig) IsMatchSkip(src string) bool {
 	return rule.MatchCheckPatterns.IsSkip(src)
 }
-func (rule *ReplaceRuleConfig) IsMatchDest(src string) bool {
+func (rule *RuleConfig) IsMatchDest(src string) bool {
 	return rule.MatchCheckPatterns.IsDest(src)
 }
 

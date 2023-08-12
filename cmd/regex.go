@@ -34,6 +34,7 @@ func init() {
 
 	regexCmd.PersistentFlags().StringVarP(&flags.IncludeSuffix, "include-suffix", "", "", "include pattern of dest file, default empty for all files")
 	regexCmd.PersistentFlags().StringVarP(&flags.ExcludeSuffix, "exclude-suffix", "", "", "exclude pattern of dest file, default empty for all files")
-	regexCmd.PersistentFlags().StringVarP(&flags.Template, "template", "t", "", "export template")
-	regexCmd.PersistentFlags().StringVarP(&flags.TemplateFile, "TemplateFile", "", "", "export template")
+	regexCmd.PersistentFlags().StringVarP(&flags.TemplateOfReplace, "replace-template", "", "", "replace template for replacing input string")
+	regexCmd.PersistentFlags().StringVarP(&flags.TempleteOfExport, "export-template", "", "", "export template for exporting matches string")
+	regexCmd.PersistentFlags().StringVarP(&flags.TemplateFile, "template-file", "", "", "export template")
 }

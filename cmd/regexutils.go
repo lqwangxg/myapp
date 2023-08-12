@@ -3,6 +3,7 @@ package cmd
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -149,11 +150,7 @@ func (rs *Regex) ProcFile(filePath string) {
 	}
 	if buffer, err := ReadAll(filePath); err == nil {
 		rs.Result.Params["filePath"] = filePath
-		if rs.Action == MatchAction {
-			rs.MatchText(buffer)
-		} else if rs.Action == ReplaceAction {
-			rs.ReplaceText(buffer)
-		}
+		rs.MatchText(buffer)
 	}
 }
 
@@ -183,7 +180,7 @@ func (rs *Regex) ProcDir(dirPath string) {
 
 func (rs *Regex) MatchText(content string) string {
 	rs.ScanMatches(content)
-	export := rs.ExportMatches(flags.Template)
+	export := rs.ExportMatches(flags.TempleteOfExport)
 	//=export log =============
 	if value, ok := rs.Result.Params["filePath"]; ok {
 		log.Printf("file: %s", value)
@@ -193,19 +190,24 @@ func (rs *Regex) MatchText(content string) string {
 	} else {
 		log.Printf("no matches")
 	}
-	//=export log =============
+	//=replace log =============
+	if rs.Action == ReplaceAction {
+		newContent := rs.replaceText()
+		fmt.Println(newContent)
+	}
+	//==========================
 	rs.Close()
 	return export
 }
 
-func (rs *Regex) ReplaceText(content string) string {
-	rs.ScanMatches(content)
-	//=export log =============
+func (rs *Regex) replaceText() string {
+	//=replace log =============
 	var sb strings.Builder
 	for _, m := range rs.Result.Ranges {
-		if m.IsMatch {
-			mval := ReplaceTemplate(flags.Template, rs.Result.Params)
-			mval = ReplaceTemplate(mval, rs.Result.Matches[m.MatchIndex].Params)
+		if m.IsMatch && flags.TemplateOfReplace != "" {
+			mval := flags.TemplateOfReplace
+			ReplaceTemplate(&mval, rs.Result.Params)
+			ReplaceTemplate(&mval, rs.Result.Matches[m.MatchIndex].Params)
 			sb.WriteString(mval)
 		} else {
 			sb.WriteString(m.Value)
@@ -213,7 +215,6 @@ func (rs *Regex) ReplaceText(content string) string {
 	}
 	newContent := sb.String()
 	config.Restore(&newContent)
-	//=export log =============
-	rs.Close()
+	//=replace log =============
 	return newContent
 }

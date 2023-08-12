@@ -3,16 +3,17 @@ package cmd
 import "regexp"
 
 type FlagConfig struct {
-	RuleName      string
-	ConfigFile    string
-	Pattern       string
-	Content       string
-	DestFile      string
-	DestDir       string
-	IncludeSuffix string
-	ExcludeSuffix string
-	Template      string
-	TemplateFile  string
+	RuleName          string
+	ConfigFile        string
+	Pattern           string
+	Content           string
+	DestFile          string
+	DestDir           string
+	IncludeSuffix     string
+	ExcludeSuffix     string
+	TemplateOfReplace string
+	TempleteOfExport  string
+	TemplateFile      string
 }
 type RegexAction int
 
@@ -74,7 +75,7 @@ type RedisOption struct {
 	DB       int    `yaml:"db"`
 }
 
-type ReplaceRuleConfig struct {
+type RuleConfig struct {
 	Name               string             `yaml:"name"`
 	Group              string             `yaml:"group"`
 	FullCheckPatterns  CheckPatternConfig `yaml:"full_patterns"`
