@@ -35,6 +35,7 @@ type RegexResult struct {
 	Matches    []RegexMatch
 	Ranges     []RegexRange
 	Params     map[string]string
+	Rules      []RuleConfig
 }
 
 type RegexRange struct {

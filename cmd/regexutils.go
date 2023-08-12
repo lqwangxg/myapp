@@ -3,7 +3,6 @@ package cmd
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -182,8 +181,9 @@ func (rs *Regex) MatchText(content string) string {
 	rs.ScanMatches(content)
 	export := rs.ExportMatches(flags.TempleteOfExport)
 	//=export log =============
-	if value, ok := rs.Result.Params["filePath"]; ok {
-		log.Printf("file: %s", value)
+	filePath, hasFilePath := rs.Result.Params["filePath"]
+	if hasFilePath {
+		log.Printf("file: %s", filePath)
 	}
 	if export != "" {
 		log.Printf("%s", export)
@@ -193,7 +193,11 @@ func (rs *Regex) MatchText(content string) string {
 	//=replace log =============
 	if rs.Action == ReplaceAction {
 		newContent := rs.replaceText()
-		fmt.Println(newContent)
+		if hasFilePath {
+			WriteAll(filePath, newContent)
+		} else {
+			log.Println(newContent)
+		}
 	}
 	//==========================
 	rs.Close()

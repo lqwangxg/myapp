@@ -23,15 +23,25 @@ func IsDir(path string) (bool, error) {
 
 func ReadAll(filePath string) (string, error) {
 	f, err := os.Open(filePath)
-	if err != nil {
-		return "", err
-	}
+	check(err)
 	defer f.Close()
 
 	content, err := io.ReadAll(f) // 全部読み込んでくれる
-	if err != nil {
-		return "", err
-	}
+	check(err)
 
 	return string(content), nil
+}
+func WriteAll(filePath, content string) {
+	f, err := os.Create(filePath)
+	check(err)
+	defer f.Close()
+
+	_, err = f.WriteString(content)
+	check(err)
+	f.Sync()
+}
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
