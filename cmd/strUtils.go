@@ -48,17 +48,17 @@ func (rs *Regex) ParamValue(key string) (bool, string) {
 	return false, ""
 }
 
-func ReplaceByKeyValue(template *string, key, value string) {
+func ReplaceByKeyValue(template *string, key string, value any) {
 	pattern := fmt.Sprintf(`\$\{(?P<key>%s)\}`, key)
 	regex := NewNoCacheRegex(pattern)
 	regex.ScanMatches(*template)
 	if ok, _ := regex.ParamValue(key); !ok {
 		return
 	}
-	*template = regex.R.ReplaceAllString(*template, value)
+	*template = regex.R.ReplaceAllString(*template, value.(string))
 }
 
-func ReplaceByMap(template *string, kvs map[string]string) *string {
+func ReplaceByMap(template *string, kvs map[string]any) *string {
 	for key, val := range kvs {
 		ReplaceByKeyValue(template, key, val)
 	}

@@ -18,10 +18,10 @@ type RegexAction int
 
 type Regex struct {
 	R         *regexp.Regexp
-	Content   string
 	Result    RegexResult
-	CacheKey  string
 	Cache     bool
+	CacheKey  string
+	Content   string
 	IsReplace bool
 	Rule      *RuleConfig
 }
@@ -30,7 +30,7 @@ type RegexResult struct {
 	GroupNames []string
 	Matches    []RegexMatch
 	Ranges     []RegexRange
-	Params     map[string]string
+	Params     map[string]any
 }
 
 type RegexRange struct {
@@ -96,4 +96,4 @@ type TemplateControlConfig struct {
 	Loop string `mapstructure:"loop"`
 }
 
-type ConvertFunc func(*string, map[string]string) *string
+type ConvertFunc func(*string, map[string]any) *string

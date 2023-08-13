@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -31,30 +30,31 @@ func NewRegexFromCmd() *Regex {
 
 // var regex regexp.Regexp
 func NewRegex(pattern string) *Regex {
-	return NewCacheRegex(pattern, config.RedisOption.Enable)
+	return NewCacheRegex(pattern, config.RedisOption.Enable, nil)
 }
 
 // var regex regexp.Regexp
 func (rule RuleConfig) NewRegex() *Regex {
-	rs := NewCacheRegex(rule.Pattern, config.RedisOption.Enable)
-	rs.Rule = &rule
-	return rs
+	return NewCacheRegex(rule.Pattern, config.RedisOption.Enable, &rule)
 }
 func NewNoCacheRegex(pattern string) *Regex {
-	return NewCacheRegex(pattern, false)
+	return NewCacheRegex(pattern, false, nil)
 }
 
 // var regex regexp.Regexp
-func NewCacheRegex(pattern string, cache bool) *Regex {
+func NewCacheRegex(pattern string, cache bool, rule *RuleConfig) *Regex {
 	r := regexp.MustCompile(pattern)
 	return &Regex{
 		R: r,
 		Result: RegexResult{
 			Pattern:    pattern,
 			GroupNames: r.SubexpNames(),
-			Params:     make(map[string]string),
+			Matches:    make([]RegexMatch, 0),
+			Ranges:     make([]RegexRange, 0),
+			Params:     make(map[string]any),
 		},
 		Cache: cache,
+		Rule:  rule,
 	}
 }
 
@@ -77,15 +77,14 @@ func (rs *Regex) ScanMatches(input string) {
 
 	//before match input, transfer special chars
 	config.Encode(&input)
-	r := rs.R
-	if !r.MatchString(input) {
+	if !rs.IsMatch(input) {
 		return
 	}
-	subMatches := r.FindAllStringSubmatch(input, -1)
-	positions := r.FindAllStringSubmatchIndex(input, -1)
-	rs.Result.Params["matches.count"] = strconv.Itoa(len(subMatches))
-	rs.Result.Params["groups.count"] = strconv.Itoa(len(rs.Result.GroupNames))
-	rs.Result.Params["groups.keys"] = strings.Join(rs.Result.GroupNames, ",")
+	subMatches := rs.R.FindAllStringSubmatch(input, -1)
+	positions := rs.R.FindAllStringSubmatchIndex(input, -1)
+	rs.Result.Params["matches.count"] = len(subMatches)
+	rs.Result.Params["groups.count"] = len(rs.Result.GroupNames)
+	rs.Result.Params["groups.keys"] = rs.Result.GroupNames
 
 	for i, smatch := range subMatches {
 		position := positions[i]
@@ -102,7 +101,7 @@ func (rs *Regex) ScanMatches(input string) {
 
 		for x, groupName := range rs.Result.GroupNames {
 			//from match 0 ~ count - 1
-			groupIndex := r.SubexpIndex(groupName)
+			groupIndex := rs.R.SubexpIndex(groupName)
 			if groupName == "" {
 				groupIndex = x
 			}
@@ -128,7 +127,7 @@ func (rs *Regex) ScanMatches(input string) {
 }
 
 // split input by matches
-func (rs *Regex) SplitMatches(input string) []RegexRange {
+func (rs *Regex) SplitMatches(input string) {
 	cpos := 0
 	epos := len(input)
 	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
@@ -158,7 +157,6 @@ func (rs *Regex) SplitMatches(input string) []RegexRange {
 		}
 		rs.Result.Ranges = append(rs.Result.Ranges, *f)
 	}
-	return rs.Result.Ranges
 }
 
 func (rs *Regex) ProcFile(filePath string) {
@@ -217,10 +215,11 @@ func (rs *Regex) ProcDir(dirPath string) {
 }
 
 func (rs *Regex) MatchText(content string) string {
-	filePath, hasFilePath := rs.Result.Params["filePath"]
+	filePath := ""
+	file, hasFilePath := rs.Result.Params["filePath"]
 	rs.Content = content
 	if hasFilePath {
-		log.Printf("file: %s", filePath)
+		filePath = file.(string)
 	}
 
 	rs.ScanMatches(rs.Content)
@@ -297,7 +296,7 @@ func (rs *Regex) replaceMatch(index int, template string) string {
 	var sb strings.Builder
 	mval := template
 	ReplaceByMap(&mval, rs.Result.Params)
-	ReplaceByMap(&mval, rs.Result.Matches[index].Params)
+	//ReplaceByMap(&mval, rs.Result.Matches[index].Params)
 	sb.WriteString(mval)
 
 	buffer := sb.String()
