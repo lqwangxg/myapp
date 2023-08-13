@@ -28,6 +28,7 @@ type Regex struct {
 	CacheKey string
 	Cache    bool
 	Action   RegexAction
+	Rule     RuleConfig
 }
 type RegexResult struct {
 	Pattern    string
@@ -35,7 +36,6 @@ type RegexResult struct {
 	Matches    []RegexMatch
 	Ranges     []RegexRange
 	Params     map[string]string
-	Rules      []RuleConfig
 }
 
 type RegexRange struct {
@@ -77,17 +77,22 @@ type RedisOption struct {
 }
 
 type RuleConfig struct {
-	Name               string             `yaml:"name"`
-	Group              string             `yaml:"group"`
-	FullCheckPatterns  CheckPatternConfig `yaml:"full_patterns"`
-	RangePattern       string             `yaml:"range_pattern"`
-	RangeParamsPattern []string           `yaml:"range_params_pattern"`
-	RangeCheckPatterns CheckPatternConfig `yaml:"range_patterns"`
-	MatchPattern       string             `yaml:"match_pattern"`
-	MatchCheckPatterns CheckPatternConfig `yaml:"match_patterns"`
-	MatchFormulas      []string           `yaml:"match_formulas"`
-	MatchCheckEvals    CheckPatternConfig `yaml:"match_evals"`
-	Key                string
+	Name            string `yaml:"name"`
+	Group           string `yaml:"group"`
+	IncludeSuffix   string `yaml:"include-suffix"`
+	ExcludeSuffix   string `yaml:"exclude-suffix"`
+	Pattern         string `yaml:"pattern"`
+	ExportTemplate  string `yaml:"export-template"`
+	ReplaceTemplate string `yaml:"replace-template"`
+
+	RangePattern string `yaml:"range_pattern"`
+
+	FullPatterns  CheckPatternConfig `yaml:"full_patterns"`
+	RangePatterns CheckPatternConfig `yaml:"range_patterns"`
+	MatchPatterns CheckPatternConfig `yaml:"match_patterns"`
+	MatchFormulas []string           `yaml:"match_formulas"`
+	MatchEvals    CheckPatternConfig `yaml:"match_evals"`
+	CacheKey      string
 }
 type CheckPatternConfig struct {
 	SkipIfany []string `yaml:"skip_ifany"`

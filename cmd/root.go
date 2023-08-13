@@ -68,4 +68,7 @@ func initConfig() {
 		viper.Unmarshal(&config)
 		log.Printf("Using config file:%s, config:%v", viper.ConfigFileUsed(), config)
 	}
+	for _, dir := range config.RuleDirs {
+		loadRules(dir, localRules)
+	}
 }

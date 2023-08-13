@@ -4,57 +4,50 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-	//"context"
-	"github.com/spf13/cobra"
+	"log"
+	"os"
+	"path/filepath"
+	"regexp"
+
 	"github.com/spf13/viper"
-	//"github.com/redis/go-redis/v9"
 )
 
-//var ruleName, ruleStr string
+func loadRules(dirPath string, rules map[string]RuleConfig) {
+	files, err := os.ReadDir(dirPath)
+	check(err)
 
-// ruleCmd represents the rule command
-var ruleCmd = &cobra.Command{
-	Use:   "rule",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("rule called")
-		//fmt.Printf("origin flag: ruleName=%s,  ruleStr=%s \n", ruleName, ruleStr)
-		ReadYaml()
-		//setValue(ruleName, ruleStr + " ===>.suffix")
-		//newRule := getValue(ruleName)
-		//fmt.Printf("after setValue ruleName=%s,  old-ruleStr=%s, new-ruleStr \n", ruleName, ruleStr,newRule)
-	},
+	r := regexp.MustCompile(`\w+\.(yaml|yml)$`)
+	for _, file := range files {
+		fullPath := filepath.Join(dirPath, file.Name())
+		isdir, err := IsDir(fullPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if isdir {
+			loadRules(fullPath, rules)
+			continue
+		}
+		//skip ifnot yaml or yml
+		if !r.MatchString(fullPath) {
+			continue
+		}
+		if rule := loadRule(fullPath); rule.Name != "" {
+			rules[rule.Name] = rule
+		}
+	}
 }
 
-func ReadYaml() {
-	viper.SetConfigType("yaml")
-	viper.SetConfigType("rule/html-input.yaml")
-	//viper.SetConfigFile("config/rules/html-input.yaml")
-	fmt.Printf("Using config: %s\n", viper.ConfigFileUsed())
-	viper.ReadInConfig()
+func loadRule(ruleFile string) RuleConfig {
+	var rule RuleConfig
+	if IsExists(ruleFile) {
+		viper.SetConfigFile(ruleFile)
+		err := viper.ReadInConfig()
+		if err == nil {
+			viper.Unmarshal(&rule)
+		} else {
+			check(err)
+		}
 
-	// if viper.IsSet("config.global_params") {
-	// 	global_params := viper.Get("config.global_params") //.([]string)
-	// 	fmt.Println("config.global_params:", global_params)
-	// } else {
-	// 	fmt.Println(" config.global_params not set.")
-	// }
-	// if viper.IsSet("config.spec_chars") {
-	// 	//params := global_params.([]map[string]string)
-	// 	spec_chars := viper.Get("config.spec_chars") //.([]map[string]string)
-	// 	fmt.Println("config.spec_chars:", spec_chars)
-	// } else {
-	// 	fmt.Println(" config.spec_chars not set.")
-	// }
-}
-
-func init() {
-	regexCmd.AddCommand(ruleCmd)
+	}
+	return rule
 }
