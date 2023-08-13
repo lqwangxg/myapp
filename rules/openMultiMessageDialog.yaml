@@ -11,8 +11,8 @@ exclude-suffix:
 pattern: if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
 # export match template
 export-template: | 
-  'matchs.count: ${matchs.count}, group.count: ${group.count}, group.keys: ${group.keys}'
-  'match.value: ${match.value}'
+  "matchs.count: ${matchs.count}, group.count: ${group.count}, group.keys: ${group.keys}
+  match.value: ${match.value} "
 
 # replace match template
 replace-template: |
@@ -29,7 +29,7 @@ replace-template: |
 # if range_end is empty then epos=length(full)
 # optional: if groupname is included in pattern, 
 #  { match.group.name: match.group.nalue } will be saved in ${match_params_map}
-range_pattern: ""
+range_pattern: \nfunction\s+(?P<function>\w+)\(form\)\s*\{.+?\n\}
 
 # before replace process: check full content skip or do.
 # priority descend: skip_ifany, skip_when, do_ifany, do_when
@@ -39,7 +39,10 @@ range_pattern: ""
 full_patterns :
   skip_ifany: []
   skip_when: []
-  do_ifany: []
+  do_ifany: 
+    - "DOCTYPE HTML PUBLIC"
+    - "swtag:html"
+    - "meta http-equiv"
   do_when: []
 
 # before replace process: check full content skip or do.

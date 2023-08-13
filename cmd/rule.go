@@ -47,7 +47,6 @@ func loadRule(ruleFile string) RuleConfig {
 		} else {
 			check(err)
 		}
-
 	}
 	return rule
 }

@@ -28,7 +28,7 @@ type Regex struct {
 	CacheKey string
 	Cache    bool
 	Action   RegexAction
-	Rule     RuleConfig
+	Rule     *RuleConfig
 }
 type RegexResult struct {
 	Pattern    string
@@ -77,26 +77,24 @@ type RedisOption struct {
 }
 
 type RuleConfig struct {
-	Name            string `yaml:"name"`
-	Group           string `yaml:"group"`
-	IncludeSuffix   string `yaml:"include-suffix"`
-	ExcludeSuffix   string `yaml:"exclude-suffix"`
-	Pattern         string `yaml:"pattern"`
-	ExportTemplate  string `yaml:"export-template"`
-	ReplaceTemplate string `yaml:"replace-template"`
+	Name            string `mapstructure:"name"`
+	Group           string `mapstructure:"group"`
+	IncludeSuffix   string `mapstructure:"include-suffix"`
+	ExcludeSuffix   string `mapstructure:"exclude-suffix"`
+	Pattern         string `mapstructure:"pattern"`
+	ExportTemplate  string `mapstructure:"export-template"`
+	ReplaceTemplate string `mapstructure:"replace-template"`
+	RangePattern    string `mapstructure:"range_pattern"`
 
-	RangePattern string `yaml:"range_pattern"`
-
-	FullPatterns  CheckPatternConfig `yaml:"full_patterns"`
-	RangePatterns CheckPatternConfig `yaml:"range_patterns"`
-	MatchPatterns CheckPatternConfig `yaml:"match_patterns"`
-	MatchFormulas []string           `yaml:"match_formulas"`
-	MatchEvals    CheckPatternConfig `yaml:"match_evals"`
-	CacheKey      string
+	FullPatterns  CheckPatternConfig `mapstructure:"full_patterns"`
+	RangePatterns CheckPatternConfig `mapstructure:"range_patterns"`
+	MatchPatterns CheckPatternConfig `mapstructure:"match_patterns"`
+	MatchFormulas []string           `mapstructure:"match_formulas"`
+	MatchEvals    CheckPatternConfig `mapstructure:"match_evals"`
 }
 type CheckPatternConfig struct {
-	SkipIfany []string `yaml:"skip_ifany"`
-	SkipWhen  []string `yaml:"skip_when"`
-	DoIfany   []string `yaml:"do_ifany"`
-	DoWhen    []string `yaml:"do_when"`
+	SkipIfany []string `mapstructure:"skip_ifany"`
+	SkipWhen  []string `mapstructure:"skip_when"`
+	DoIfany   []string `mapstructure:"do_ifany"`
+	DoWhen    []string `mapstructure:"do_when"`
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -15,7 +16,7 @@ func NewRegexFromCmd() *Regex {
 	if flags.RuleName != "" {
 		rule, found := localRules[flags.RuleName]
 		if found {
-			rs = NewRegexByRule(rule)
+			rs = rule.NewRegex()
 			return rs
 		}
 	}
@@ -34,9 +35,9 @@ func NewRegex(pattern string) *Regex {
 }
 
 // var regex regexp.Regexp
-func NewRegexByRule(rule RuleConfig) *Regex {
+func (rule RuleConfig) NewRegex() *Regex {
 	rs := NewCacheRegex(rule.Pattern, config.RedisOption.Enable)
-	rs.Rule = rule
+	rs.Rule = &rule
 	return rs
 }
 
@@ -79,6 +80,8 @@ func (rs *Regex) ScanMatches(input string) {
 	}
 	subMatches := r.FindAllStringSubmatch(input, -1)
 	positions := r.FindAllStringSubmatchIndex(input, -1)
+	rs.Result.Params["matchs.count"] = strconv.Itoa(len(subMatches))
+	rs.Result.Params["group.count"] = strconv.Itoa(len(rs.Result.GroupNames))
 
 	for i, smatch := range subMatches {
 		position := positions[i]
@@ -93,6 +96,7 @@ func (rs *Regex) ScanMatches(input string) {
 			Value:  smatch[0],
 			Params: make(map[string]string),
 		}
+
 		for x, groupName := range rs.Result.GroupNames {
 			//from match 0 ~ count - 1
 			groupIndex := r.SubexpIndex(groupName)
@@ -160,14 +164,22 @@ func (rs *Regex) ProcFile(filePath string) {
 	if !IsExists(filePath) {
 		return
 	}
-	if flags.IncludeSuffix != "" {
+	if flags.IncludeSuffix != "" || rs.Rule.IncludeSuffix != "" {
 		re := NewRegex(flags.IncludeSuffix)
 		if !re.IsMatch(filePath) {
 			return
 		}
+		re = NewRegex(rs.Rule.IncludeSuffix)
+		if !re.IsMatch(filePath) {
+			return
+		}
 	}
-	if flags.ExcludeSuffix != "" {
+	if flags.ExcludeSuffix != "" || rs.Rule.ExcludeSuffix != "" {
 		re := NewRegex(flags.ExcludeSuffix)
+		if re.IsMatch(filePath) {
+			return
+		}
+		re = NewRegex(rs.Rule.ExcludeSuffix)
 		if re.IsMatch(filePath) {
 			return
 		}
@@ -204,7 +216,7 @@ func (rs *Regex) ProcDir(dirPath string) {
 
 func (rs *Regex) MatchText(content string) string {
 	rs.ScanMatches(content)
-	export := rs.exportMatches(flags.TempleteOfExport)
+	export := rs.exportMatches()
 	//=export log =============
 	filePath, hasFilePath := rs.Result.Params["filePath"]
 	if hasFilePath {
@@ -247,12 +259,23 @@ func (rs *Regex) replaceText() string {
 	//=replace log =============
 	return newContent
 }
-func (rs *Regex) exportMatches(template string) string {
+func (rs *Regex) exportMatches() string {
+	template := rs.Rule.ExportTemplate
+	if flags.TempleteOfExport != "" {
+		template = flags.TempleteOfExport
+	}
 	var sb strings.Builder
 	for i := 0; i < len(rs.Result.Matches); i++ {
-		ReplaceTemplate(&template, rs.Result.Matches[i].Params)
+		if template != "" {
+			//replace match.value by match.params
+			ReplaceTemplate(&template, rs.Result.Matches[i].Params)
+			sb.WriteString(template)
+		} else {
+			//when template is empty, export match.value
+			sb.WriteString(rs.Result.Matches[i].Value)
+		}
 	}
-	sb.WriteString(template)
+
 	exports := sb.String()
 	config.Restore(&exports)
 	return exports
