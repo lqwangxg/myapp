@@ -14,8 +14,8 @@ export-template: |
   matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
   match.value:
     ${match.value}
-  $ctr-loop-start=groups
-    ${group.key}: ${group.value}: 
+  $ctr-loop-start=params
+    ${param.key}: ${param.value} 
   $ctr-loop-end=groups
   
 # TODO:

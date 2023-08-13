@@ -86,14 +86,13 @@ func (rs *Regex) ScanMatches(input string) {
 
 	for i, smatch := range subMatches {
 		position := positions[i]
-		groups := make([]RegexGroup, 0)
 		match := RegexMatch{
 			Index: i,
 			Position: RegexMatchIndex{
 				Start: position[0],
 				End:   position[1],
 			},
-			Groups: groups,
+			Groups: make([]RegexGroup, 0),
 			Value:  smatch[0],
 			Params: make(map[string]string),
 		}
@@ -109,7 +108,6 @@ func (rs *Regex) ScanMatches(input string) {
 				gname = "match.value"
 			}
 			group := RegexGroup{
-				Index: x,
 				Name:  gname,
 				Value: smatch[groupIndex],
 				Position: RegexMatchIndex{
@@ -117,8 +115,8 @@ func (rs *Regex) ScanMatches(input string) {
 					End:   position[x*2+1],
 				},
 			}
-			match.Params[gname] = group.Value
-			groups = append(groups, group)
+			match.Params[gname] = config.Restore(&group.Value)
+			match.Groups = append(match.Groups, group)
 		}
 		rs.Result.Matches = append(rs.Result.Matches, match)
 	}
@@ -231,7 +229,7 @@ func (rs *Regex) MatchText(content string) string {
 	}
 	//=replace log =============
 	if rs.Action == ReplaceAction {
-		newContent := rs.replaceText()
+		newContent := rs.replaceText("")
 		if hasFilePath {
 			WriteAll(filePath, newContent)
 		} else {
@@ -242,11 +240,13 @@ func (rs *Regex) MatchText(content string) string {
 	rs.close()
 	return export
 }
-func (rs *Regex) replaceText() string {
+func (rs *Regex) replaceText(template string) string {
 	//=replace log =============
 	var sb strings.Builder
-	template := rs.Rule.ReplaceTemplate
-	if flags.ReplaceTemplate != "" {
+	if template == "" {
+		template = rs.Rule.ReplaceTemplate
+	}
+	if template == "" && flags.ReplaceTemplate != "" {
 		template = flags.ReplaceTemplate
 	}
 	for _, m := range rs.Result.Ranges {
@@ -271,7 +271,7 @@ func (rs *Regex) exportMatches() string {
 	for i := 0; i < len(rs.Result.Matches); i++ {
 		if template != "" {
 			tmp := rs.replaceMatch(i, template)
-			tmp = rs.ReplaceLoop(&tmp, ReplaceTemplate)
+			rs.ReplaceLoop(&tmp, ReplaceTemplate)
 			sb.WriteString(tmp)
 		} else {
 			//when template is empty, export match.value
@@ -296,11 +296,11 @@ func (rs *Regex) replaceMatch(index int, template string) string {
 }
 func (rs *Regex) close() {
 	//match restore
-	for i, m := range rs.Result.Matches {
+	for i, _ := range rs.Result.Matches {
 		config.Restore(&rs.Result.Matches[i].Value)
-		for x := 0; x < len(m.Groups); x++ {
-			config.Restore(&rs.Result.Matches[i].Groups[x].Value)
-		}
+		// for x := 0; x < len(*m.Groups); x++ {
+		// 	config.Restore(rs.Result.Matches[i].Groups[x].Value)
+		// }
 	}
 	//range restore
 	for x := 0; x < len(rs.Result.Ranges); x++ {

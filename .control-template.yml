@@ -1,2 +1,1 @@
-loop-start: $ctr-loop-start=(?P<sitems>\w+)
-loop-end: $ctr-loop-end=(?P<eitems>\w+)
+loop: \$ctr-loop-start=(?P<items>\w+)(?P<process>.+?)\$ctr-loop-end=(?P<items>\w+)

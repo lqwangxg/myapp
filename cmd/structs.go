@@ -50,7 +50,6 @@ type RegexMatch struct {
 	Params   map[string]string
 }
 type RegexGroup struct {
-	Index    int
 	Name     string
 	Value    string
 	Position RegexMatchIndex
@@ -98,8 +97,7 @@ type CheckPatternConfig struct {
 	DoWhen    []string `mapstructure:"do_when"`
 }
 type TemplateControlConfig struct {
-	LoopStart string `mapstructure:"loop-start"`
-	LoopEnd   string `mapstructure:"loop-end"`
+	Loop string `mapstructure:"loop"`
 }
 
 type ConvertFunc func(*string, map[string]string) *string
