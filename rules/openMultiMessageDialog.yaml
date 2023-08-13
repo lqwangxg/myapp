@@ -8,21 +8,27 @@ include-suffix: jsp|html
 exclude-suffix: 
 
 # regex pattern   
-pattern: if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+pattern: (?P<indent>[ ]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
 # export match template
 export-template: | 
-  "matchs.count: ${matchs.count}, group.count: ${group.count}, group.keys: ${group.keys}
-  match.value: ${match.value} "
+  matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
+  match.value:
+    ${match.value}
+  $ctr-loop-start=groups
+    ${group.key}: ${group.value}: 
+  $ctr-loop-end=groups
+  
+# TODO:
+#  #GROUP-LOOP-START#
+#    ${group.key}: ${${group.index}}
+#  #GROUP-LOOP-END#
 
 # replace match template
 replace-template: |
-  `   ${call}(${param}, \"callbackForRetunWindow\");
-      window[\"callbackForRetunWindow\"] = function (res){
-        if(res){
-        ${process}
-        }
-      }
-  `
+  ${indent}${call}(${param}, "callbackForRetunWindow");
+  ${indent}window["callbackForRetunWindow"] = function (res){
+  ${indent}  if(res){${process}}
+  ${indent}}
 
 # match destination range(spos=startIndex, epos=endIndex + endLength) 
 # if range_start is empty then spos=0

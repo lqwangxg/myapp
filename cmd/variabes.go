@@ -3,6 +3,7 @@ package cmd
 var config AppConfig
 var flags FlagConfig
 var localRules = make(map[string]RuleConfig)
+var templateCtl TemplateControlConfig
 
 // var appContext map[string]string
 // var transContext map[string]string

@@ -71,4 +71,14 @@ func initConfig() {
 	for _, dir := range config.RuleDirs {
 		loadRules(dir, localRules)
 	}
+
+	//load .control-template.yml
+	controlFile := ".control-template.yml"
+	if IsExists(controlFile) {
+		viper.SetConfigFile(controlFile)
+		if err := viper.ReadInConfig(); err == nil {
+			viper.Unmarshal(&templateCtl)
+			log.Printf("Using config file:%s, config:%v", viper.ConfigFileUsed(), config)
+		}
+	}
 }

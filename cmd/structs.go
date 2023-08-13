@@ -3,17 +3,16 @@ package cmd
 import "regexp"
 
 type FlagConfig struct {
-	RuleName          string
-	ConfigFile        string
-	Pattern           string
-	Content           string
-	DestFile          string
-	DestDir           string
-	IncludeSuffix     string
-	ExcludeSuffix     string
-	TemplateOfReplace string
-	TempleteOfExport  string
-	TemplateFile      string
+	RuleName        string
+	ConfigFile      string
+	Pattern         string
+	Content         string
+	DestFile        string
+	DestDir         string
+	IncludeSuffix   string
+	ExcludeSuffix   string
+	ExportTemplate  string
+	ReplaceTemplate string
 }
 type RegexAction int
 
@@ -98,3 +97,9 @@ type CheckPatternConfig struct {
 	DoIfany   []string `mapstructure:"do_ifany"`
 	DoWhen    []string `mapstructure:"do_when"`
 }
+type TemplateControlConfig struct {
+	LoopStart string `mapstructure:"loop-start"`
+	LoopEnd   string `mapstructure:"loop-end"`
+}
+
+type ConvertFunc func(*string, map[string]string) *string

@@ -1,0 +1,2 @@
+loop-start: $ctr-loop-start=(?P<sitems>\w+)
+loop-end: $ctr-loop-end=(?P<eitems>\w+)

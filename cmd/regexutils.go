@@ -80,8 +80,9 @@ func (rs *Regex) ScanMatches(input string) {
 	}
 	subMatches := r.FindAllStringSubmatch(input, -1)
 	positions := r.FindAllStringSubmatchIndex(input, -1)
-	rs.Result.Params["matchs.count"] = strconv.Itoa(len(subMatches))
-	rs.Result.Params["group.count"] = strconv.Itoa(len(rs.Result.GroupNames))
+	rs.Result.Params["matches.count"] = strconv.Itoa(len(subMatches))
+	rs.Result.Params["groups.count"] = strconv.Itoa(len(rs.Result.GroupNames))
+	rs.Result.Params["groups.keys"] = strings.Join(rs.Result.GroupNames, ",")
 
 	for i, smatch := range subMatches {
 		position := positions[i]
@@ -215,13 +216,14 @@ func (rs *Regex) ProcDir(dirPath string) {
 }
 
 func (rs *Regex) MatchText(content string) string {
-	rs.ScanMatches(content)
-	export := rs.exportMatches()
-	//=export log =============
 	filePath, hasFilePath := rs.Result.Params["filePath"]
 	if hasFilePath {
 		log.Printf("file: %s", filePath)
 	}
+
+	rs.ScanMatches(content)
+	export := rs.exportMatches()
+	//=export log =============
 	if export != "" {
 		log.Printf("%s", export)
 	} else {
@@ -240,16 +242,16 @@ func (rs *Regex) MatchText(content string) string {
 	rs.close()
 	return export
 }
-
 func (rs *Regex) replaceText() string {
 	//=replace log =============
 	var sb strings.Builder
+	template := rs.Rule.ReplaceTemplate
+	if flags.ReplaceTemplate != "" {
+		template = flags.ReplaceTemplate
+	}
 	for _, m := range rs.Result.Ranges {
-		if m.IsMatch && flags.TemplateOfReplace != "" {
-			mval := flags.TemplateOfReplace
-			ReplaceTemplate(&mval, rs.Result.Params)
-			ReplaceTemplate(&mval, rs.Result.Matches[m.MatchIndex].Params)
-			sb.WriteString(mval)
+		if m.IsMatch {
+			sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
 		} else {
 			sb.WriteString(m.Value)
 		}
@@ -259,26 +261,38 @@ func (rs *Regex) replaceText() string {
 	//=replace log =============
 	return newContent
 }
+
 func (rs *Regex) exportMatches() string {
 	template := rs.Rule.ExportTemplate
-	if flags.TempleteOfExport != "" {
-		template = flags.TempleteOfExport
+	if flags.ExportTemplate != "" {
+		template = flags.ExportTemplate
 	}
 	var sb strings.Builder
 	for i := 0; i < len(rs.Result.Matches); i++ {
 		if template != "" {
-			//replace match.value by match.params
-			ReplaceTemplate(&template, rs.Result.Matches[i].Params)
-			sb.WriteString(template)
+			tmp := rs.replaceMatch(i, template)
+			tmp = rs.ReplaceLoop(&tmp, ReplaceTemplate)
+			sb.WriteString(tmp)
 		} else {
 			//when template is empty, export match.value
 			sb.WriteString(rs.Result.Matches[i].Value)
 		}
 	}
-
 	exports := sb.String()
 	config.Restore(&exports)
 	return exports
+}
+
+func (rs *Regex) replaceMatch(index int, template string) string {
+	var sb strings.Builder
+	mval := template
+	ReplaceTemplate(&mval, rs.Result.Params)
+	ReplaceTemplate(&mval, rs.Result.Matches[index].Params)
+	sb.WriteString(mval)
+
+	buffer := sb.String()
+	config.Restore(&buffer)
+	return buffer
 }
 func (rs *Regex) close() {
 	//match restore

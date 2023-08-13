@@ -14,8 +14,8 @@
             //
             //    "args": ["regex", "replace","-n","html-input", "-p","\\<html:(?P<type>button).*?\/?\\>","-f", "C:\\work\\go\\myapp\\test\\C01W001P01.jsp", "--config", ".myapp.yaml"]
             "args": ["regex", 
-                    "match",
-                    //"replace",
+                    //"match",
+                    "replace",
                     "--name","openMultiMessageDialog", 
                     //"-p","if\\((?P<call>openMultiMessageDialog)\\((?P<param>[^{]+)\\)\\s*\\)\\s*\\{(?P<process>[^}]+?)\\}",
                     "-f","C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main\\public\\pages\\jsp\\d01\\D01W002P00.jsp",
