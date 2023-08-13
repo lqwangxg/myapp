@@ -23,8 +23,8 @@ func (rs *Regex) ReplaceLoop(template *string, repFunc ConvertFunc) {
 	if isParamLoop {
 		for _, m := range rs.Result.Matches {
 			for key, value := range m.Params {
-				ReplaceTemplateByKeyValue(template, "param.key", key)
-				ReplaceTemplateByKeyValue(template, "param.value", value)
+				ReplaceByKeyValue(template, "param.key", key)
+				ReplaceByKeyValue(template, "param.value", value)
 			}
 		}
 	}

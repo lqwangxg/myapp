@@ -5,9 +5,9 @@ import (
 	"regexp"
 )
 
-// Transform content from keyChar to valueChar defined in config.yaml
+// Encode content from keyChar to valueChar defined in config.yaml
 // keychar:valuechar= {'\n': '乚' , '\r': '刂', '\t': '亠'}
-func (cfg *AppConfig) Transform(content *string) string {
+func (cfg *AppConfig) Encode(content *string) string {
 	for key, val := range config.EChars {
 		encode(content, key, val)
 	}
@@ -16,7 +16,7 @@ func (cfg *AppConfig) Transform(content *string) string {
 
 // Transform content from valueChar to keyChar defined in config.yaml
 // keychar:valuechar= {'\n': '乚' , '\r': '刂', '\t': '亠'}
-func (cfg *AppConfig) Restore(content *string) string {
+func (cfg *AppConfig) Decode(content *string) string {
 	for key, val := range config.EChars {
 		ckey := key
 		switch key {
@@ -37,44 +37,30 @@ func encode(input *string, fchar, tchar string) {
 	r, _ := regexp.Compile(fchar)
 	*input = r.ReplaceAllString(*input, tchar)
 }
-func (rs *Regex) ContainsGroupKey(key string) bool {
+func (rs *Regex) ParamValue(key string) (bool, string) {
 	for _, m := range rs.Result.Matches {
 		for _, val := range m.Params {
 			if val == key {
-				return true
+				return true, m.Params[key]
 			}
 		}
 	}
-	return false
+	return false, ""
 }
 
-func ReplaceTemplateByKeyValue(template *string, key, value string) {
+func ReplaceByKeyValue(template *string, key, value string) {
 	pattern := fmt.Sprintf(`\$\{(?P<key>%s)\}`, key)
 	regex := NewNoCacheRegex(pattern)
 	regex.ScanMatches(*template)
-	if !regex.ContainsGroupKey(key) {
+	if ok, _ := regex.ParamValue(key); !ok {
 		return
 	}
 	*template = regex.R.ReplaceAllString(*template, value)
 }
 
-func ReplaceTemplate(template *string, kvs map[string]string) *string {
+func ReplaceByMap(template *string, kvs map[string]string) *string {
 	for key, val := range kvs {
-		ReplaceTemplateByKeyValue(template, key, val)
+		ReplaceByKeyValue(template, key, val)
 	}
 	return template
 }
-
-// func TestReplaceMap() {
-// 	input := "${t1}+${t2}=${t3}"
-// 	kvs := map[string]string{
-// 		"t1": "1000",
-// 		"t2": "1500",
-// 		"t3": "2500",
-// 	}
-// 	//key := "t1"
-// 	//val := "1000"
-// 	//result := ReplaceTemplateByKeyValue(input, key, val)
-// 	result := ReplaceTemplate(&input, kvs)
-// 	log.Println(result)
-// }

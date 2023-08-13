@@ -14,16 +14,7 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "myapp",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "read params and flags in cui",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -41,7 +32,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&flags.ConfigFile, "config", "", "config file (default is $HOME/.myapp.yaml)")
+	rootCmd.PersistentFlags().StringVar(&flags.ConfigFile, "config", ".myapp.yaml", "config file (default is .myapp.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -68,17 +59,10 @@ func initConfig() {
 		viper.Unmarshal(&config)
 		log.Printf("Using config file:%s, config:%v", viper.ConfigFileUsed(), config)
 	}
-	for _, dir := range config.RuleDirs {
-		loadRules(dir, localRules)
-	}
+	// for _, dir := range config.RuleDirs {
+	// 	loadRules(dir, localRules)
+	// }
 
 	//load .control-template.yml
-	controlFile := ".control-template.yml"
-	if IsExists(controlFile) {
-		viper.SetConfigFile(controlFile)
-		if err := viper.ReadInConfig(); err == nil {
-			viper.Unmarshal(&templateCtl)
-			log.Printf("Using config file:%s, config:%v", viper.ConfigFileUsed(), config)
-		}
-	}
+	LoadConfig(".control-template.yml", &templateCtl)
 }

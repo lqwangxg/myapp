@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -13,6 +14,11 @@ var client = redis.NewClient(&redis.Options{
 	Password: config.RedisOption.Password, // no password set
 	DB:       config.RedisOption.DB,       // use default DB
 })
+
+type Cache interface {
+	FromCache(key string) bool
+	ToCache() bool
+}
 
 // read from redis cache
 func (rs *Regex) FromCache(input string) bool {
@@ -38,18 +44,21 @@ func (rs *Regex) FromCache(input string) bool {
 }
 
 // save to redis as cache
-func (rs *Regex) ToCache() {
+func (rs *Regex) ToCache() bool {
 	// if redis disabled, return
 	if !rs.Cache {
-		return
+		return false
 	}
 	//byteArray, err := json.Marshal(rs)
 	byteArray, err := json.MarshalIndent(rs.Result, config.Prefix, config.Indent)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+		return false
 	}
 	err = client.Set(ctx, rs.CacheKey, byteArray, 0).Err()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+		return false
 	}
+	return true
 }

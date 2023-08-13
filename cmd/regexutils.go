@@ -76,7 +76,7 @@ func (rs *Regex) ScanMatches(input string) {
 	}
 
 	//before match input, transfer special chars
-	config.Transform(&input)
+	config.Encode(&input)
 	r := rs.R
 	if !r.MatchString(input) {
 		return
@@ -118,7 +118,7 @@ func (rs *Regex) ScanMatches(input string) {
 					End:   position[x*2+1],
 				},
 			}
-			match.Params[gname] = config.Restore(&group.Value)
+			match.Params[gname] = config.Decode(&group.Value)
 			match.Groups = append(match.Groups, group)
 		}
 		rs.Result.Matches = append(rs.Result.Matches, match)
@@ -232,7 +232,7 @@ func (rs *Regex) MatchText(content string) string {
 		log.Printf("no matches")
 	}
 	//=replace log =============
-	if rs.Action == ReplaceAction && rs.fullCheck(rs.Content) {
+	if rs.IsReplace && rs.fullCheck(rs.Content) {
 		newContent := rs.replaceText("")
 		if hasFilePath {
 			WriteAll(filePath, newContent)
@@ -267,7 +267,7 @@ func (rs *Regex) replaceText(template string) string {
 		}
 	}
 	newContent := sb.String()
-	config.Restore(&newContent)
+	config.Decode(&newContent)
 	//=replace log =============
 	return newContent
 }
@@ -281,7 +281,7 @@ func (rs *Regex) exportMatches() string {
 	for i := 0; i < len(rs.Result.Matches); i++ {
 		if template != "" {
 			tmp := rs.replaceMatch(i, template)
-			rs.ReplaceLoop(&tmp, ReplaceTemplate)
+			rs.ReplaceLoop(&tmp, ReplaceByMap)
 			sb.WriteString(tmp)
 		} else {
 			//when template is empty, export match.value
@@ -289,33 +289,33 @@ func (rs *Regex) exportMatches() string {
 		}
 	}
 	exports := sb.String()
-	config.Restore(&exports)
+	config.Decode(&exports)
 	return exports
 }
 
 func (rs *Regex) replaceMatch(index int, template string) string {
 	var sb strings.Builder
 	mval := template
-	ReplaceTemplate(&mval, rs.Result.Params)
-	ReplaceTemplate(&mval, rs.Result.Matches[index].Params)
+	ReplaceByMap(&mval, rs.Result.Params)
+	ReplaceByMap(&mval, rs.Result.Matches[index].Params)
 	sb.WriteString(mval)
 
 	buffer := sb.String()
-	config.Restore(&buffer)
+	config.Decode(&buffer)
 	return buffer
 }
 
 func (rs *Regex) close() {
 	//match restore
 	for i := 0; i < len(rs.Result.Matches); i++ {
-		config.Restore(&rs.Result.Matches[i].Value)
+		config.Decode(&rs.Result.Matches[i].Value)
 		for x := 0; x < len(rs.Result.Matches[i].Groups); x++ {
-			config.Restore(&rs.Result.Matches[i].Groups[x].Value)
+			config.Decode(&rs.Result.Matches[i].Groups[x].Value)
 		}
 	}
 	//range restore
 	for x := 0; x < len(rs.Result.Ranges); x++ {
-		config.Restore(&rs.Result.Ranges[x].Value)
+		config.Decode(&rs.Result.Ranges[x].Value)
 	}
 	//save to cache
 	rs.ToCache()

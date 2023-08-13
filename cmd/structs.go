@@ -16,19 +16,14 @@ type FlagConfig struct {
 }
 type RegexAction int
 
-const (
-	MatchAction RegexAction = iota
-	ReplaceAction
-)
-
 type Regex struct {
-	R        *regexp.Regexp
-	Content  string
-	Result   RegexResult
-	CacheKey string
-	Cache    bool
-	Action   RegexAction
-	Rule     *RuleConfig
+	R         *regexp.Regexp
+	Content   string
+	Result    RegexResult
+	CacheKey  string
+	Cache     bool
+	IsReplace bool
+	Rule      *RuleConfig
 }
 type RegexResult struct {
 	Pattern    string

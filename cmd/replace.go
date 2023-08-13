@@ -18,7 +18,7 @@ var replaceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex replace called")
 		rs := NewRegexFromCmd()
-		rs.Action = ReplaceAction
+		rs.IsReplace = true
 		//flags.RuleName
 		if flags.Content != "" {
 			rs.MatchText(flags.Content)

@@ -17,7 +17,6 @@ var matchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex match called")
 		rs := NewRegexFromCmd()
-		rs.Action = MatchAction
 		if flags.Content != "" {
 			rs.MatchText(flags.Content)
 		}

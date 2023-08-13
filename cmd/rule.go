@@ -8,11 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-
-	"github.com/spf13/viper"
 )
 
-func loadRules(dirPath string, rules map[string]RuleConfig) {
+func LoadRules(dirPath string, rules map[string]RuleConfig) {
 	files, err := os.ReadDir(dirPath)
 	check(err)
 
@@ -24,29 +22,22 @@ func loadRules(dirPath string, rules map[string]RuleConfig) {
 			log.Fatal(err)
 		}
 		if isdir {
-			loadRules(fullPath, rules)
+			LoadRules(fullPath, rules)
 			continue
 		}
 		//skip ifnot yaml or yml
 		if !r.MatchString(fullPath) {
 			continue
 		}
-		if rule := loadRule(fullPath); rule.Name != "" {
+
+		//=============================
+		if ok, rule := LoadRule(fullPath); ok {
 			rules[rule.Name] = rule
 		}
 	}
 }
-
-func loadRule(ruleFile string) RuleConfig {
+func LoadRule(fullPath string) (bool, RuleConfig) {
 	var rule RuleConfig
-	if IsExists(ruleFile) {
-		viper.SetConfigFile(ruleFile)
-		err := viper.ReadInConfig()
-		if err == nil {
-			viper.Unmarshal(&rule)
-		} else {
-			check(err)
-		}
-	}
-	return rule
+	ok := LoadConfig(fullPath, &rule)
+	return ok, rule
 }
