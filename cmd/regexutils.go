@@ -40,6 +40,9 @@ func (rule RuleConfig) NewRegex() *Regex {
 	rs.Rule = &rule
 	return rs
 }
+func NewNoCacheRegex(pattern string) *Regex {
+	return NewCacheRegex(pattern, false)
+}
 
 // var regex regexp.Regexp
 func NewCacheRegex(pattern string, cache bool) *Regex {
@@ -215,11 +218,12 @@ func (rs *Regex) ProcDir(dirPath string) {
 
 func (rs *Regex) MatchText(content string) string {
 	filePath, hasFilePath := rs.Result.Params["filePath"]
+	rs.Content = content
 	if hasFilePath {
 		log.Printf("file: %s", filePath)
 	}
 
-	rs.ScanMatches(content)
+	rs.ScanMatches(rs.Content)
 	export := rs.exportMatches()
 	//=export log =============
 	if export != "" {
@@ -228,7 +232,7 @@ func (rs *Regex) MatchText(content string) string {
 		log.Printf("no matches")
 	}
 	//=replace log =============
-	if rs.Action == ReplaceAction {
+	if rs.Action == ReplaceAction && rs.fullCheck(rs.Content) {
 		newContent := rs.replaceText("")
 		if hasFilePath {
 			WriteAll(filePath, newContent)
@@ -240,6 +244,7 @@ func (rs *Regex) MatchText(content string) string {
 	rs.close()
 	return export
 }
+
 func (rs *Regex) replaceText(template string) string {
 	//=replace log =============
 	var sb strings.Builder
@@ -251,7 +256,12 @@ func (rs *Regex) replaceText(template string) string {
 	}
 	for _, m := range rs.Result.Ranges {
 		if m.IsMatch {
-			sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
+			match := rs.Result.Matches[m.MatchIndex]
+			if rs.matchCheck(rs.Content, match) {
+				sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
+			} else {
+				sb.WriteString(m.Value)
+			}
 		} else {
 			sb.WriteString(m.Value)
 		}
@@ -294,13 +304,14 @@ func (rs *Regex) replaceMatch(index int, template string) string {
 	config.Restore(&buffer)
 	return buffer
 }
+
 func (rs *Regex) close() {
 	//match restore
-	for i, _ := range rs.Result.Matches {
+	for i := 0; i < len(rs.Result.Matches); i++ {
 		config.Restore(&rs.Result.Matches[i].Value)
-		// for x := 0; x < len(*m.Groups); x++ {
-		// 	config.Restore(rs.Result.Matches[i].Groups[x].Value)
-		// }
+		for x := 0; x < len(rs.Result.Matches[i].Groups); x++ {
+			config.Restore(&rs.Result.Matches[i].Groups[x].Value)
+		}
 	}
 	//range restore
 	for x := 0; x < len(rs.Result.Ranges); x++ {

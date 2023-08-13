@@ -50,7 +50,7 @@ func (rs *Regex) ContainsGroupKey(key string) bool {
 
 func ReplaceTemplateByKeyValue(template *string, key, value string) {
 	pattern := fmt.Sprintf(`\$\{(?P<key>%s)\}`, key)
-	regex := NewCacheRegex(pattern, false)
+	regex := NewNoCacheRegex(pattern)
 	regex.ScanMatches(*template)
 	if !regex.ContainsGroupKey(key) {
 		return

@@ -3,7 +3,7 @@ package cmd
 import "log"
 
 func (rs *Regex) ReplaceLoop(template *string, repFunc ConvertFunc) {
-	rsLoop := NewCacheRegex(templateCtl.Loop, false)
+	rsLoop := NewNoCacheRegex(templateCtl.Loop)
 	rsLoop.ScanMatches(*template)
 	if len(rsLoop.Result.Matches) == 0 {
 		return

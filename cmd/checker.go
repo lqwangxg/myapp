@@ -7,6 +7,53 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+func (rs *Regex) fullCheck(src string) bool {
+	rule := rs.Rule
+	if rule.IsFullSkip(src) {
+		return false
+	}
+	if !rule.IsFullDest(src) {
+		return false
+	}
+	return true
+}
+func (rs *Regex) matchCheck(src string, match RegexMatch) bool {
+	if rs.Rule.RangePattern == "" {
+		return true
+	}
+
+	rsRange := NewNoCacheRegex(rs.Rule.RangePattern)
+	rsRange.ScanMatches(src)
+	rsRange.SplitMatches(src)
+	innerCheck := false
+	var inMatch RegexMatch
+	for _, rm := range rsRange.Result.Matches {
+		// match.position(start, end) is inner rm.position(start, end)
+		if rm.Position.Start <= match.Position.Start && match.Position.End <= rm.Position.End {
+			innerCheck = true
+			inMatch = rm
+			break
+		}
+	}
+	// return false if not included in any range.
+	if !innerCheck {
+		return false
+	}
+	if rs.Rule.IsRangeSkip(inMatch.Value) {
+		return false
+	}
+	if !rs.Rule.IsRangeDest(inMatch.Value) {
+		return false
+	}
+	if rs.Rule.IsMatchSkip(match.Value) {
+		return false
+	}
+	if !rs.Rule.IsMatchDest(match.Value) {
+		return false
+	}
+	return true
+}
+
 /*
  * is skip check
  */

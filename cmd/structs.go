@@ -23,6 +23,7 @@ const (
 
 type Regex struct {
 	R        *regexp.Regexp
+	Content  string
 	Result   RegexResult
 	CacheKey string
 	Cache    bool
