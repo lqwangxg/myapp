@@ -7,7 +7,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func (rs *Regex) fullCheck(src string) bool {
+func (rs *Regex) FullCheck(src string) bool {
 	rule := rs.Rule
 	if rule.IsFullSkip(src) {
 		return false

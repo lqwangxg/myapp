@@ -8,8 +8,9 @@ func (rs *Regex) ReplaceLoop(template *string, repFunc ConvertFunc) {
 	if len(rsLoop.Result.Matches) == 0 {
 		return
 	}
+	rsLoop.replaceTemplate = templateCtl.Process
+	*template = rsLoop.replaceText()
 
-	*template = rsLoop.replaceText("${process}")
 	repFunc(template, rs.Result.Params)
 	isParamLoop := false
 	for _, m := range rsLoop.Result.Matches {

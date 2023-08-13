@@ -185,7 +185,7 @@ func (rs *Regex) ProcFile(filePath string) {
 		}
 	}
 	if buffer, err := ReadAll(filePath); err == nil {
-		rs.Result.Params["filePath"] = filePath
+		rs.fromFile = filePath
 		rs.MatchText(buffer)
 	}
 }
@@ -215,26 +215,21 @@ func (rs *Regex) ProcDir(dirPath string) {
 }
 
 func (rs *Regex) MatchText(content string) string {
-	filePath := ""
-	file, hasFilePath := rs.Result.Params["filePath"]
-	rs.Content = content
-	if hasFilePath {
-		filePath = file.(string)
-	}
+	rs.content = content
+	rs.ScanMatches(rs.content)
 
-	rs.ScanMatches(rs.Content)
-	export := rs.exportMatches()
 	//=export log =============
+	export := rs.exportMatches()
 	if export != "" {
 		log.Printf("%s", export)
 	} else {
 		log.Printf("no matches")
 	}
 	//=replace log =============
-	if rs.IsReplace && rs.fullCheck(rs.Content) {
-		newContent := rs.replaceText("")
-		if hasFilePath {
-			WriteAll(filePath, newContent)
+	if rs.IsReplace && rs.FullCheck(rs.content) {
+		newContent := rs.replaceText()
+		if rs.fromFile != "" {
+			rs.writeText(newContent)
 		} else {
 			log.Println(newContent)
 		}
@@ -244,20 +239,20 @@ func (rs *Regex) MatchText(content string) string {
 	return export
 }
 
-func (rs *Regex) replaceText(template string) string {
+func (rs *Regex) replaceText() string {
 	//=replace log =============
 	var sb strings.Builder
-	if template == "" {
-		template = rs.Rule.ReplaceTemplate
+	if rs.replaceTemplate == "" {
+		rs.replaceTemplate = rs.Rule.ReplaceTemplate
 	}
-	if template == "" && flags.ReplaceTemplate != "" {
-		template = flags.ReplaceTemplate
+	if flags.ReplaceTemplate != "" {
+		rs.replaceTemplate = flags.ReplaceTemplate
 	}
 	for _, m := range rs.Result.Ranges {
 		if m.IsMatch {
 			match := rs.Result.Matches[m.MatchIndex]
-			if rs.matchCheck(rs.Content, match) {
-				sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
+			if rs.matchCheck(rs.content, match) {
+				sb.WriteString(rs.replaceMatch(m.MatchIndex, rs.replaceTemplate))
 			} else {
 				sb.WriteString(m.Value)
 			}
@@ -270,7 +265,11 @@ func (rs *Regex) replaceText(template string) string {
 	//=replace log =============
 	return newContent
 }
-
+func (rs *Regex) writeText(content string) {
+	if rs.fromFile != "" {
+		WriteAll(rs.fromFile, content)
+	}
+}
 func (rs *Regex) exportMatches() string {
 	template := rs.Rule.ExportTemplate
 	if flags.ExportTemplate != "" {

@@ -17,13 +17,15 @@ type FlagConfig struct {
 type RegexAction int
 
 type Regex struct {
-	R         *regexp.Regexp
-	Result    RegexResult
-	Cache     bool
-	CacheKey  string
-	Content   string
-	IsReplace bool
-	Rule      *RuleConfig
+	R               *regexp.Regexp
+	Result          RegexResult
+	Cache           bool
+	CacheKey        string
+	content         string
+	fromFile        string
+	IsReplace       bool
+	replaceTemplate string
+	Rule            *RuleConfig
 }
 type RegexResult struct {
 	Pattern    string
@@ -93,7 +95,8 @@ type CheckPatternConfig struct {
 	DoWhen    []string `mapstructure:"do_when"`
 }
 type TemplateControlConfig struct {
-	Loop string `mapstructure:"loop"`
+	Loop    string `mapstructure:"loop"`
+	Process string `mapstructure:"process"`
 }
 
 type ConvertFunc func(*string, map[string]any) *string
