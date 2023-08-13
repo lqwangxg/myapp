@@ -179,7 +179,7 @@ func (rs *Regex) ProcDir(dirPath string) {
 
 func (rs *Regex) MatchText(content string) string {
 	rs.ScanMatches(content)
-	export := rs.ExportMatches(flags.TempleteOfExport)
+	export := rs.exportMatches(flags.TempleteOfExport)
 	//=export log =============
 	filePath, hasFilePath := rs.Result.Params["filePath"]
 	if hasFilePath {
@@ -200,7 +200,7 @@ func (rs *Regex) MatchText(content string) string {
 		}
 	}
 	//==========================
-	rs.Close()
+	rs.close()
 	return export
 }
 
@@ -221,4 +221,29 @@ func (rs *Regex) replaceText() string {
 	config.Restore(&newContent)
 	//=replace log =============
 	return newContent
+}
+func (rs *Regex) exportMatches(template string) string {
+	var sb strings.Builder
+	for i := 0; i < len(rs.Result.Matches); i++ {
+		ReplaceTemplate(&template, rs.Result.Matches[i].Params)
+	}
+	sb.WriteString(template)
+	exports := sb.String()
+	config.Restore(&exports)
+	return exports
+}
+func (rs *Regex) close() {
+	//match restore
+	for i, m := range rs.Result.Matches {
+		config.Restore(&rs.Result.Matches[i].Value)
+		for x := 0; x < len(m.Groups); x++ {
+			config.Restore(&rs.Result.Matches[i].Groups[x].Value)
+		}
+	}
+	//range restore
+	for x := 0; x < len(rs.Result.Ranges); x++ {
+		config.Restore(&rs.Result.Ranges[x].Value)
+	}
+	//save to cache
+	rs.ToCache()
 }

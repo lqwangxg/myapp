@@ -36,5 +36,4 @@ var matchCmd = &cobra.Command{
 
 func init() {
 	regexCmd.AddCommand(matchCmd)
-	TestReplaceMap()
 }

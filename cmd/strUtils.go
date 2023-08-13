@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 )
 
@@ -66,16 +65,16 @@ func ReplaceTemplate(template *string, kvs map[string]string) *string {
 	return template
 }
 
-func TestReplaceMap() {
-	input := "${t1}+${t2}=${t3}"
-	kvs := map[string]string{
-		"t1": "1000",
-		"t2": "1500",
-		"t3": "2500",
-	}
-	//key := "t1"
-	//val := "1000"
-	//result := ReplaceTemplateByKeyValue(input, key, val)
-	result := ReplaceTemplate(&input, kvs)
-	log.Println(result)
-}
+// func TestReplaceMap() {
+// 	input := "${t1}+${t2}=${t3}"
+// 	kvs := map[string]string{
+// 		"t1": "1000",
+// 		"t2": "1500",
+// 		"t3": "2500",
+// 	}
+// 	//key := "t1"
+// 	//val := "1000"
+// 	//result := ReplaceTemplateByKeyValue(input, key, val)
+// 	result := ReplaceTemplate(&input, kvs)
+// 	log.Println(result)
+// }
