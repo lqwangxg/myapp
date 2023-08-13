@@ -16,15 +16,7 @@ var matchCmd = &cobra.Command{
 	Long:  ` match string by regrep pattern, and replace string if parameter --replace is set.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex match called")
-		pattern := flags.Pattern
-		if flags.RuleName == "" && flags.Pattern == "" {
-			panic("pattern is empty, and ruleName is empty.")
-		}
-
-		// if pattern == "" {
-		// 	return
-		// }
-		rs := NewRegex(pattern)
+		rs := NewRegexFromCmd()
 		rs.Action = MatchAction
 		if flags.Content != "" {
 			rs.MatchText(flags.Content)

@@ -10,9 +10,34 @@ import (
 	"strings"
 )
 
+func NewRegexFromCmd() *Regex {
+	var rs *Regex
+	if flags.RuleName != "" {
+		rule, found := localRules[flags.RuleName]
+		if found {
+			rs = NewRegexByRule(rule)
+			return rs
+		}
+	}
+	if flags.Pattern != "" {
+		rs = NewRegex(flags.Pattern)
+	}
+	if rs == nil {
+		panic("pattern is empty, ruleName is empty, or ruleName not avaiable.")
+	}
+	return rs
+}
+
 // var regex regexp.Regexp
 func NewRegex(pattern string) *Regex {
 	return NewCacheRegex(pattern, config.RedisOption.Enable)
+}
+
+// var regex regexp.Regexp
+func NewRegexByRule(rule RuleConfig) *Regex {
+	rs := NewCacheRegex(rule.Pattern, config.RedisOption.Enable)
+	rs.Rule = rule
+	return rs
 }
 
 // var regex regexp.Regexp

@@ -17,13 +17,7 @@ var replaceCmd = &cobra.Command{
 	      pattern name connects to a json or configMap which includes rules of pattern/replacement/skipRules.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("regex replace called")
-
-		pattern := flags.Pattern
-		// if pattern == "" {
-		// 	return
-		// }
-
-		rs := NewRegex(pattern)
+		rs := NewRegexFromCmd()
 		rs.Action = ReplaceAction
 		//flags.RuleName
 		if flags.Content != "" {
