@@ -10,11 +10,26 @@ import (
 	"regexp"
 )
 
-func LoadRules(dirPath string, rules map[string]RuleConfig) {
+//	func LoadRule(fullPath string) (bool, *RuleConfig) {
+//		var rule RuleConfig
+//		ok := LoadConfig(fullPath, &rule)
+//		return ok, &rule
+//	}
+func (rule *RuleConfig) findByName(ruleName string) bool {
+	for _, dirPath := range config.RuleDirs {
+		if rule.findRule(dirPath, ruleName) {
+			return true
+		}
+	}
+	return false
+}
+func (rule *RuleConfig) findRule(dirPath string, ruleName string) bool {
 	files, err := os.ReadDir(dirPath)
-	check(err)
+	if err != nil {
+		return false
+	}
 
-	r := regexp.MustCompile(`\w+\.(yaml|yml)$`)
+	r := regexp.MustCompile(ruleName + `\.(yaml|yml)$`)
 	for _, file := range files {
 		fullPath := filepath.Join(dirPath, file.Name())
 		isdir, err := IsDir(fullPath)
@@ -22,22 +37,17 @@ func LoadRules(dirPath string, rules map[string]RuleConfig) {
 			log.Fatal(err)
 		}
 		if isdir {
-			LoadRules(fullPath, rules)
+			if rule.findRule(fullPath, ruleName) {
+				return true
+			}
 			continue
 		}
-		//skip ifnot yaml or yml
-		if !r.MatchString(fullPath) {
+		//skip ifnot destfile of yaml or yml
+		if !r.MatchString(file.Name()) {
 			continue
 		}
-
 		//=============================
-		if ok, rule := LoadRule(fullPath); ok {
-			rules[rule.Name] = *rule
-		}
+		return LoadConfig(fullPath, &rule)
 	}
-}
-func LoadRule(fullPath string) (bool, *RuleConfig) {
-	var rule RuleConfig
-	ok := LoadConfig(fullPath, &rule)
-	return ok, &rule
+	return false
 }

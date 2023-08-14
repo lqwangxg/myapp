@@ -13,10 +13,9 @@ import (
 func NewRegexFromCmd() *Regex {
 	var rs *Regex
 	if flags.RuleName != "" {
-		found, rule := LoadRule(flags.RuleName)
-		if found {
+		var rule RuleConfig
+		if rule.findByName(flags.RuleName) {
 			rs = rule.NewRegex()
-			return rs
 		}
 	}
 	if flags.Pattern != "" {
@@ -137,6 +136,7 @@ func (rs *Regex) SplitMatches(input string) {
 			h := &RegexRange{
 				Value:   input[cpos:match.Bound.Start],
 				IsMatch: false,
+				Bound:   Bound{Start: cpos, End: match.Bound.Start},
 			}
 			rs.Result.Ranges = append(rs.Result.Ranges, *h)
 		}
@@ -145,6 +145,7 @@ func (rs *Regex) SplitMatches(input string) {
 			Value:      input[match.Bound.Start:match.Bound.End],
 			IsMatch:    true,
 			MatchIndex: match.Index,
+			Bound:      Bound{Start: match.Bound.Start, End: match.Bound.End},
 		}
 		rs.Result.Ranges = append(rs.Result.Ranges, *m)
 		cpos = match.Bound.End
@@ -154,6 +155,7 @@ func (rs *Regex) SplitMatches(input string) {
 		f := &RegexRange{
 			Value:   input[cpos:epos],
 			IsMatch: false,
+			Bound:   Bound{Start: cpos, End: epos},
 		}
 		rs.Result.Ranges = append(rs.Result.Ranges, *f)
 	}

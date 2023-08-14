@@ -39,7 +39,7 @@ type RegexRange struct {
 	Value      string
 	IsMatch    bool
 	MatchIndex int
-	Bound
+	Bound      Bound
 }
 type RegexMatch struct {
 	Index  int
