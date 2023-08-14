@@ -238,21 +238,32 @@ func (rs *Regex) MatchText(content string) string {
 	rs.close()
 	return export
 }
-
+func (rs *Regex) getTemplate() string {
+	// private template first.
+	if rs.template != "" {
+		return rs.template
+	}
+	// then flags.ReplaceTemplate
+	if flags.ReplaceTemplate != "" {
+		return flags.ReplaceTemplate
+	}
+	// then rule.ReplaceTemplate
+	if rs.Rule.ReplaceTemplate != "" {
+		return rs.Rule.ReplaceTemplate
+	}
+	return ""
+}
 func (rs *Regex) replaceText() string {
 	//=replace log =============
 	var sb strings.Builder
-	if rs.replaceTemplate == "" {
-		rs.replaceTemplate = rs.Rule.ReplaceTemplate
-	}
-	if flags.ReplaceTemplate != "" {
-		rs.replaceTemplate = flags.ReplaceTemplate
-	}
+	template := rs.getTemplate()
+
 	for _, m := range rs.Result.Ranges {
-		if m.IsMatch {
+		if m.IsMatch && template != "" {
 			match := rs.Result.Matches[m.MatchIndex]
-			if rs.matchCheck(rs.content, match) {
-				sb.WriteString(rs.replaceMatch(m.MatchIndex, rs.replaceTemplate))
+			//
+			if rs.IsDestMatch(rs.content, match) {
+				sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
 			} else {
 				sb.WriteString(m.Value)
 			}

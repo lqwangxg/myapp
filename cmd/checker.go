@@ -17,7 +17,7 @@ func (rs *Regex) FullCheck(src string) bool {
 	}
 	return true
 }
-func (rs *Regex) matchCheck(src string, match RegexMatch) bool {
+func (rs *Regex) IsDestMatch(src string, match RegexMatch) bool {
 	// if rs.Rule.RangePattern == "" {
 	// 	return true
 	// }

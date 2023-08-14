@@ -17,15 +17,15 @@ type FlagConfig struct {
 type RegexAction int
 
 type Regex struct {
-	R               *regexp.Regexp
-	Result          RegexResult
-	Cache           bool
-	CacheKey        string
-	content         string
-	fromFile        string
-	IsReplace       bool
-	replaceTemplate string
-	Rule            *RuleConfig
+	R         *regexp.Regexp
+	Result    RegexResult
+	Cache     bool
+	CacheKey  string
+	content   string
+	fromFile  string
+	IsReplace bool
+	template  string
+	Rule      *RuleConfig
 }
 type RegexResult struct {
 	Pattern    string

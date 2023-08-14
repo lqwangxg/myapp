@@ -8,7 +8,7 @@ func (rs *Regex) ReplaceLoop(template *string, repFunc ConvertFunc) {
 	if len(rsLoop.Result.Matches) == 0 {
 		return
 	}
-	rsLoop.replaceTemplate = templateCtl.Process
+	rsLoop.template = templateCtl.Process
 	*template = rsLoop.replaceText()
 
 	repFunc(template, rs.Result.Params)
