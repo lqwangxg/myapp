@@ -18,18 +18,18 @@ func (rs *Regex) FullCheck(src string) bool {
 	return true
 }
 func (rs *Regex) matchCheck(src string, match RegexMatch) bool {
-	if rs.Rule.RangePattern == "" {
-		return true
-	}
+	// if rs.Rule.RangePattern == "" {
+	// 	return true
+	// }
 
-	rsRange := NewNoCacheRegex(rs.Rule.RangePattern)
+	rsRange := NewNoCacheRegex(rs.Rule.RangeStart)
 	rsRange.ScanMatches(src)
 	rsRange.SplitMatches(src)
 	innerCheck := false
 	var inMatch RegexMatch
 	for _, rm := range rsRange.Result.Matches {
 		// match.position(start, end) is inner rm.position(start, end)
-		if rm.Position.Start <= match.Position.Start && match.Position.End <= rm.Position.End {
+		if rm.Bound.Start <= match.Bound.Start && match.Bound.End <= rm.Bound.End {
 			innerCheck = true
 			inMatch = rm
 			break

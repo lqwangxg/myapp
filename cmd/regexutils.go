@@ -13,7 +13,7 @@ import (
 func NewRegexFromCmd() *Regex {
 	var rs *Regex
 	if flags.RuleName != "" {
-		rule, found := localRules[flags.RuleName]
+		found, rule := LoadRule(flags.RuleName)
 		if found {
 			rs = rule.NewRegex()
 			return rs
@@ -90,7 +90,7 @@ func (rs *Regex) ScanMatches(input string) {
 		position := positions[i]
 		match := RegexMatch{
 			Index: i,
-			Position: RegexMatchIndex{
+			Bound: Bound{
 				Start: position[0],
 				End:   position[1],
 			},
@@ -112,7 +112,7 @@ func (rs *Regex) ScanMatches(input string) {
 			group := RegexGroup{
 				Name:  gname,
 				Value: smatch[groupIndex],
-				Position: RegexMatchIndex{
+				Bound: Bound{
 					Start: position[x*2+0],
 					End:   position[x*2+1],
 				},
@@ -132,22 +132,22 @@ func (rs *Regex) SplitMatches(input string) {
 	epos := len(input)
 	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
 	for _, match := range rs.Result.Matches {
-		if cpos < epos && cpos < match.Position.Start {
+		if cpos < epos && cpos < match.Bound.Start {
 			//append string before match
 			h := &RegexRange{
-				Value:   input[cpos:match.Position.Start],
+				Value:   input[cpos:match.Bound.Start],
 				IsMatch: false,
 			}
 			rs.Result.Ranges = append(rs.Result.Ranges, *h)
 		}
 		// append match.value
 		m := &RegexRange{
-			Value:      input[match.Position.Start:match.Position.End],
+			Value:      input[match.Bound.Start:match.Bound.End],
 			IsMatch:    true,
 			MatchIndex: match.Index,
 		}
 		rs.Result.Ranges = append(rs.Result.Ranges, *m)
-		cpos = match.Position.End
+		cpos = match.Bound.End
 	}
 	if cpos < epos {
 		//append last string

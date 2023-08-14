@@ -39,20 +39,21 @@ type RegexRange struct {
 	Value      string
 	IsMatch    bool
 	MatchIndex int
+	Bound
 }
 type RegexMatch struct {
-	Index    int
-	Value    string
-	Groups   []RegexGroup
-	Position RegexMatchIndex
-	Params   map[string]string
+	Index  int
+	Value  string
+	Groups []RegexGroup
+	Bound
+	Params map[string]string
 }
 type RegexGroup struct {
-	Name     string
-	Value    string
-	Position RegexMatchIndex
+	Name  string
+	Value string
+	Bound
 }
-type RegexMatchIndex struct {
+type Bound struct {
 	Start int
 	End   int
 }
@@ -80,7 +81,8 @@ type RuleConfig struct {
 	Pattern         string `mapstructure:"pattern"`
 	ExportTemplate  string `mapstructure:"export-template"`
 	ReplaceTemplate string `mapstructure:"replace-template"`
-	RangePattern    string `mapstructure:"range_pattern"`
+	RangeStart      string `mapstructure:"range_start"`
+	RangeEnd        string `mapstructure:"range_end"`
 
 	FullPatterns  CheckPatternConfig `mapstructure:"full_patterns"`
 	RangePatterns CheckPatternConfig `mapstructure:"range_patterns"`

@@ -32,12 +32,12 @@ func LoadRules(dirPath string, rules map[string]RuleConfig) {
 
 		//=============================
 		if ok, rule := LoadRule(fullPath); ok {
-			rules[rule.Name] = rule
+			rules[rule.Name] = *rule
 		}
 	}
 }
-func LoadRule(fullPath string) (bool, RuleConfig) {
+func LoadRule(fullPath string) (bool, *RuleConfig) {
 	var rule RuleConfig
 	ok := LoadConfig(fullPath, &rule)
-	return ok, rule
+	return ok, &rule
 }
