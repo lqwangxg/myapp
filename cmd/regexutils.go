@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -49,8 +50,7 @@ func NewCacheRegex(pattern string, cache bool, rule *RuleConfig) *Regex {
 			Pattern:    pattern,
 			GroupNames: r.SubexpNames(),
 			Matches:    make([]RegexMatch, 0),
-			Ranges:     make([]RegexRange, 0),
-			Params:     make(map[string]any),
+			Params:     make(map[string]string),
 		},
 		Cache: cache,
 		Rule:  rule,
@@ -81,81 +81,84 @@ func (rs *Regex) ScanMatches(input string) {
 	}
 	subMatches := rs.R.FindAllStringSubmatch(input, -1)
 	positions := rs.R.FindAllStringSubmatchIndex(input, -1)
-	rs.Result.Params["matches.count"] = len(subMatches)
-	rs.Result.Params["groups.count"] = len(rs.Result.GroupNames)
-	rs.Result.Params["groups.keys"] = rs.Result.GroupNames
+	rs.Result.Params["matches.count"] = strconv.Itoa(len(subMatches))
+	rs.Result.Params["groups.count"] = strconv.Itoa(len(rs.Result.GroupNames))
+	rs.Result.Params["groups.keys"] = strings.Join(rs.Result.GroupNames, ",")
 
 	for i, smatch := range subMatches {
 		position := positions[i]
-		match := RegexMatch{
-			Index: i,
-			Bound: Bound{
+		match := &RegexMatch{
+			Capture: &Capture{
 				Start: position[0],
 				End:   position[1],
+				Value: smatch[0],
+				RType: MatchType,
 			},
 			Groups: make([]RegexGroup, 0),
-			Value:  smatch[0],
 			Params: make(map[string]string),
 		}
-
-		for x, groupName := range rs.Result.GroupNames {
-			//from match 0 ~ count - 1
-			groupIndex := rs.R.SubexpIndex(groupName)
-			if groupName == "" {
-				groupIndex = x
-			}
-			gname := groupName
+		//match.Params["match.value"] = match.Value
+		for x := 0; x < len(rs.Result.GroupNames); x++ {
+			gname := rs.Result.GroupNames[x]
 			if x == 0 {
 				gname = "match.value"
 			}
-			group := RegexGroup{
-				Name:  gname,
-				Value: smatch[groupIndex],
-				Bound: Bound{
+			group := &RegexGroup{
+				Name: gname,
+				Capture: &Capture{
 					Start: position[x*2+0],
 					End:   position[x*2+1],
+					Value: smatch[x],
+					RType: GroupType,
 				},
 			}
-			match.Params[gname] = config.Decode(&group.Value)
-			match.Groups = append(match.Groups, group)
+			match.Groups = append(match.Groups, *group)
+			match.Params[group.Name] = group.Value
 		}
-		rs.Result.Matches = append(rs.Result.Matches, match)
+		rs.Result.Matches = append(rs.Result.Matches, *match)
 	}
-	// split input by matches
-	rs.SplitMatches(input)
 }
 
 // split input by matches
-func (rs *Regex) SplitMatches(input string) {
+func (rs *Regex) SplitMatches() {
 	cpos := 0
-	epos := len(input)
+	epos := len(rs.content)
 	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
-	for _, match := range rs.Result.Matches {
-		if cpos < epos && cpos < match.Bound.Start {
+	for i, match := range rs.Result.Matches {
+		if cpos < epos && cpos < match.Start {
 			//append string before match
 			h := &RegexRange{
-				Value:   input[cpos:match.Bound.Start],
-				IsMatch: false,
-				Bound:   Bound{Start: cpos, End: match.Bound.Start},
+				Capture: &Capture{
+					Start: cpos,
+					End:   match.Start,
+					Value: rs.content[cpos:match.Start],
+					RType: UnMatchType,
+				},
 			}
 			rs.Result.Ranges = append(rs.Result.Ranges, *h)
 		}
 		// append match.value
 		m := &RegexRange{
-			Value:      input[match.Bound.Start:match.Bound.End],
-			IsMatch:    true,
-			MatchIndex: match.Index,
-			Bound:      Bound{Start: match.Bound.Start, End: match.Bound.End},
+			Capture: &Capture{
+				Start: match.Start,
+				End:   match.End,
+				Value: rs.content[match.Start:match.End],
+				RType: MatchType,
+			},
+			MatchIndex: i,
 		}
 		rs.Result.Ranges = append(rs.Result.Ranges, *m)
-		cpos = match.Bound.End
+		cpos = match.End
 	}
 	if cpos < epos {
 		//append last string
 		f := &RegexRange{
-			Value:   input[cpos:epos],
-			IsMatch: false,
-			Bound:   Bound{Start: cpos, End: epos},
+			Capture: &Capture{
+				Start: cpos,
+				End:   epos,
+				Value: rs.content[cpos:epos],
+				RType: UnMatchType,
+			},
 		}
 		rs.Result.Ranges = append(rs.Result.Ranges, *f)
 	}
@@ -259,9 +262,10 @@ func (rs *Regex) replaceText() string {
 	//=replace log =============
 	var sb strings.Builder
 	template := rs.getTemplate()
-
+	// split input by matches
+	rs.SplitMatches()
 	for _, m := range rs.Result.Ranges {
-		if m.IsMatch && template != "" {
+		if m.RType == MatchType && template != "" {
 			match := rs.Result.Matches[m.MatchIndex]
 			//
 			if rs.IsDestMatch(rs.content, match) {
@@ -284,21 +288,33 @@ func (rs *Regex) writeText(content string) {
 	}
 }
 func (rs *Regex) exportMatches() string {
-	template := rs.Rule.ExportTemplate
-	if flags.ExportTemplate != "" {
-		template = flags.ExportTemplate
-	}
+	tHeader := rs.Rule.ExportTemplateHeader
 	var sb strings.Builder
+
+	//---------------------------------------
+	// replace Header/Footer: rs.Result.Params
+	ReplaceByMap(&tHeader, rs.Result.Params)
+	sb.WriteString(tHeader)
+
+	//---------------------------------------
+	// replace Loop-Matches: rs.Result.Matches
 	for i := 0; i < len(rs.Result.Matches); i++ {
-		if template != "" {
-			tmp := rs.replaceMatch(i, template)
-			rs.ReplaceLoop(&tmp, ReplaceByMap)
+		if rs.Rule.ExportTemplateContent != "" {
+			tContent := rs.Rule.ExportTemplateContent
+			tmp := rs.replaceMatch(i, tContent)
 			sb.WriteString(tmp)
 		} else {
 			//when template is empty, export match.value
 			sb.WriteString(rs.Result.Matches[i].Value)
 		}
 	}
+	//---------------------------------------
+	// replace Header/Footer: rs.Result.Params
+	tFooter := rs.Rule.ExportTemplateFooter
+	ReplaceByMap(&tFooter, rs.Result.Params)
+	sb.WriteString(tFooter)
+	//---------------------------------------
+
 	exports := sb.String()
 	config.Decode(&exports)
 	return exports
@@ -307,8 +323,9 @@ func (rs *Regex) exportMatches() string {
 func (rs *Regex) replaceMatch(index int, template string) string {
 	var sb strings.Builder
 	mval := template
+
 	ReplaceByMap(&mval, rs.Result.Params)
-	//ReplaceByMap(&mval, rs.Result.Matches[index].Params)
+	ReplaceByMap(&mval, rs.Result.Matches[index].Params)
 	sb.WriteString(mval)
 
 	buffer := sb.String()

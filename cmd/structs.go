@@ -32,27 +32,40 @@ type RegexResult struct {
 	GroupNames []string
 	Matches    []RegexMatch
 	Ranges     []RegexRange
-	Params     map[string]any
+	Params     map[string]string
 }
 
 type RegexRange struct {
-	Value      string
-	IsMatch    bool
+	*Capture
 	MatchIndex int
-	Bound      Bound
 }
 type RegexMatch struct {
-	Index  int
-	Value  string
+	*Capture
 	Groups []RegexGroup
-	Bound
 	Params map[string]string
 }
 type RegexGroup struct {
-	Name  string
-	Value string
-	Bound
+	*Capture
+	Name string
 }
+
+// define RegexResultType as int.
+type RegexResultType int
+
+// RegexType of UnMatchType, MatchType and GroupType
+const (
+	UnMatchType RegexResultType = iota
+	MatchType
+	GroupType
+)
+
+type Capture struct {
+	Start int
+	End   int
+	Value string
+	RType RegexResultType
+}
+
 type Bound struct {
 	Start int
 	End   int
@@ -74,15 +87,17 @@ type RedisOption struct {
 }
 
 type RuleConfig struct {
-	Name            string `mapstructure:"name"`
-	Group           string `mapstructure:"group"`
-	IncludeSuffix   string `mapstructure:"include-suffix"`
-	ExcludeSuffix   string `mapstructure:"exclude-suffix"`
-	Pattern         string `mapstructure:"pattern"`
-	ExportTemplate  string `mapstructure:"export-template"`
-	ReplaceTemplate string `mapstructure:"replace-template"`
-	RangeStart      string `mapstructure:"range_start"`
-	RangeEnd        string `mapstructure:"range_end"`
+	Name                  string `mapstructure:"name"`
+	Group                 string `mapstructure:"group"`
+	IncludeSuffix         string `mapstructure:"include-suffix"`
+	ExcludeSuffix         string `mapstructure:"exclude-suffix"`
+	Pattern               string `mapstructure:"pattern"`
+	ExportTemplateHeader  string `mapstructure:"export-template-header"`
+	ExportTemplateContent string `mapstructure:"export-template-content"`
+	ExportTemplateFooter  string `mapstructure:"export-template-footer"`
+	ReplaceTemplate       string `mapstructure:"replace-template"`
+	RangeStart            string `mapstructure:"range_start"`
+	RangeEnd              string `mapstructure:"range_end"`
 
 	FullPatterns  CheckPatternConfig `mapstructure:"full_patterns"`
 	RangePatterns CheckPatternConfig `mapstructure:"range_patterns"`
@@ -101,4 +116,4 @@ type TemplateControlConfig struct {
 	Process string `mapstructure:"process"`
 }
 
-type ConvertFunc func(*string, map[string]any) *string
+type ConvertFunc func(*string, map[string]string) *string

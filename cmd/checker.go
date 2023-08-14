@@ -24,17 +24,17 @@ func (rs *Regex) IsDestMatch(src string, match RegexMatch) bool {
 
 	rsRange := NewNoCacheRegex(rs.Rule.RangeStart)
 	rsRange.ScanMatches(src)
-	rsRange.SplitMatches(src)
+	rsRange.SplitMatches()
 	innerCheck := false
 	var inMatch RegexMatch
-	for _, rm := range rsRange.Result.Matches {
-		// match.position(start, end) is inner rm.position(start, end)
-		if rm.Bound.Start <= match.Bound.Start && match.Bound.End <= rm.Bound.End {
-			innerCheck = true
-			inMatch = rm
-			break
-		}
-	}
+	// for _, rm := range rsRange.Result.Matches {
+	// 	// match.position(start, end) is inner rm.position(start, end)
+	// 	if rm.Bound.Start <= match.Bound.Start && match.Bound.End <= rm.Bound.End {
+	// 		innerCheck = true
+	// 		inMatch = rm
+	// 		break
+	// 	}
+	// }
 	// return false if not included in any range.
 	if !innerCheck {
 		return false

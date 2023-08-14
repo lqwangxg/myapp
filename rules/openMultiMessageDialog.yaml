@@ -10,13 +10,16 @@ exclude-suffix:
 # regex pattern   
 pattern: (?P<indent>[ ]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
 # export match template
-export-template: | 
+export-template-header: | 
   matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
-  match.value:
-    ${match.value}
-  $ctr-loop-start=params
-    ${param.key}: ${param.value} 
-  $ctr-loop-end=groups
+  indent | call | param | process
+  |--|--|--|
+  
+export-template-content: | 
+  ${indent} | ${call} | ${param} | ${process}
+
+export-template-footer: | 
+  "--"
   
 # TODO:
 #  #GROUP-LOOP-START#
