@@ -37,12 +37,7 @@ func (rs *CustomRules) GetRule(name string) *RuleConfig {
 //		return ok, &rule
 //	}
 func (rule *RuleConfig) findByName(ruleName string) bool {
-	for _, dirPath := range config.RuleDirs {
-		if rule.findRule(dirPath, ruleName) {
-			return true
-		}
-	}
-	return false
+	return rule.findRule(config.RuleDir, ruleName)
 }
 func (rule *RuleConfig) findRule(dirPath string, ruleName string) bool {
 	files, err := os.ReadDir(dirPath)

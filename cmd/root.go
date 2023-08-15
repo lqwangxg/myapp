@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -54,5 +55,6 @@ func initConfig() {
 	//load .control-template.yml
 	LoadConfig(".control-template.yml", &templateCtl)
 	//NewDefaultRules()
-	LoadConfig("rules/default.yaml", &customRules)
+	fullPath := filepath.Join(config.RuleDir, "default.yaml")
+	LoadConfig(fullPath, &customRules)
 }

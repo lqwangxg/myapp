@@ -75,7 +75,7 @@ type Bound struct {
 
 type AppConfig struct {
 	EChars      map[string]string `yaml:"echars"`
-	RuleDirs    []string          `yaml:"ruledirs"`
+	RuleDir     string            `yaml:"ruledir"`
 	Params      []string          `yaml:"params"`
 	Indent      string            `yaml:"indent"`
 	Prefix      string            `yaml:"prefix"`

@@ -174,26 +174,27 @@ func (rs *Regex) ProcFile(filePath string) {
 	if !IsExists(filePath) {
 		return
 	}
-	if flags.IncludeSuffix != "" || rs.Rule.IncludeFile != "" {
-		re := NewRegex(flags.IncludeSuffix)
-		if !re.IsMatch(filePath) {
-			return
-		}
-		re = NewRegex(rs.Rule.IncludeFile)
-		if !re.IsMatch(filePath) {
+	if flags.IncludeSuffix != "" {
+		if !IsMatchString(flags.IncludeSuffix, filePath) {
 			return
 		}
 	}
-	if flags.ExcludeSuffix != "" || rs.Rule.ExcludeFile != "" {
-		re := NewRegex(flags.ExcludeSuffix)
-		if re.IsMatch(filePath) {
-			return
-		}
-		re = NewRegex(rs.Rule.ExcludeFile)
-		if re.IsMatch(filePath) {
+	if rs.Rule.IncludeFile != "" {
+		if !IsMatchString(rs.Rule.IncludeFile, filePath) {
 			return
 		}
 	}
+	if flags.ExcludeSuffix != "" {
+		if IsMatchString(flags.ExcludeSuffix, filePath) {
+			return
+		}
+	}
+	if rs.Rule.ExcludeFile != "" {
+		if IsMatchString(rs.Rule.ExcludeFile, filePath) {
+			return
+		}
+	}
+
 	if buffer, err := ReadAll(filePath); err == nil {
 		rs.FromFile = filePath
 		rs.MatchText(buffer)
