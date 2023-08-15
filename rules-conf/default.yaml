@@ -1,5 +1,5 @@
 # export match template
-template-define: &default-template
+template-define: &default-template # define anchor for reference below by &anchor-name
   name: default
   header: | 
     matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
@@ -14,7 +14,7 @@ template-define: &default-template
     ===="copyright lqwangxg@gmail.com 2023"====================================================
 
 export-template: &default-export-template
-  <<: *default-template
+  <<: *default-template     # reference anchor by *anchor-name
   name: export  # override the name
 replace-template: &default-replace-template
   name: replace # override the name
@@ -94,7 +94,7 @@ rule-define: &default-rule
 # write your custom rules below.
 #=========================
 custom-rules:
-  - <<: *default-rule
+  - <<: *default-rule  #reference anchor defined above by *anchor-name
     name: "openMultiMessageDialog"
     # regex pattern   
     pattern: (?P<indent>[ \t]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
@@ -102,7 +102,7 @@ custom-rules:
     #range-end: '\n\}'
     replace-template:
       <<: *default-replace-template
-      match : | 
+      match : |-  # |: has \n in last row, |- : no \n in last row.  
         ${indent}${call}(${param}, function (res){
         ${indent}  if(res){${process}}
         ${indent}});

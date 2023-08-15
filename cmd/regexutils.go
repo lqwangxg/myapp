@@ -54,8 +54,7 @@ func NewCacheRegex(pattern string, cache bool, rule *RuleConfig) *Regex {
 		Result: RegexResult{
 			Pattern:    pattern,
 			GroupNames: r.SubexpNames(),
-			// Matches:    make([]RegexMatch, 0),
-			// Params:     make(map[string]string),
+			Params:     make(map[string]string),
 		},
 		Cache: cache,
 		Rule:  rule,
@@ -77,11 +76,11 @@ func (rs *Regex) ScanMatches(input string) {
 	if !rs.IsMatch(input) {
 		return
 	}
-	subMatches := rs.R.FindAllStringSubmatch(input, -1)
+	//subMatches := rs.R.FindAllStringSubmatch(input, -1)
 	positions := rs.R.FindAllStringSubmatchIndex(input, -1)
 	rs.Result.Captures = *SplitBy(&positions, input, false, rs.Result.Captures)
 
-	rs.Result.Params["matches.count"] = strconv.Itoa(len(subMatches))
+	rs.Result.Params["matches.count"] = strconv.Itoa(len(positions) / 2)
 	rs.Result.Params["groups.count"] = strconv.Itoa(len(rs.Result.GroupNames))
 	rs.Result.Params["groups.keys"] = strings.Join(rs.Result.GroupNames, ",")
 
@@ -140,6 +139,7 @@ func (rs *Regex) ProcFile(filePath string) {
 
 	if buffer, err := ReadAll(filePath); err == nil {
 		rs.FromFile = filePath
+		log.Printf("Start Matching file:%s\npattern:%s\n=======================", rs.FromFile, rs.Result.Pattern)
 		rs.MatchText(buffer)
 	}
 }
@@ -197,6 +197,8 @@ func (rs *Regex) MatchText(content string) {
 				} else {
 					log.Println(newContent)
 				}
+			} else if rs.FromFile != "" {
+				log.Printf("no content replaced in file:%s", rs.FromFile)
 			} else {
 				log.Println("no content replaced.")
 				return
@@ -230,11 +232,20 @@ func (rs *Regex) replaceText(content string) (bool, string) {
 	//=replace =============
 	return replaced, newContent
 }
+
+// write content to file
 func (rs *Regex) writeText(content string) {
-	if rs.FromFile != "" {
-		WriteAll(rs.FromFile, content)
+	if rs.ToFile == "" && rs.FromFile != "" {
+		rs.ToFile = rs.FromFile
+	}
+	if rs.ToFile != "" {
+		WriteAll(rs.ToFile, content)
 	}
 }
+
+// export Matches using export template defined in rule.yaml
+// custom template can include header/match/group/footer
+// match/group can export by loop
 func (rs *Regex) exportMatches() string {
 	var sb strings.Builder
 
@@ -265,12 +276,3 @@ func (rs *Regex) exportMatches() string {
 	exports := sb.String()
 	return exports
 }
-
-// func (rs *Regex) GetMatch(start int) (bool, *RegexMatch) {
-// 	for _, m := range rs.Result.Matches {
-// 		if m.Start == start {
-// 			return true, &m
-// 		}
-// 	}
-// 	return false, nil
-// }
