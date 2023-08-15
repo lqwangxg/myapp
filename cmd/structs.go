@@ -6,6 +6,7 @@ type FlagConfig struct {
 	RuleName        string
 	ConfigFile      string
 	Pattern         string
+	ExportFlag      bool
 	Content         string
 	DestFile        string
 	DestDir         string
@@ -17,15 +18,16 @@ type FlagConfig struct {
 type RegexAction int
 
 type Regex struct {
-	R         *regexp.Regexp
-	Result    RegexResult
-	Cache     bool
-	CacheKey  string
-	content   string
-	fromFile  string
-	IsReplace bool
-	template  string
-	Rule      *RuleConfig
+	R           *regexp.Regexp
+	Result      RegexResult
+	Cache       bool
+	CacheKey    string
+	content     string
+	FromFile    string
+	ToFile      string
+	ExportFlag  bool
+	ReplaceFlag bool
+	Rule        *RuleConfig
 }
 type RegexResult struct {
 	Pattern    string
@@ -89,19 +91,19 @@ type RedisOption struct {
 type RuleConfig struct {
 	Name            string        `mapstructure:"name"`
 	Group           string        `mapstructure:"group"`
-	IncludeSuffix   string        `mapstructure:"include-suffix"`
-	ExcludeSuffix   string        `mapstructure:"exclude-suffix"`
-	RangeStart      string        `mapstructure:"range_start"`
-	RangeEnd        string        `mapstructure:"range_end"`
+	IncludeFile     string        `mapstructure:"include-file"`
+	ExcludeFile     string        `mapstructure:"exclude-file"`
+	RangeStart      string        `mapstructure:"range-start"`
+	RangeEnd        string        `mapstructure:"range-end"`
 	Pattern         string        `mapstructure:"pattern"`
 	ExportTemplate  RegexTemplate `mapstructure:"export-template"`
 	ReplaceTemplate RegexTemplate `mapstructure:"replace-template"`
 
-	FullPatterns  CheckPatternConfig `mapstructure:"full_patterns"`
-	RangePatterns CheckPatternConfig `mapstructure:"range_patterns"`
-	MatchPatterns CheckPatternConfig `mapstructure:"match_patterns"`
-	MatchFormulas []string           `mapstructure:"match_formulas"`
-	MatchEvals    CheckPatternConfig `mapstructure:"match_evals"`
+	FullPatterns  CheckPatternConfig `mapstructure:"full-patterns"`
+	RangePatterns CheckPatternConfig `mapstructure:"range-patterns"`
+	MatchPatterns CheckPatternConfig `mapstructure:"match-patterns"`
+	MatchFormulas []string           `mapstructure:"match-formulas"`
+	MatchEvals    CheckPatternConfig `mapstructure:"match-evals"`
 }
 type RegexTemplate struct {
 	Name   string `mapstructure:"name"`

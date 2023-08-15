@@ -4,8 +4,8 @@ name: openMultiMessageDialog
 group: showModalDialog
 
 # file suffix of include/exlude
-include-suffix: jsp|html
-exclude-suffix: 
+include-file: jsp|html
+exclude-file: 
 
 # regex pattern   
 pattern: (?P<indent>[ ]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
@@ -25,7 +25,7 @@ templates: &templates
 export-template:  
   <<: *templates
   footer: "copyright lqwangxg@gmail.com 2023"
-  
+
 # TODO:
 #  #GROUP-LOOP-START#
 #    ${group.key}: ${${group.index}}
@@ -46,48 +46,3 @@ replace-template:
 #  { match.group.name: match.group.nalue } will be saved in ${match_params_map}
 range_start: \nfunction\s+(?P<function>\w+)\(form\)\s*\{.+?\n\}
 range_end:
-
-# before replace process: check full content skip or do.
-# priority descend: skip_ifany, skip_when, do_ifany, do_when
-# if any true return skip/do;
-# optional: if groupname is included in pattern, 
-#  { match.group.name: match.group.nalue } will be saved in ${full_params_map}
-full_patterns :
-  skip_ifany: []
-  skip_when: []
-  do_ifany: 
-    - "DOCTYPE HTML PUBLIC"
-    - "swtag:html"
-    - "meta http-equiv"
-  do_when: []
-
-# before replace process: check full content skip or do.
-# priority descend: skip_ifany, skip_when, do_ifany, do_when
-# if any true return skip/do;
-# optional: if groupname is included in pattern, 
-#  { match.group.name: match.group.nalue } will be saved in ${match_params_map}
-range_patterns:
-  skip_ifany: []
-  skip_when: []
-  do_ifany: []
-  do_when: []
-
-# before replace process: check skip or do replace conditions
-match_patterns:
-  skip_ifany: []
-  skip_when: []
-  do_ifany: []
-  do_when: []
-
-# process for refreshing params
-# support functions: 
-#  string: len(string), ucase(string), lcase(string)
-#  number: +,-,*,/
-#  compare: <, <=, >, >=, ==
-match_formulas: []
-
-match_evals:
-  skip_ifany: []
-  skip_when: []
-  do_ifany: []
-  do_when: []

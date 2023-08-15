@@ -169,28 +169,28 @@ func (rs *Regex) ProcFile(filePath string) {
 	if !IsExists(filePath) {
 		return
 	}
-	if flags.IncludeSuffix != "" || rs.Rule.IncludeSuffix != "" {
+	if flags.IncludeSuffix != "" || rs.Rule.IncludeFile != "" {
 		re := NewRegex(flags.IncludeSuffix)
 		if !re.IsMatch(filePath) {
 			return
 		}
-		re = NewRegex(rs.Rule.IncludeSuffix)
+		re = NewRegex(rs.Rule.IncludeFile)
 		if !re.IsMatch(filePath) {
 			return
 		}
 	}
-	if flags.ExcludeSuffix != "" || rs.Rule.ExcludeSuffix != "" {
+	if flags.ExcludeSuffix != "" || rs.Rule.ExcludeFile != "" {
 		re := NewRegex(flags.ExcludeSuffix)
 		if re.IsMatch(filePath) {
 			return
 		}
-		re = NewRegex(rs.Rule.ExcludeSuffix)
+		re = NewRegex(rs.Rule.ExcludeFile)
 		if re.IsMatch(filePath) {
 			return
 		}
 	}
 	if buffer, err := ReadAll(filePath); err == nil {
-		rs.fromFile = filePath
+		rs.FromFile = filePath
 		rs.MatchText(buffer)
 	}
 }
@@ -219,21 +219,23 @@ func (rs *Regex) ProcDir(dirPath string) {
 	}
 }
 
-func (rs *Regex) MatchText(content string) string {
+func (rs *Regex) MatchText(content string) {
 	rs.content = content
 	rs.ScanMatches(rs.content)
 
 	//=export log =============
-	export := rs.exportMatches()
-	if export != "" {
-		log.Printf("%s", export)
-	} else {
-		log.Printf("no matches")
+	if rs.ExportFlag {
+		export := rs.exportMatches()
+		if export != "" {
+			log.Printf("%s", export)
+		} else {
+			log.Printf("no matches")
+		}
 	}
 	//=replace log =============
-	if rs.IsReplace && rs.FullCheck(rs.content) {
+	if rs.ReplaceFlag && rs.FullCheck(rs.content) {
 		newContent := rs.replaceText()
-		if rs.fromFile != "" {
+		if rs.FromFile != "" {
 			rs.writeText(newContent)
 		} else {
 			log.Println(newContent)
@@ -241,35 +243,20 @@ func (rs *Regex) MatchText(content string) string {
 	}
 	//==========================
 	rs.close()
-	return export
 }
-func (rs *Regex) getTemplate() string {
-	// private template first.
-	if rs.template != "" {
-		return rs.template
-	}
-	// then flags.ReplaceTemplate
-	if flags.ReplaceTemplate != "" {
-		return flags.ReplaceTemplate
-	}
-	// then rule.ReplaceTemplate
-	if rs.Rule.ReplaceTemplate.Match != "" {
-		return rs.Rule.ReplaceTemplate.Match
-	}
-	return ""
-}
+
 func (rs *Regex) replaceText() string {
 	//=replace log =============
 	var sb strings.Builder
-	template := rs.getTemplate()
+	// template := rs.getTemplate()
 	// split input by matches
 	rs.SplitMatches()
 	for _, m := range rs.Result.Ranges {
-		if m.RType == MatchType && template != "" {
+		if m.RType == MatchType {
 			match := rs.Result.Matches[m.MatchIndex]
-			//
 			if rs.IsDestMatch(rs.content, match) {
-				//sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
+				mTemplate := NewTemplate(rs.Rule.ReplaceTemplate.Match)
+				sb.WriteString(mTemplate.ReplaceByMap(match.Params))
 			} else {
 				sb.WriteString(m.Value)
 			}
@@ -283,8 +270,8 @@ func (rs *Regex) replaceText() string {
 	return newContent
 }
 func (rs *Regex) writeText(content string) {
-	if rs.fromFile != "" {
-		WriteAll(rs.fromFile, content)
+	if rs.FromFile != "" {
+		WriteAll(rs.FromFile, content)
 	}
 }
 func (rs *Regex) exportMatches() string {
@@ -294,7 +281,6 @@ func (rs *Regex) exportMatches() string {
 	// replace Footer: rs.Result.Params
 	tHeader := NewTemplate(rs.Rule.ExportTemplate.Header)
 	sb.WriteString(tHeader.ReplaceByMap(rs.Result.Params))
-
 	//---------------------------------------
 	// replace Loop-Matches: rs.Result.Matches
 	for i := 0; i < len(rs.Result.Matches); i++ {
