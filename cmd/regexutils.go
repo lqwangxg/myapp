@@ -139,7 +139,7 @@ func (rs *Regex) ProcFile(filePath string) {
 
 	if buffer, err := ReadAll(filePath); err == nil {
 		rs.FromFile = filePath
-		log.Printf("Start Matching file:%s\npattern:%s\n=======================", rs.FromFile, rs.Result.Pattern)
+		log.Printf("Matching file: %s", rs.FromFile)
 		rs.MatchText(buffer)
 	}
 }
@@ -187,7 +187,7 @@ func (rs *Regex) MatchText(content string) {
 		}
 	}
 	//=replace log =============
-	if rs.ReplaceFlag {
+	if rs.ReplaceFlag && rs.HasMatches() {
 		if rs.FullCheck(content) {
 			replaced, newContent := rs.replaceText(content)
 			if replaced {
@@ -198,9 +198,9 @@ func (rs *Regex) MatchText(content string) {
 					log.Println(newContent)
 				}
 			} else if rs.FromFile != "" {
-				log.Printf("no content replaced in file:%s", rs.FromFile)
+				log.Printf("Nothing Replaced. File: %s", rs.FromFile)
 			} else {
-				log.Println("no content replaced.")
+				log.Println("Nothing Replaced.")
 				return
 			}
 
@@ -211,6 +211,10 @@ func (rs *Regex) MatchText(content string) {
 	rs.ToCache()
 }
 
+// matched if RegexResult.captures > 1
+func (rs *Regex) HasMatches() bool {
+	return len(rs.Result.Captures) > 1
+}
 func (rs *Regex) replaceText(content string) (bool, string) {
 	//=replace =============
 	var sb strings.Builder
@@ -240,6 +244,7 @@ func (rs *Regex) writeText(content string) {
 	}
 	if rs.ToFile != "" {
 		WriteAll(rs.ToFile, content)
+		log.Printf("Written To:%s", rs.ToFile)
 	}
 }
 
