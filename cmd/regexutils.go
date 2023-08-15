@@ -47,6 +47,7 @@ func NewRegexByPattern(pattern string) *Regex {
 
 // var regex regexp.Regexp
 func NewCacheRegex(pattern string, cache bool, rule *RuleConfig) *Regex {
+	config.EncodePattern(&pattern)
 	r := regexp.MustCompile(pattern)
 	return &Regex{
 		R: r,
@@ -78,6 +79,8 @@ func (rs *Regex) ScanMatches(input string) {
 	}
 	subMatches := rs.R.FindAllStringSubmatch(input, -1)
 	positions := rs.R.FindAllStringSubmatchIndex(input, -1)
+	rs.Result.Captures = *SplitBy(&positions, input, false, rs.Result.Captures)
+
 	rs.Result.Params["matches.count"] = strconv.Itoa(len(subMatches))
 	rs.Result.Params["groups.count"] = strconv.Itoa(len(rs.Result.GroupNames))
 	rs.Result.Params["groups.keys"] = strings.Join(rs.Result.GroupNames, ",")
@@ -113,51 +116,6 @@ func (rs *Regex) ScanMatches(input string) {
 			match.Params[group.Name] = group.Value
 		}
 		rs.Result.Matches = append(rs.Result.Matches, *match)
-	}
-}
-
-// split input by matches
-func (rs *Regex) SplitMatches(input string) {
-	cpos := 0
-	epos := len(input)
-	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
-	for i, match := range rs.Result.Matches {
-		if cpos < epos && cpos < match.Start {
-			//append string before match
-			h := &RegexRange{
-				Capture: &Capture{
-					Start: cpos,
-					End:   match.Start,
-					Value: input[cpos:match.Start],
-					RType: UnMatchType,
-				},
-			}
-			rs.Result.Ranges = append(rs.Result.Ranges, *h)
-		}
-		// append match.value
-		m := &RegexRange{
-			Capture: &Capture{
-				Start: match.Start,
-				End:   match.End,
-				Value: input[match.Start:match.End],
-				RType: MatchType,
-			},
-			MatchIndex: i,
-		}
-		rs.Result.Ranges = append(rs.Result.Ranges, *m)
-		cpos = match.End
-	}
-	if cpos < epos {
-		//append last string
-		f := &RegexRange{
-			Capture: &Capture{
-				Start: cpos,
-				End:   epos,
-				Value: input[cpos:epos],
-				RType: UnMatchType,
-			},
-		}
-		rs.Result.Ranges = append(rs.Result.Ranges, *f)
 	}
 }
 
@@ -238,13 +196,19 @@ func (rs *Regex) MatchText(content string) {
 	//=replace log =============
 	if rs.ReplaceFlag {
 		if rs.FullCheck(content) {
-			newContent := rs.replaceText(content)
-			config.Decode(&newContent)
-			if rs.FromFile != "" {
-				rs.writeText(newContent)
+			replaced, newContent := rs.replaceText(content)
+			if replaced {
+				config.Decode(&newContent)
+				if rs.FromFile != "" {
+					rs.writeText(newContent)
+				} else {
+					log.Println(newContent)
+				}
 			} else {
-				log.Println(newContent)
+				log.Println("no content replaced.")
+				return
 			}
+
 		}
 	}
 	//==========================
@@ -252,28 +216,27 @@ func (rs *Regex) MatchText(content string) {
 	rs.ToCache()
 }
 
-func (rs *Regex) replaceText(content string) string {
-	//=replace log =============
+func (rs *Regex) replaceText(content string) (bool, string) {
+	//=replace =============
 	var sb strings.Builder
-	// template := rs.getTemplate()
-	// split input by matches
-	rs.SplitMatches(content)
-	for _, m := range rs.Result.Ranges {
-		if m.RType == MatchType {
-			match := rs.Result.Matches[m.MatchIndex]
-			if rs.IsDestMatch(match, content) {
+	replaced := false
+	for _, b := range rs.Result.Captures {
+		if b.RType == MatchType {
+			found, match := rs.GetMatch(b.Start)
+			if found && rs.IsDestMatch(*match, content) {
 				mTemplate := NewTemplate(rs.Rule.ReplaceTemplate.Match)
 				sb.WriteString(mTemplate.ReplaceByMap(match.Params))
+				replaced = true
 			} else {
-				sb.WriteString(m.Value)
+				sb.WriteString(content[b.Start:b.End])
 			}
 		} else {
-			sb.WriteString(m.Value)
+			sb.WriteString(content[b.Start:b.End])
 		}
 	}
 	newContent := sb.String()
-	//=replace log =============
-	return newContent
+	//=replace =============
+	return replaced, newContent
 }
 func (rs *Regex) writeText(content string) {
 	if rs.FromFile != "" {
@@ -309,31 +272,11 @@ func (rs *Regex) exportMatches() string {
 	return exports
 }
 
-// func (rs *Regex) replaceMatch(index int, template string) string {
-// 	var sb strings.Builder
-
-// 	mTemplate := NewTemplate(template)
-// 	mTemplate.ReplaceByMap(rs.Result.Params)
-// 	mTemplate.ReplaceByMap(rs.Result.Matches[index].Params)
-// 	sb.WriteString(mTemplate.Template)
-
-// 	buffer := sb.String()
-// 	config.Decode(&buffer)
-// 	return buffer
-// }
-
-// func (rs *Regex) close() {
-// 	// //match restore
-// 	// for i := 0; i < len(rs.Result.Matches); i++ {
-// 	// 	config.Decode(&rs.Result.Matches[i].Value)
-// 	// 	for x := 0; x < len(rs.Result.Matches[i].Groups); x++ {
-// 	// 		config.Decode(&rs.Result.Matches[i].Groups[x].Value)
-// 	// 	}
-// 	// }
-// 	// //range restore
-// 	// for x := 0; x < len(rs.Result.Ranges); x++ {
-// 	// 	config.Decode(&rs.Result.Ranges[x].Value)
-// 	// }
-// 	//save to cache
-// 	rs.ToCache()
-// }
+func (rs *Regex) GetMatch(start int) (bool, *RegexMatch) {
+	for _, m := range rs.Result.Matches {
+		if m.Start == start {
+			return true, &m
+		}
+	}
+	return false, nil
+}

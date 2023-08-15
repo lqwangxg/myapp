@@ -2,7 +2,6 @@ package cmd
 
 var config AppConfig
 var flags FlagConfig
-var templateCtl TemplateControlConfig
 var customRules CustomRules
 
 // var appContext map[string]string

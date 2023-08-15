@@ -1,98 +1,166 @@
 package cmd
 
-import "regexp"
+// // split input by matches
+// func (rs *Regex) SplitMatches(input string) {
+// 	cpos := 0
+// 	epos := len(input)
+// 	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
+// 	for i, match := range rs.Result.Matches {
+// 		if cpos < epos && cpos < match.Start {
+// 			//append string before match
+// 			h := &RegexRange{
+// 				Capture: &Capture{
+// 					Start: cpos,
+// 					End:   match.Start,
+// 					Value: input[cpos:match.Start],
+// 					RType: UnMatchType,
+// 				},
+// 			}
+// 			rs.Result.Ranges = append(rs.Result.Ranges, *h)
+// 		}
+// 		// append match.value
+// 		m := &RegexRange{
+// 			Capture: &Capture{
+// 				Start: match.Start,
+// 				End:   match.End,
+// 				Value: input[match.Start:match.End],
+// 				RType: MatchType,
+// 			},
+// 			MatchIndex: i,
+// 		}
+// 		rs.Result.Ranges = append(rs.Result.Ranges, *m)
+// 		cpos = match.End
+// 	}
+// 	if cpos < epos {
+// 		//append last string
+// 		f := &RegexRange{
+// 			Capture: &Capture{
+// 				Start: cpos,
+// 				End:   epos,
+// 				Value: input[cpos:epos],
+// 				RType: UnMatchType,
+// 			},
+// 		}
+// 		rs.Result.Ranges = append(rs.Result.Ranges, *f)
+// 	}
+// }
 
-// split input by matches
-func SplitMatchIndex(pattern, input string) *[]Bound {
-	bounds := make([]Bound, 0)
+// split input by pattern matches
+// if matchOnly=true, will get matches Capture[Start:End] only.
+func SplitMatchIndex(pattern, input string, matchOnly bool) *[]Capture {
 	// return 0 ~ length when pattern is empty
+	captures := make([]Capture, 0)
 	if pattern == "" {
-		bounds = append(bounds, Bound{Start: 0, End: len(input)})
-		return &bounds
+		captures = append(captures, Capture{Start: 0, End: len(input)})
+		return &captures
 	}
 
-	r := regexp.MustCompile(pattern)
-	positions := r.FindAllStringSubmatchIndex(input, -1)
-	if len(positions) == 0 {
-		bounds = append(bounds, Bound{Start: 0, End: len(input)})
+	rs := NewRegexByPattern(pattern)
+	//r := regexp.MustCompile(pattern)
+	positions := rs.R.FindAllStringSubmatchIndex(input, -1)
+	return SplitBy(&positions, input, matchOnly, captures)
+	//return &captures
+}
+
+// split positions
+// if matchOnly=true, will get matches Capture[Start:End] only.
+func SplitBy(positions *[][]int, input string, matchOnly bool, captures []Capture) *[]Capture {
+	//captures := make([]Capture, 0)
+	if captures == nil {
+		captures = make([]Capture, 0)
+	}
+	if len(*positions) == 0 {
+		captures = append(captures, Capture{Start: 0, End: len(input)})
 	} else {
-		for _, pos := range positions {
+		cpos := 0
+		epos := len(input)
+		for _, pos := range *positions {
+			// match Capture
+			match := Capture{
+				Start: pos[0],
+				End:   pos[1],
+				Value: input[pos[0]:pos[1]],
+				RType: MatchType,
+			}
+			// append the ahead of match
+			if !matchOnly && cpos < epos && cpos < match.Start {
+				captures = append(captures,
+					Capture{
+						Start: cpos,
+						End:   match.Start,
+						Value: input[cpos:match.Start],
+						RType: UnMatchType,
+					})
+			}
 			// append match.value
-			bounds = append(bounds, Bound{Start: pos[0], End: pos[1]})
+			captures = append(captures, match)
+			cpos = match.End
+		}
+		// append last string
+		if !matchOnly && cpos < epos {
+			captures = append(captures,
+				Capture{
+					Start: cpos,
+					End:   epos,
+					Value: input[cpos:epos],
+					RType: UnMatchType,
+				})
 		}
 	}
-	return &bounds
+	return &captures
 }
-func MergeRangeStartEnd(rangeStart, rangeEnd, input string) *[]Bound {
-	sBound := SplitMatchIndex(rangeStart, input)
-	eBound := SplitMatchIndex(rangeEnd, input)
+func (cap *Capture) SetValue(input string) {
+	cap.Value = input[cap.Start:cap.End]
+}
+func (rule *RuleConfig) MergeRangeStartEnd(input string) *[]Capture {
+	sBounds := SplitMatchIndex(rule.RangeStart, input, true)
+	eBounds := SplitMatchIndex(rule.RangeEnd, input, true)
 
-	rBound := make([]Bound, 0)
-	if len(*sBound) > 1 {
+	rBounds := make([]Capture, 0)
+	if len(*sBounds) > 1 {
 		//==================================
 		// on matches rangeStart, len(*sBound)>1
-		sb := *sBound
-		for i := 0; i < len(*sBound)-1; i++ {
+		sb := *sBounds
+		for i := 0; i < len(*sBounds); i++ {
 			s := sb[i]
-			n := sb[i+1]
-			r := &Bound{Start: s.Start, End: n.Start}
-			for _, e := range *eBound {
-				if s.Start <= e.Start && e.End <= n.Start {
+			r := &Capture{
+				Start: s.Start,
+				End:   len(input),
+			}
+			if i < len(*sBounds)-1 {
+				r.End = sb[i+1].Start
+			}
+			for _, e := range *eBounds {
+				if s.Start <= e.Start && e.End <= r.End {
 					r.End = e.End
 					break
 				}
 			}
-			rBound = append(rBound, *r)
+			r.SetValue(input)
+			rBounds = append(rBounds, *r)
 		}
-	} else if len(*eBound) > 1 {
+		//last capture
+
+	} else if len(*eBounds) > 1 {
 		//==================================
 		// on matches rangeEnd, len(*eBound)=1
-		eb := *eBound
-		for i := 1; i < len(*eBound); i++ {
-			eh := eb[i-1]
-			ec := eb[i]
-			if i == 1 {
-				rBound = append(rBound, Bound{Start: 0, End: eh.End})
-			} else {
-				rBound = append(rBound, Bound{Start: eh.End, End: ec.End})
+		eb := *eBounds
+		for i := 0; i < len(*eBounds); i++ {
+			r := &Capture{
+				Start: 0,
+				End:   eb[i].End,
 			}
+			if i > 1 {
+				r.Start = eb[i-1].End
+				r.End = eb[i].End
+			}
+			r.SetValue(input)
+			rBounds = append(rBounds, *r)
 		}
 	} else {
 		//rangeStart,rangeEnd
-		rBound = *sBound
+		rBounds = *sBounds
 	}
 
-	return &rBound
+	return &rBounds
 }
-
-// func SplitRangeStartEnd(mPattern, rangeStart, rangeEnd, input string) {
-// 	mRange := SplitMatches(mPattern, input)
-// 	sRange := SplitMatches(rangeStart, input)
-// 	eRange := SplitMatches(rangeEnd, input)
-// 	rRange := make([]RegexRange, 0)
-// 	for _, m := range *mRange {
-// 		r := &RegexRange{
-// 			Bound: Bound{Start: 0, End: 0},
-// 		}
-// 		//compare(startRange,matchRange)
-// 		for _, s := range *sRange {
-// 			if s.Start <= m.Start {
-// 				//reset Start on startRange.Start <= matchRange.Start
-// 				r.Start = s.Start
-// 			} else {
-// 				//break on startRange.Start > matchRange.Start
-// 				break
-// 			}
-// 		}
-// 		//compare(matchRange, endRange)
-// 		for _, e := range *eRange {
-// 			if m.End <= e.End {
-// 				//break on matchRange.End <= endRange.End
-// 				r.End = e.End
-// 				break
-// 			}
-// 		}
-
-// 	}
-
-// }

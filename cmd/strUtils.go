@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"regexp"
+	"strings"
 )
 
 // Encode content from keyChar to valueChar defined in config.yaml
@@ -29,6 +30,19 @@ func (cfg *AppConfig) Decode(content *string) string {
 		encode(content, val, ckey)
 	}
 	return *content
+}
+
+func (cfg *AppConfig) EncodePattern(input *string) string {
+	for key, val := range config.EChars {
+		*input = strings.ReplaceAll(*input, key, val)
+	}
+	return *input
+}
+func (cfg *AppConfig) DecodePattern(input *string) string {
+	for key, val := range config.EChars {
+		*input = strings.ReplaceAll(*input, val, key)
+	}
+	return *input
 }
 
 // replace all string by fchar to tchar

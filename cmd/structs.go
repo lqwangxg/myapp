@@ -32,14 +32,10 @@ type RegexResult struct {
 	Pattern    string
 	GroupNames []string
 	Matches    []RegexMatch
-	Ranges     []RegexRange
+	Captures   []Capture
 	Params     map[string]string
 }
 
-type RegexRange struct {
-	*Capture
-	MatchIndex int
-}
 type RegexMatch struct {
 	*Capture
 	Groups []RegexGroup
@@ -65,11 +61,6 @@ type Capture struct {
 	End   int
 	Value string
 	RType RegexResultType
-}
-
-type Bound struct {
-	Start int
-	End   int
 }
 
 type AppConfig struct {
@@ -121,9 +112,3 @@ type CheckPatternConfig struct {
 	DoIfany   []string `mapstructure:"do_ifany"`
 	DoWhen    []string `mapstructure:"do_when"`
 }
-type TemplateControlConfig struct {
-	Loop    string `mapstructure:"loop"`
-	Process string `mapstructure:"process"`
-}
-
-type ConvertFunc func(*string, map[string]string) *string

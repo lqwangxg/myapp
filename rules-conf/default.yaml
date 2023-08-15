@@ -97,12 +97,18 @@ custom-rules:
   - <<: *default-rule
     name: "openMultiMessageDialog"
     # regex pattern   
-    pattern: (?P<indent>[ ]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
-    range_start: \nfunction\s+(?P<function>\w+)\(form\)\s*\{.+?\n\}
+    pattern: (?P<indent>[ \t]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+    range-start: \nfunction\s+(?P<function>\w+)
+    #range-end: '\n\}'
     replace-template:
       <<: *default-replace-template
       match : | 
-        ${indent}${call}(${param}, "callbackForRetunWindow");
-        ${indent}window["callbackForRetunWindow"] = function (res){
+        ${indent}${call}(${param}, function (res){
         ${indent}  if(res){${process}}
-        ${indent}}
+        ${indent}});
+      #update method-1: 
+      #match : | 
+      #  ${indent}${call}(${param}, "callbackForRetunWindow");
+      #  ${indent}window["callbackForRetunWindow"] = function (res){
+      #  ${indent}  if(res){${process}}
+      #  ${indent}}

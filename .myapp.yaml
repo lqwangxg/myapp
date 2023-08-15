@@ -3,7 +3,7 @@
 echars:
   '\n': '乚'
   '\r': '刂'
-  '\t': '亠'
+#  '\t': '亠'
 ruledir: rules-conf
 # get params by match input contents.
 params:

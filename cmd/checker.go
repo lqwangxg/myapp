@@ -18,31 +18,25 @@ func (rs *Regex) FullCheck(content string) bool {
 	return true
 }
 func (rs *Regex) IsDestMatch(match RegexMatch, content string) bool {
-	// if rs.Rule.RangePattern == "" {
-	// 	return true
-	// }
+	bounds := rs.Rule.MergeRangeStartEnd(content)
+	inBound := false
+	rangeValue := ""
+	for _, bd := range *bounds {
+		if bd.Start <= match.Start && match.End <= bd.End {
+			inBound = true
+			rangeValue = content[bd.Start:bd.End]
+			break
+		}
+	}
 
-	rsRange := NewRegexByPattern(rs.Rule.RangeStart)
-	rsRange.ScanMatches(content)
-	rsRange.SplitMatches(content)
-	innerCheck := false
-	var inMatch RegexMatch
-	// for _, rm := range rsRange.Result.Matches {
-	// 	// match.position(start, end) is inner rm.position(start, end)
-	// 	if rm.Bound.Start <= match.Bound.Start && match.Bound.End <= rm.Bound.End {
-	// 		innerCheck = true
-	// 		inMatch = rm
-	// 		break
-	// 	}
-	// }
 	// return false if not included in any range.
-	if !innerCheck {
+	if !inBound {
 		return false
 	}
-	if rs.Rule.IsRangeSkip(inMatch.Value) {
+	if rs.Rule.IsRangeSkip(rangeValue) {
 		return false
 	}
-	if !rs.Rule.IsRangeDest(inMatch.Value) {
+	if !rs.Rule.IsRangeDest(rangeValue) {
 		return false
 	}
 	if rs.Rule.IsMatchSkip(match.Value) {

@@ -52,8 +52,6 @@ func initConfig() {
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv() // read in environment variables that match
 
-	//load .control-template.yml
-	LoadConfig(".control-template.yml", &templateCtl)
 	//NewDefaultRules()
 	fullPath := filepath.Join(config.RuleDir, "default.yaml")
 	LoadConfig(fullPath, &customRules)
