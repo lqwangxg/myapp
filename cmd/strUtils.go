@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"regexp"
 )
 
@@ -47,20 +46,8 @@ func (rs *Regex) ParamValue(key string) (bool, string) {
 	}
 	return false, ""
 }
-
-func ReplaceByKeyValue(template *string, key string, value string) {
-	pattern := fmt.Sprintf(`\$\{(?P<key>%s)\}`, key)
-	regex := NewNoCacheRegex(pattern)
-	regex.ScanMatches(*template)
-	if ok, _ := regex.ParamValue(key); !ok {
-		return
-	}
-	*template = regex.R.ReplaceAllString(*template, value)
-}
-
-func ReplaceByMap(template *string, kvs map[string]string) *string {
-	for key, val := range kvs {
-		ReplaceByKeyValue(template, key, val)
-	}
-	return template
+func IsMatchString(pattern, input string) bool {
+	//pattern = `\$\{(?P<key>[\w\.\-]+)\}`
+	r := regexp.MustCompile(pattern)
+	return r.MatchString(input)
 }

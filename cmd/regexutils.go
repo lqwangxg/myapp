@@ -253,8 +253,8 @@ func (rs *Regex) getTemplate() string {
 		return flags.ReplaceTemplate
 	}
 	// then rule.ReplaceTemplate
-	if rs.Rule.ReplaceTemplate != "" {
-		return rs.Rule.ReplaceTemplate
+	if rs.Rule.ReplaceTemplate.Match != "" {
+		return rs.Rule.ReplaceTemplate.Match
 	}
 	return ""
 }
@@ -269,7 +269,7 @@ func (rs *Regex) replaceText() string {
 			match := rs.Result.Matches[m.MatchIndex]
 			//
 			if rs.IsDestMatch(rs.content, match) {
-				sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
+				//sb.WriteString(rs.replaceMatch(m.MatchIndex, template))
 			} else {
 				sb.WriteString(m.Value)
 			}
@@ -288,20 +288,19 @@ func (rs *Regex) writeText(content string) {
 	}
 }
 func (rs *Regex) exportMatches() string {
-	tHeader := rs.Rule.ExportTemplateHeader
 	var sb strings.Builder
 
 	//---------------------------------------
-	// replace Header/Footer: rs.Result.Params
-	ReplaceByMap(&tHeader, rs.Result.Params)
-	sb.WriteString(tHeader)
+	// replace Footer: rs.Result.Params
+	tHeader := NewTemplate(rs.Rule.ExportTemplate.Header)
+	sb.WriteString(tHeader.ReplaceByMap(rs.Result.Params))
 
 	//---------------------------------------
 	// replace Loop-Matches: rs.Result.Matches
 	for i := 0; i < len(rs.Result.Matches); i++ {
-		if rs.Rule.ExportTemplateContent != "" {
-			tContent := rs.Rule.ExportTemplateContent
-			tmp := rs.replaceMatch(i, tContent)
+		if rs.Rule.ExportTemplate.Match != "" {
+			tContent := NewTemplate(rs.Rule.ExportTemplate.Match)
+			tmp := tContent.ReplaceByRegexResult(rs.Result)
 			sb.WriteString(tmp)
 		} else {
 			//when template is empty, export match.value
@@ -309,10 +308,9 @@ func (rs *Regex) exportMatches() string {
 		}
 	}
 	//---------------------------------------
-	// replace Header/Footer: rs.Result.Params
-	tFooter := rs.Rule.ExportTemplateFooter
-	ReplaceByMap(&tFooter, rs.Result.Params)
-	sb.WriteString(tFooter)
+	// replace Footer: rs.Result.Params
+	tFooter := NewTemplate(rs.Rule.ExportTemplate.Footer)
+	sb.WriteString(tFooter.ReplaceByMap(rs.Result.Params))
 	//---------------------------------------
 
 	exports := sb.String()
@@ -320,18 +318,18 @@ func (rs *Regex) exportMatches() string {
 	return exports
 }
 
-func (rs *Regex) replaceMatch(index int, template string) string {
-	var sb strings.Builder
-	mval := template
+// func (rs *Regex) replaceMatch(index int, template string) string {
+// 	var sb strings.Builder
 
-	ReplaceByMap(&mval, rs.Result.Params)
-	ReplaceByMap(&mval, rs.Result.Matches[index].Params)
-	sb.WriteString(mval)
+// 	mTemplate := NewTemplate(template)
+// 	mTemplate.ReplaceByMap(rs.Result.Params)
+// 	mTemplate.ReplaceByMap(rs.Result.Matches[index].Params)
+// 	sb.WriteString(mTemplate.Template)
 
-	buffer := sb.String()
-	config.Decode(&buffer)
-	return buffer
-}
+// 	buffer := sb.String()
+// 	config.Decode(&buffer)
+// 	return buffer
+// }
 
 func (rs *Regex) close() {
 	//match restore

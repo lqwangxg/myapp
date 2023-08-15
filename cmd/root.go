@@ -4,7 +4,6 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,28 +39,11 @@ func initConfig() {
 	//fmt.Println("root initConfig called ", cfgFile)
 	if flags.ConfigFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(flags.ConfigFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".myapp" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".myapp")
+		//viper.SetConfigFile(flags.ConfigFile)
+		LoadConfig(flags.ConfigFile, &config)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		viper.Unmarshal(&config)
-		log.Printf("Using config file:%s, config:%v", viper.ConfigFileUsed(), config)
-	}
-	// for _, dir := range config.RuleDirs {
-	// 	loadRules(dir, localRules)
-	// }
 
 	//load .control-template.yml
 	LoadConfig(".control-template.yml", &templateCtl)

@@ -87,23 +87,28 @@ type RedisOption struct {
 }
 
 type RuleConfig struct {
-	Name                  string `mapstructure:"name"`
-	Group                 string `mapstructure:"group"`
-	IncludeSuffix         string `mapstructure:"include-suffix"`
-	ExcludeSuffix         string `mapstructure:"exclude-suffix"`
-	Pattern               string `mapstructure:"pattern"`
-	ExportTemplateHeader  string `mapstructure:"export-template-header"`
-	ExportTemplateContent string `mapstructure:"export-template-content"`
-	ExportTemplateFooter  string `mapstructure:"export-template-footer"`
-	ReplaceTemplate       string `mapstructure:"replace-template"`
-	RangeStart            string `mapstructure:"range_start"`
-	RangeEnd              string `mapstructure:"range_end"`
+	Name            string        `mapstructure:"name"`
+	Group           string        `mapstructure:"group"`
+	IncludeSuffix   string        `mapstructure:"include-suffix"`
+	ExcludeSuffix   string        `mapstructure:"exclude-suffix"`
+	RangeStart      string        `mapstructure:"range_start"`
+	RangeEnd        string        `mapstructure:"range_end"`
+	Pattern         string        `mapstructure:"pattern"`
+	ExportTemplate  RegexTemplate `mapstructure:"export-template"`
+	ReplaceTemplate RegexTemplate `mapstructure:"replace-template"`
 
 	FullPatterns  CheckPatternConfig `mapstructure:"full_patterns"`
 	RangePatterns CheckPatternConfig `mapstructure:"range_patterns"`
 	MatchPatterns CheckPatternConfig `mapstructure:"match_patterns"`
 	MatchFormulas []string           `mapstructure:"match_formulas"`
 	MatchEvals    CheckPatternConfig `mapstructure:"match_evals"`
+}
+type RegexTemplate struct {
+	Name   string `mapstructure:"name"`
+	Header string `mapstructure:"header"`
+	Match  string `mapstructure:"match"`
+	Group  string `mapstructure:"group"`
+	Footer string `mapstructure:"footer"`
 }
 type CheckPatternConfig struct {
 	SkipIfany []string `mapstructure:"skip_ifany"`

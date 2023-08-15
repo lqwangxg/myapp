@@ -58,7 +58,7 @@ func LoadConfig(configFilePath string, cfg any) bool {
 	viper.SetConfigFile(configFilePath)
 	if err := viper.ReadInConfig(); err == nil {
 		viper.Unmarshal(cfg)
-		log.Printf("Read config file OK:%s\n=↓↓↓======\n%v\n=↑↑↑=======", viper.ConfigFileUsed(), config)
+		log.Printf("Read config file OK:%s\n=↓↓↓======\n%v\n=↑↑↑=======", viper.ConfigFileUsed(), cfg)
 		return true
 	} else {
 		log.Fatal(err)

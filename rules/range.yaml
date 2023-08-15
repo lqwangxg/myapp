@@ -1,11 +1,19 @@
 # rule-name
-name: openMultiMessageDialog
+name: range
 # rule-group
-group: showModalDialog
+group: default
 
 # file suffix of include/exlude
 include-suffix: jsp|html
 exclude-suffix: 
+
+# match destination range(spos=startIndex, epos=endIndex + endLength) 
+# if range_start is empty then spos=0
+# if range_end is empty then epos=length(full) or ahead of next range_start
+# optional: if groupname is included in pattern, 
+#  { match.group.name: match.group.nalue } will be saved in ${match_params_map}
+range_start: \nfunction\s+(?P<function>\w+)\(form\)\s*\{.+?\n\}
+range_end:
 
 # regex pattern   
 pattern: (?P<indent>[ ]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
@@ -22,10 +30,10 @@ templates: &templates
   
   footer: | 
     "--"
-export-template:  
+export-template: 
   <<: *templates
   footer: "copyright lqwangxg@gmail.com 2023"
-  
+
 # TODO:
 #  #GROUP-LOOP-START#
 #    ${group.key}: ${${group.index}}
@@ -39,14 +47,6 @@ replace-template:
     ${indent}  if(res){${process}}
     ${indent}}
   
-# match destination range(spos=startIndex, epos=endIndex + endLength) 
-# if range_start is empty then spos=0
-# if range_end is empty then epos=length(full) or ahead of next range_start
-# optional: if groupname is included in pattern, 
-#  { match.group.name: match.group.nalue } will be saved in ${match_params_map}
-range_start: \nfunction\s+(?P<function>\w+)\(form\)\s*\{.+?\n\}
-range_end:
-
 # before replace process: check full content skip or do.
 # priority descend: skip_ifany, skip_when, do_ifany, do_when
 # if any true return skip/do;
