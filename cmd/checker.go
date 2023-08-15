@@ -7,6 +7,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// check whether the content is should be skiped by skip-pattern,
+// or is required by dest-pattern
 func (rs *Regex) FullCheck(content string) bool {
 	rule := rs.Rule
 	if rule.IsFullSkip(content) {
@@ -17,20 +19,23 @@ func (rs *Regex) FullCheck(content string) bool {
 	}
 	return true
 }
-func (rs *Regex) IsDestMatch(match RegexMatch, content string) bool {
-	bounds := rs.Rule.MergeRangeStartEnd(content)
-	inBound := false
+
+// check the given match[start,end] whether between the range of matches
+// by range-start and range-end
+func (rs *Regex) IsDestMatch(match Capture, content string) bool {
+	ranges := rs.Rule.MergeRangeStartEnd(content)
+	inRange := false
 	rangeValue := ""
-	for _, bd := range *bounds {
-		if bd.Start <= match.Start && match.End <= bd.End {
-			inBound = true
-			rangeValue = content[bd.Start:bd.End]
+	for _, r := range *ranges {
+		if r.Start <= match.Start && match.End <= r.End {
+			inRange = true
+			rangeValue = content[r.Start:r.End]
 			break
 		}
 	}
 
 	// return false if not included in any range.
-	if !inBound {
+	if !inRange {
 		return false
 	}
 	if rs.Rule.IsRangeSkip(rangeValue) {

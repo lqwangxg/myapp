@@ -50,16 +50,17 @@ func encode(input *string, fchar, tchar string) {
 	r, _ := regexp.Compile(fchar)
 	*input = r.ReplaceAllString(*input, tchar)
 }
-func (rs *Regex) ParamValue(key string) (bool, string) {
-	for _, m := range rs.Result.Matches {
-		for _, val := range m.Params {
-			if val == key {
-				return true, m.Params[key]
-			}
-		}
-	}
-	return false, ""
-}
+
+//	func (rs *Regex) ParamValue(key string) (bool, string) {
+//		for _, m := range rs.Result.Matches {
+//			for _, val := range m.Params {
+//				if val == key {
+//					return true, m.Params[key]
+//				}
+//			}
+//		}
+//		return false, ""
+//	}
 func IsMatchString(pattern, input string) bool {
 	//pattern = `\$\{(?P<key>[\w\.\-]+)\}`
 	r := regexp.MustCompile(pattern)

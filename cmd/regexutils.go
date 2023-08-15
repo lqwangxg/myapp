@@ -54,8 +54,8 @@ func NewCacheRegex(pattern string, cache bool, rule *RuleConfig) *Regex {
 		Result: RegexResult{
 			Pattern:    pattern,
 			GroupNames: r.SubexpNames(),
-			Matches:    make([]RegexMatch, 0),
-			Params:     make(map[string]string),
+			// Matches:    make([]RegexMatch, 0),
+			// Params:     make(map[string]string),
 		},
 		Cache: cache,
 		Rule:  rule,
@@ -85,37 +85,30 @@ func (rs *Regex) ScanMatches(input string) {
 	rs.Result.Params["groups.count"] = strconv.Itoa(len(rs.Result.GroupNames))
 	rs.Result.Params["groups.keys"] = strings.Join(rs.Result.GroupNames, ",")
 
-	for i, smatch := range subMatches {
-		position := positions[i]
-		match := &RegexMatch{
-			Capture: &Capture{
-				Start: position[0],
-				End:   position[1],
-				Value: smatch[0],
-				RType: MatchType,
-			},
-			Groups: make([]RegexGroup, 0),
-			Params: make(map[string]string),
+	// match.Index.
+	x := 0
+	for i, c := range rs.Result.Captures {
+		// skip if it's not match
+		if !c.IsMatch {
+			continue
 		}
-		//match.Params["match.value"] = match.Value
+
+		match := &rs.Result.Captures[i]
+		match.Groups = make([]Capture, 0)
+		match.Params = make(map[string]string)
+		position := positions[x]
+
 		for x := 0; x < len(rs.Result.GroupNames); x++ {
 			gname := rs.Result.GroupNames[x]
 			if x == 0 {
 				gname = "match.value"
 			}
-			group := &RegexGroup{
-				Name: gname,
-				Capture: &Capture{
-					Start: position[x*2+0],
-					End:   position[x*2+1],
-					Value: smatch[x],
-					RType: GroupType,
-				},
-			}
+			group := &Capture{Start: position[x*2+0], End: position[x*2+1]}
+			group.SetValue(input)
 			match.Groups = append(match.Groups, *group)
-			match.Params[group.Name] = group.Value
+			match.Params[gname] = group.Value
 		}
-		rs.Result.Matches = append(rs.Result.Matches, *match)
+		x++
 	}
 }
 
@@ -220,18 +213,17 @@ func (rs *Regex) replaceText(content string) (bool, string) {
 	//=replace =============
 	var sb strings.Builder
 	replaced := false
-	for _, b := range rs.Result.Captures {
-		if b.RType == MatchType {
-			found, match := rs.GetMatch(b.Start)
-			if found && rs.IsDestMatch(*match, content) {
+	for _, c := range rs.Result.Captures {
+		if c.IsMatch {
+			if rs.IsDestMatch(c, content) {
 				mTemplate := NewTemplate(rs.Rule.ReplaceTemplate.Match)
-				sb.WriteString(mTemplate.ReplaceByMap(match.Params))
+				sb.WriteString(mTemplate.ReplaceByMap(c.Params))
 				replaced = true
 			} else {
-				sb.WriteString(content[b.Start:b.End])
+				sb.WriteString(content[c.Start:c.End])
 			}
 		} else {
-			sb.WriteString(content[b.Start:b.End])
+			sb.WriteString(content[c.Start:c.End])
 		}
 	}
 	newContent := sb.String()
@@ -252,14 +244,16 @@ func (rs *Regex) exportMatches() string {
 	sb.WriteString(tHeader.ReplaceByMap(rs.Result.Params))
 	//---------------------------------------
 	// replace Loop-Matches: rs.Result.Matches
-	for i := 0; i < len(rs.Result.Matches); i++ {
-		if rs.Rule.ExportTemplate.Match != "" {
-			tContent := NewTemplate(rs.Rule.ExportTemplate.Match)
-			tmp := tContent.ReplaceByRegexResult(rs.Result)
-			sb.WriteString(tmp)
-		} else {
-			//when template is empty, export match.value
-			sb.WriteString(rs.Result.Matches[i].Value)
+	for _, item := range rs.Result.Captures {
+		if item.IsMatch {
+			if rs.Rule.ExportTemplate.Match != "" {
+				tContent := NewTemplate(rs.Rule.ExportTemplate.Match)
+				tmp := tContent.ReplaceByRegexResult(rs.Result)
+				sb.WriteString(tmp)
+			} else {
+				//when template is empty, export match.value
+				sb.WriteString(item.Value)
+			}
 		}
 	}
 	//---------------------------------------
@@ -272,11 +266,11 @@ func (rs *Regex) exportMatches() string {
 	return exports
 }
 
-func (rs *Regex) GetMatch(start int) (bool, *RegexMatch) {
-	for _, m := range rs.Result.Matches {
-		if m.Start == start {
-			return true, &m
-		}
-	}
-	return false, nil
-}
+// func (rs *Regex) GetMatch(start int) (bool, *RegexMatch) {
+// 	for _, m := range rs.Result.Matches {
+// 		if m.Start == start {
+// 			return true, &m
+// 		}
+// 	}
+// 	return false, nil
+// }

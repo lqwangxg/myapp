@@ -15,7 +15,6 @@ type FlagConfig struct {
 	ExportTemplate  string
 	ReplaceTemplate string
 }
-type RegexAction int
 
 type Regex struct {
 	R           *regexp.Regexp
@@ -31,36 +30,8 @@ type Regex struct {
 type RegexResult struct {
 	Pattern    string
 	GroupNames []string
-	Matches    []RegexMatch
 	Captures   []Capture
 	Params     map[string]string
-}
-
-type RegexMatch struct {
-	*Capture
-	Groups []RegexGroup
-	Params map[string]string
-}
-type RegexGroup struct {
-	*Capture
-	Name string
-}
-
-// define RegexResultType as int.
-type RegexResultType int
-
-// RegexType of UnMatchType, MatchType and GroupType
-const (
-	UnMatchType RegexResultType = iota
-	MatchType
-	GroupType
-)
-
-type Capture struct {
-	Start int
-	End   int
-	Value string
-	RType RegexResultType
 }
 
 type AppConfig struct {

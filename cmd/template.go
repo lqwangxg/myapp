@@ -55,8 +55,10 @@ func (t *StringTemplate) ReplaceByMap(kvs map[string]string) string {
 
 func (t *StringTemplate) ReplaceByRegexResult(result RegexResult) string {
 	t.Template = t.ReplaceByMap(result.Params)
-	for _, m := range result.Matches {
-		t.Template = t.ReplaceByMap(m.Params)
+	for _, m := range result.Captures {
+		if m.IsMatch && m.Params != nil {
+			t.Template = t.ReplaceByMap(m.Params)
+		}
 	}
 	return t.Template
 }
