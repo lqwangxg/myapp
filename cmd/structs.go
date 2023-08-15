@@ -22,7 +22,6 @@ type Regex struct {
 	Result      RegexResult
 	Cache       bool
 	CacheKey    string
-	content     string
 	FromFile    string
 	ToFile      string
 	ExportFlag  bool

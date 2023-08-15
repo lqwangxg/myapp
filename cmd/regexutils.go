@@ -23,8 +23,7 @@ func NewRegexFromCmd() *Regex {
 				rs = rule.NewRegex()
 			}
 		}
-	}
-	if flags.Pattern != "" {
+	} else if flags.Pattern != "" {
 		rs = NewRegex(flags.Pattern)
 	}
 	if rs == nil {
@@ -42,7 +41,7 @@ func NewRegex(pattern string) *Regex {
 func (rule RuleConfig) NewRegex() *Regex {
 	return NewCacheRegex(rule.Pattern, config.RedisOption.Enable, &rule)
 }
-func NewNoCacheRegex(pattern string) *Regex {
+func NewRegexByPattern(pattern string) *Regex {
 	return NewCacheRegex(pattern, false, nil)
 }
 
@@ -74,13 +73,6 @@ func (rs *Regex) IsMatch(input string) bool {
 
 // var regex regexp.Regexp
 func (rs *Regex) ScanMatches(input string) {
-	// get from redis cache
-	if rs.FromCache(input) {
-		return
-	}
-
-	//before match input, transfer special chars
-	config.Encode(&input)
 	if !rs.IsMatch(input) {
 		return
 	}
@@ -125,9 +117,9 @@ func (rs *Regex) ScanMatches(input string) {
 }
 
 // split input by matches
-func (rs *Regex) SplitMatches() {
+func (rs *Regex) SplitMatches(input string) {
 	cpos := 0
-	epos := len(rs.content)
+	epos := len(input)
 	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
 	for i, match := range rs.Result.Matches {
 		if cpos < epos && cpos < match.Start {
@@ -136,7 +128,7 @@ func (rs *Regex) SplitMatches() {
 				Capture: &Capture{
 					Start: cpos,
 					End:   match.Start,
-					Value: rs.content[cpos:match.Start],
+					Value: input[cpos:match.Start],
 					RType: UnMatchType,
 				},
 			}
@@ -147,7 +139,7 @@ func (rs *Regex) SplitMatches() {
 			Capture: &Capture{
 				Start: match.Start,
 				End:   match.End,
-				Value: rs.content[match.Start:match.End],
+				Value: input[match.Start:match.End],
 				RType: MatchType,
 			},
 			MatchIndex: i,
@@ -161,7 +153,7 @@ func (rs *Regex) SplitMatches() {
 			Capture: &Capture{
 				Start: cpos,
 				End:   epos,
-				Value: rs.content[cpos:epos],
+				Value: input[cpos:epos],
 				RType: UnMatchType,
 			},
 		}
@@ -226,12 +218,17 @@ func (rs *Regex) ProcDir(dirPath string) {
 }
 
 func (rs *Regex) MatchText(content string) {
-	rs.content = content
-	rs.ScanMatches(rs.content)
+	//before match input, transfer special chars
+	config.Encode(&content)
+	// get from redis cache
+	if !rs.FromCache(content) {
+		rs.ScanMatches(content)
+	}
 
 	//=export log =============
 	if rs.ExportFlag {
 		export := rs.exportMatches()
+		config.Decode(&export)
 		if export != "" {
 			log.Printf("%s", export)
 		} else {
@@ -239,28 +236,32 @@ func (rs *Regex) MatchText(content string) {
 		}
 	}
 	//=replace log =============
-	if rs.ReplaceFlag && rs.FullCheck(rs.content) {
-		newContent := rs.replaceText()
-		if rs.FromFile != "" {
-			rs.writeText(newContent)
-		} else {
-			log.Println(newContent)
+	if rs.ReplaceFlag {
+		if rs.FullCheck(content) {
+			newContent := rs.replaceText(content)
+			config.Decode(&newContent)
+			if rs.FromFile != "" {
+				rs.writeText(newContent)
+			} else {
+				log.Println(newContent)
+			}
 		}
 	}
 	//==========================
-	rs.close()
+	//save to cache
+	rs.ToCache()
 }
 
-func (rs *Regex) replaceText() string {
+func (rs *Regex) replaceText(content string) string {
 	//=replace log =============
 	var sb strings.Builder
 	// template := rs.getTemplate()
 	// split input by matches
-	rs.SplitMatches()
+	rs.SplitMatches(content)
 	for _, m := range rs.Result.Ranges {
 		if m.RType == MatchType {
 			match := rs.Result.Matches[m.MatchIndex]
-			if rs.IsDestMatch(rs.content, match) {
+			if rs.IsDestMatch(match, content) {
 				mTemplate := NewTemplate(rs.Rule.ReplaceTemplate.Match)
 				sb.WriteString(mTemplate.ReplaceByMap(match.Params))
 			} else {
@@ -271,7 +272,6 @@ func (rs *Regex) replaceText() string {
 		}
 	}
 	newContent := sb.String()
-	config.Decode(&newContent)
 	//=replace log =============
 	return newContent
 }
@@ -306,7 +306,6 @@ func (rs *Regex) exportMatches() string {
 	//---------------------------------------
 
 	exports := sb.String()
-	config.Decode(&exports)
 	return exports
 }
 
@@ -323,18 +322,18 @@ func (rs *Regex) exportMatches() string {
 // 	return buffer
 // }
 
-func (rs *Regex) close() {
-	//match restore
-	for i := 0; i < len(rs.Result.Matches); i++ {
-		config.Decode(&rs.Result.Matches[i].Value)
-		for x := 0; x < len(rs.Result.Matches[i].Groups); x++ {
-			config.Decode(&rs.Result.Matches[i].Groups[x].Value)
-		}
-	}
-	//range restore
-	for x := 0; x < len(rs.Result.Ranges); x++ {
-		config.Decode(&rs.Result.Ranges[x].Value)
-	}
-	//save to cache
-	rs.ToCache()
-}
+// func (rs *Regex) close() {
+// 	// //match restore
+// 	// for i := 0; i < len(rs.Result.Matches); i++ {
+// 	// 	config.Decode(&rs.Result.Matches[i].Value)
+// 	// 	for x := 0; x < len(rs.Result.Matches[i].Groups); x++ {
+// 	// 		config.Decode(&rs.Result.Matches[i].Groups[x].Value)
+// 	// 	}
+// 	// }
+// 	// //range restore
+// 	// for x := 0; x < len(rs.Result.Ranges); x++ {
+// 	// 	config.Decode(&rs.Result.Ranges[x].Value)
+// 	// }
+// 	//save to cache
+// 	rs.ToCache()
+// }

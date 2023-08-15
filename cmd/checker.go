@@ -7,24 +7,24 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func (rs *Regex) FullCheck(src string) bool {
+func (rs *Regex) FullCheck(content string) bool {
 	rule := rs.Rule
-	if rule.IsFullSkip(src) {
+	if rule.IsFullSkip(content) {
 		return false
 	}
-	if !rule.IsFullDest(src) {
+	if !rule.IsFullDest(content) {
 		return false
 	}
 	return true
 }
-func (rs *Regex) IsDestMatch(src string, match RegexMatch) bool {
+func (rs *Regex) IsDestMatch(match RegexMatch, content string) bool {
 	// if rs.Rule.RangePattern == "" {
 	// 	return true
 	// }
 
-	rsRange := NewNoCacheRegex(rs.Rule.RangeStart)
-	rsRange.ScanMatches(src)
-	rsRange.SplitMatches()
+	rsRange := NewRegexByPattern(rs.Rule.RangeStart)
+	rsRange.ScanMatches(content)
+	rsRange.SplitMatches(content)
 	innerCheck := false
 	var inMatch RegexMatch
 	// for _, rm := range rsRange.Result.Matches {
@@ -82,10 +82,10 @@ func (rule *RuleConfig) IsMatchDest(src string) bool {
  */
 func (checker *CheckPatternConfig) IsSkip(src string) bool {
 
-	if IfAnyMatch(src, checker.SkipIfany) {
+	if IfAnyMatch(src, checker.SkipIfany, false) {
 		return true
 	}
-	if WhenMatch(src, checker.SkipWhen) {
+	if WhenMatch(src, checker.SkipWhen, false) {
 		return true
 	}
 	return false
@@ -96,20 +96,23 @@ func (checker *CheckPatternConfig) IsSkip(src string) bool {
  */
 func (checker *CheckPatternConfig) IsDest(src string) bool {
 
-	if IfAnyMatch(src, checker.DoIfany) {
+	if IfAnyMatch(src, checker.DoIfany, true) {
 		return true
 	}
-	if WhenMatch(src, checker.DoWhen) {
+	if WhenMatch(src, checker.DoWhen, true) {
 		return true
 	}
 	return false
 }
 
 /*
- * if empty, return false
+ * if empty, return emptyFlag
  * if any true,  return true.
  */
-func IfAnyMatch(src string, patterns []string) bool {
+func IfAnyMatch(src string, patterns []string, emptyFlag bool) bool {
+	if len(patterns) == 0 {
+		return emptyFlag
+	}
 	var boolSlice []bool
 	for _, pattern := range patterns {
 		if pattern == "" {
@@ -127,10 +130,13 @@ func IfAnyMatch(src string, patterns []string) bool {
 }
 
 /*
- * if empty, return false
+ * if empty, return emptyFlag
  * if any false,  return false.
  */
-func WhenMatch(src string, patterns []string) bool {
+func WhenMatch(src string, patterns []string, emptyFlag bool) bool {
+	if len(patterns) == 0 {
+		return emptyFlag
+	}
 	var boolSlice []bool
 	for _, pattern := range patterns {
 		if pattern == "" {

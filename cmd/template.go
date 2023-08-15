@@ -37,7 +37,7 @@ func (t *StringTemplate) ReplaceByKeyValue(key string, value string) string {
 		return t.Template
 	}
 
-	regex := NewNoCacheRegex(t.Pattern(key))
+	regex := NewRegexByPattern(t.Pattern(key))
 	regex.ScanMatches(t.Template)
 	return regex.R.ReplaceAllString(t.Template, value)
 }

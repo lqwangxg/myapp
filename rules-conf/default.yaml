@@ -13,6 +13,16 @@ template-define: &default-template
     ===========================================================================================
     ===="copyright lqwangxg@gmail.com 2023"====================================================
 
+export-template: &default-export-template
+  <<: *default-template
+  name: export  # override the name
+replace-template: &default-replace-template
+  name: replace # override the name
+  header:
+  match :
+  group :
+  footer: 
+   
 # check content skip or do on condition
 # priority descend: skip_ifany, skip_when, do_ifany, do_when
 check-patterns-define: &default_check_patterns
@@ -44,14 +54,12 @@ rule-define: &default-rule
   # regex pattern   
   pattern: 
 
-  export-template:
-    <<: *default-template
-    name: export  # override the name
+  export-template: 
+    <<: *default-export-template
+    #name: export  # override the name
   replace-template:
-    <<: *default-template
-    name: replace # override the name  
-    header:       # override the header 
-    footer:       # override the footer
+    <<: *default-replace-template
+    #name: replace # override the name  
 
   # check full content by regex match
   full-patterns :
@@ -91,7 +99,8 @@ custom-rules:
     # regex pattern   
     pattern: (?P<indent>[ ]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
     range_start: \nfunction\s+(?P<function>\w+)\(form\)\s*\{.+?\n\}
-    replace-templates:
+    replace-template:
+      <<: *default-replace-template
       match : | 
         ${indent}${call}(${param}, "callbackForRetunWindow");
         ${indent}window["callbackForRetunWindow"] = function (res){
