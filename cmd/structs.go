@@ -88,6 +88,10 @@ type RedisOption struct {
 	DB       int    `yaml:"db"`
 }
 
+type CustomRules struct {
+	Rules []RuleConfig `mapstructure:"custom-rules"`
+}
+
 type RuleConfig struct {
 	Name            string        `mapstructure:"name"`
 	Group           string        `mapstructure:"group"`

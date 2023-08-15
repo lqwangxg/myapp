@@ -14,9 +14,14 @@ import (
 func NewRegexFromCmd() *Regex {
 	var rs *Regex
 	if flags.RuleName != "" {
-		var rule RuleConfig
-		if rule.findByName(flags.RuleName) {
-			rs = rule.NewRegex()
+		cr := customRules.GetRule(flags.RuleName)
+		if cr != nil {
+			rs = cr.NewRegex()
+		} else {
+			var rule RuleConfig
+			if rule.findByName(flags.RuleName) {
+				rs = rule.NewRegex()
+			}
 		}
 	}
 	if flags.Pattern != "" {

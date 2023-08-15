@@ -42,9 +42,17 @@ func initConfig() {
 		//viper.SetConfigFile(flags.ConfigFile)
 		LoadConfig(flags.ConfigFile, &config)
 	}
+	// Find home directory.
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
 
+	// Search config in home directory with name ".myapp" (without extension).
+	viper.AddConfigPath(home)
+	viper.SetConfigType("yaml")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	//load .control-template.yml
 	LoadConfig(".control-template.yml", &templateCtl)
+	//NewDefaultRules()
+	LoadConfig("rules/default.yaml", &customRules)
 }

@@ -4,7 +4,6 @@ template-define: &default-template
   header: | 
     matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
     ===========================================================================================
-
   match : | 
     [${match.start}:${match.end}]${match.value}
   group : | 
@@ -86,7 +85,7 @@ rule-define: &default-rule
 #=========================
 # write your custom rules below.
 #=========================
-rules:
+custom-rules:
   - <<: *default-rule
     name: "openMultiMessageDialog"
     # regex pattern   
