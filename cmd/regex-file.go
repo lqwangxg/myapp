@@ -36,11 +36,11 @@ func (rf *RegexFile) Match() *RegexResult {
 // write content to file
 func (rs *RegexFile) Write(result *RegexResult) {
 	if result == nil {
-		log.Print("No Regex Result, No Write, Over :<.")
+		log.Print("No Result.")
 		return
 	}
+	log.Printf("Match.Count=%d", result.MatchCount)
 	if result.MatchCount == 0 {
-		log.Print("No Regex Result, No Write, Over :<.")
 		return
 	}
 	if rs.ToFile == "" && rs.FromFile != "" {
@@ -48,10 +48,10 @@ func (rs *RegexFile) Write(result *RegexResult) {
 	}
 	content, changed := result.Export(&rs.Rule.ReplaceTemplate, false)
 	if !changed {
-		log.Print("No Changed.")
+		log.Print("No changed.")
 	} else {
 		config.Decode(&content)
 		WriteAll(rs.ToFile, content)
-		log.Printf("%s OK, Written file: %s", flags.Action, rs.ToFile)
+		log.Printf("%s OK", flags.Action)
 	}
 }

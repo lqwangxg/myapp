@@ -73,7 +73,7 @@ func (rs *RegexText) Match() *RegexResult {
 // write content to file
 func (rs *RegexText) Write(result *RegexResult) {
 	if result == nil {
-		log.Print("No RegexResult, call Match firstly.")
+		log.Print("No Result.")
 		return
 	}
 	log.Printf("Match.Count=%d", result.MatchCount)
@@ -84,7 +84,7 @@ func (rs *RegexText) Write(result *RegexResult) {
 	rule := appRules.GetDefaultRule()
 	content, changed := result.Export(&rule.ExportTemplate, false)
 	if !changed {
-		log.Print("No Changed.")
+		log.Print("No changed.")
 	} else {
 		config.Decode(&content)
 		log.Println(content)

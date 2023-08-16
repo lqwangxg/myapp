@@ -17,7 +17,7 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, 
 	hasChanged := false
 	//---------------------------------------
 	// replace Footer: rs.Result.Params
-	if template != nil {
+	if template != nil && template.Header != "" {
 		tHeader := NewTemplate(template.Header)
 		header, changed := tHeader.ReplaceByMap(rs.Params)
 		sb.WriteString(header)
@@ -57,7 +57,7 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, 
 		}
 	}
 	//---------------------------------------
-	if template != nil {
+	if template != nil && template.Footer != "" {
 		tFooter := NewTemplate(template.Footer)
 		footer, changed := tFooter.ReplaceByMap(rs.Params)
 		sb.WriteString(footer)

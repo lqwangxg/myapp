@@ -41,11 +41,13 @@ func (t *StringTemplate) ReplaceByKeyValue(key string, value string) (string, bo
 	}
 
 	regex := regexp.MustCompile(t.Pattern(key))
+	changed := false
 	if regex.MatchString(t.Template) {
-		return regex.ReplaceAllString(t.Template, value), true
-	} else {
-		return t.Template, false
+		t.Template = regex.ReplaceAllString(t.Template, value)
+		changed = true
 	}
+	return t.Template, changed
+
 }
 
 func (t *StringTemplate) ReplaceByMap(kvs map[string]string) (string, bool) {
