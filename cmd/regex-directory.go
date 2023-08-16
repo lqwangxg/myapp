@@ -23,11 +23,11 @@ func NewRegexDirectory(ruleName, dirPath string) *RegexDirectory {
 		DirPath: dirPath,
 	}
 }
-func (rf *RegexDirectory) Match() {
+func (rf *RegexDirectory) Match() *RegexResult {
 	files, err := os.ReadDir(rf.DirPath)
 	if err != nil {
 		log.Fatal(err)
-		return
+		return nil
 	}
 
 	for _, file := range files {
@@ -43,9 +43,10 @@ func (rf *RegexDirectory) Match() {
 			}
 		}
 	}
+	return nil
 }
 
 // write content to file
-func (rs *RegexDirectory) Write() {
+func (rs *RegexDirectory) Write(result *RegexResult) {
 	log.Printf("Written Completed: %s", rs.DirPath)
 }

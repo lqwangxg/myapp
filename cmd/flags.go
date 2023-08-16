@@ -1,6 +1,7 @@
 package cmd
 
 type FlagConfig struct {
+	Action          string
 	RuleName        string
 	ConfigFile      string
 	Pattern         string

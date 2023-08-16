@@ -6,7 +6,6 @@ import (
 
 type RegexFile struct {
 	Rule     *RuleConfig
-	Result   *RegexResult
 	FromFile string
 	ToFile   string
 }
@@ -22,26 +21,26 @@ func NewRegexFile(ruleName string, filePath string) *RegexFile {
 	}
 }
 
-func (rf *RegexFile) Match() {
+func (rf *RegexFile) Match() *RegexResult {
 	content, err := ReadAll(rf.FromFile)
 	if err != nil {
 		log.Fatal(err)
-		return
+		return nil
 	}
 	hand := NewRegexText(rf.Rule.Pattern, content)
-	reger.Execute(hand)
+	return reger.Match(hand)
 }
 
 // write content to file
-func (rs *RegexFile) Write() {
-	if rs.Result == nil {
+func (rs *RegexFile) Write(result *RegexResult) {
+	if result == nil {
 		log.Print("No RegexResult, call Match firstly.")
 		return
 	}
 	if rs.ToFile == "" && rs.FromFile != "" {
 		rs.ToFile = rs.FromFile
 	}
-	content := rs.Result.Export(&rs.Rule.ReplaceTemplate, false)
+	content := result.Export(&rs.Rule.ReplaceTemplate, false)
 	log.Printf("Writing To: %s", rs.ToFile)
 	WriteAll(rs.ToFile, content)
 	log.Printf("Written Completed: %s", rs.ToFile)

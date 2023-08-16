@@ -3,37 +3,37 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 */
 package cmd
 
-import (
-	"fmt"
+// import (
+// 	"fmt"
 
-	"github.com/spf13/cobra"
-)
+// 	"github.com/spf13/cobra"
+// )
 
-// matchCmd represents the match command
-var matchCmd = &cobra.Command{
-	Use:   "match",
-	Short: "match string by regrep",
-	Long:  ` match string by regrep pattern, and replace string if parameter --replace is set.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("regex match called")
-		if flags.Pattern != "" && flags.Content != "" {
-			handler := NewRegexText(flags.Pattern, flags.Content)
-			reger.Execute(handler)
-		}
-		if flags.RuleName != "" && flags.DestFile != "" {
-			handler := NewRegexFile(flags.RuleName, flags.DestFile)
-			reger.Execute(handler)
-		}
-		if flags.RuleName != "" && flags.DestDir != "" {
-			handler := NewRegexDirectory(flags.RuleName, flags.DestDir)
-			reger.Execute(handler)
-		}
-	},
-}
+// // matchCmd represents the match command
+// var matchCmd = &cobra.Command{
+// 	Use:   "match",
+// 	Short: "match string by regrep",
+// 	Long:  ` match string by regrep pattern, and replace string if parameter --replace is set.`,
+// 	Run: func(cmd *cobra.Command, args []string) {
+// 		fmt.Println("regex match called")
+// 		if flags.Pattern != "" && flags.Content != "" {
+// 			handler := NewRegexText(flags.Pattern, flags.Content)
+// 			reger.Execute(handler)
+// 		}
+// 		if flags.RuleName != "" && flags.DestFile != "" {
+// 			handler := NewRegexFile(flags.RuleName, flags.DestFile)
+// 			reger.Execute(handler)
+// 		}
+// 		if flags.RuleName != "" && flags.DestDir != "" {
+// 			handler := NewRegexDirectory(flags.RuleName, flags.DestDir)
+// 			reger.Execute(handler)
+// 		}
+// 	},
+// }
 
-func init() {
-	regexCmd.AddCommand(matchCmd)
-}
+// func init() {
+// 	regexCmd.AddCommand(matchCmd)
+// }
 
 // func ProcFile(filePath string) {
 // 	// exit if file not exists

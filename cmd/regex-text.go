@@ -10,15 +10,14 @@ import (
 type RegexText struct {
 	Pattern string
 	Content string
-	Result  *RegexResult
 }
 
 func NewRegexText(pattern, content string) *RegexText {
-	rs := &RegexText{pattern, content, nil}
+	rs := &RegexText{pattern, content}
 	return rs
 }
 
-func (rs *RegexText) Match() {
+func (rs *RegexText) Match() *RegexResult {
 	// before match
 	input := rs.Content
 	config.Encode(&input)
@@ -31,13 +30,11 @@ func (rs *RegexText) Match() {
 		GroupNames: r.SubexpNames(),
 		Captures:   make([]Capture, 0),
 		Params:     make(map[string]string),
-		MatchCount: len(positions) / 2,
 	}
 	result.Captures = *SplitBy(&positions, input, false, result.Captures)
-	result.Params["matches.count"] = strconv.Itoa(result.MatchCount)
 	result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
 	result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
-	rs.Result = result
+
 	// match.Index.
 	x := 0
 	for i, c := range result.Captures {
@@ -63,20 +60,24 @@ func (rs *RegexText) Match() {
 		}
 		x++
 	}
+	result.MatchCount = x
+	result.Params["matches.count"] = strconv.Itoa(x)
+	return result
 }
 
 // write content to file
-func (rs *RegexText) Write() {
-	if rs.Result == nil {
+func (rs *RegexText) Write(result *RegexResult) {
+	if result == nil {
 		log.Print("No RegexResult, call Match firstly.")
 		return
 	}
-	log.Printf("Match.Count=%d", rs.Result.MatchCount)
-	if rs.Result.MatchCount == 0 {
+	log.Printf("Match.Count=%d", result.MatchCount)
+	if result.MatchCount == 0 {
 		return
 	}
 
 	rule := appRules.GetDefaultRule()
-	content := rs.Result.Export(&rule.ExportTemplate, false)
+	content := result.Export(&rule.ExportTemplate, false)
+	config.Decode(&content)
 	log.Println(content)
 }
