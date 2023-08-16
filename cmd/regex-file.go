@@ -22,6 +22,22 @@ func NewRegexFile(ruleName string, filePath string) *RegexFile {
 		FromFile: filePath,
 	}
 }
+func NewRegexFileByPattern(pattern, ruleName string, filePath string) *RegexFile {
+	log.Printf("Regex %s file: %s", flags.Action, filePath)
+	if ruleName == "" {
+		ruleName = "default"
+	}
+	rule := appRules.GetRule(ruleName)
+	if rule == nil {
+		log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
+		return nil
+	}
+	rule.Pattern = pattern
+	return &RegexFile{
+		Rule:     rule,
+		FromFile: filePath,
+	}
+}
 
 func (rf *RegexFile) Match() *RegexResult {
 	content, err := ReadAll(rf.FromFile)

@@ -21,11 +21,15 @@ and usage of using your command. `,
 			return
 		}
 		fmt.Printf("regex %s called", flags.Action)
-		if flags.Pattern != "" && flags.Content != "" {
-			handler := NewRegexText(flags.Pattern, flags.Content)
-			reger.Execute(handler)
-		}
-		if flags.RuleName != "" && flags.DestFile != "" {
+		if flags.Pattern != "" {
+			if flags.Content != "" {
+				handler := NewRegexText(flags.Pattern, flags.Content)
+				reger.Execute(handler)
+			} else if flags.DestFile != "" {
+				handler := NewRegexFileByPattern(flags.Pattern, flags.RuleName, flags.DestFile)
+				reger.Execute(handler)
+			}
+		} else if flags.RuleName != "" && flags.DestFile != "" {
 			handler := NewRegexFile(flags.RuleName, flags.DestFile)
 			reger.Execute(handler)
 		}
