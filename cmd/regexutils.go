@@ -3,9 +3,6 @@ package cmd
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"log"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,7 +11,7 @@ import (
 func NewRegexFromCmd() *Regex {
 	var rs *Regex
 	if flags.RuleName != "" {
-		cr := customRules.GetRule(flags.RuleName)
+		cr := appRules.GetRule(flags.RuleName)
 		if cr != nil {
 			rs = cr.NewRegex()
 		} else {
@@ -111,106 +108,6 @@ func (rs *Regex) ScanMatches(input string) {
 	}
 }
 
-func (rs *Regex) ProcFile(filePath string) {
-	// exit if file not exists
-	if !IsExists(filePath) {
-		return
-	}
-	if flags.IncludeSuffix != "" {
-		if !IsMatchString(flags.IncludeSuffix, filePath) {
-			return
-		}
-	}
-	if rs.Rule.IncludeFile != "" {
-		if !IsMatchString(rs.Rule.IncludeFile, filePath) {
-			return
-		}
-	}
-	if flags.ExcludeSuffix != "" {
-		if IsMatchString(flags.ExcludeSuffix, filePath) {
-			return
-		}
-	}
-	if rs.Rule.ExcludeFile != "" {
-		if IsMatchString(rs.Rule.ExcludeFile, filePath) {
-			return
-		}
-	}
-
-	if buffer, err := ReadAll(filePath); err == nil {
-		rs.FromFile = filePath
-		log.Printf("Matching file: %s", rs.FromFile)
-		rs.MatchText(buffer)
-	}
-}
-
-func (rs *Regex) ProcDir(dirPath string) {
-	if !IsExists(dirPath) {
-		log.Printf("dirPath is not found. dirPath=%s", dirPath)
-		return
-	}
-	files, err := os.ReadDir(dirPath)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	for _, file := range files {
-		fullPath := filepath.Join(dirPath, file.Name())
-		ok, err := IsDir(fullPath)
-		if err == nil {
-			if ok {
-				rs.ProcDir(fullPath)
-			} else {
-				rs.ProcFile(fullPath)
-			}
-		}
-	}
-}
-
-func (rs *Regex) MatchText(content string) {
-	//before match input, transfer special chars
-	config.Encode(&content)
-	// get from redis cache
-	if !rs.FromCache(content) {
-		rs.ScanMatches(content)
-	}
-
-	//=export log =============
-	if rs.ExportFlag {
-		export := rs.exportMatches()
-		config.Decode(&export)
-		if export != "" {
-			log.Printf("%s", export)
-		} else {
-			log.Printf("no matches")
-		}
-	}
-	//=replace log =============
-	if rs.ReplaceFlag && rs.HasMatches() {
-		if rs.FullCheck(content) {
-			replaced, newContent := rs.replaceText(content)
-			if replaced {
-				config.Decode(&newContent)
-				if rs.FromFile != "" {
-					rs.writeText(newContent)
-				} else {
-					log.Println(newContent)
-				}
-			} else if rs.FromFile != "" {
-				log.Printf("Nothing Replaced. File: %s", rs.FromFile)
-			} else {
-				log.Println("Nothing Replaced.")
-				return
-			}
-
-		}
-	}
-	//==========================
-	//save to cache
-	rs.ToCache()
-}
-
 // matched if RegexResult.captures > 1
 func (rs *Regex) HasMatches() bool {
 	return len(rs.Result.Captures) > 1
@@ -235,17 +132,6 @@ func (rs *Regex) replaceText(content string) (bool, string) {
 	newContent := sb.String()
 	//=replace =============
 	return replaced, newContent
-}
-
-// write content to file
-func (rs *Regex) writeText(content string) {
-	if rs.ToFile == "" && rs.FromFile != "" {
-		rs.ToFile = rs.FromFile
-	}
-	if rs.ToFile != "" {
-		WriteAll(rs.ToFile, content)
-		log.Printf("Written To:%s", rs.ToFile)
-	}
 }
 
 // export Matches using export template defined in rule.yaml

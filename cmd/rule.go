@@ -10,18 +10,16 @@ import (
 	"regexp"
 )
 
-//var localRules = make(map[string]RuleConfig)
+var appRules CustomRules
 
-// func NewDefaultRules(*CustomRules) {
-// 	//LoadConfig()
-// 	//load .control-template.yml
-// 	var rs = &CustomRules{
-// 		Rules: make([]RuleConfig, 0),
-// 	}
-// 	LoadConfig("rules/default.yml", rs)
-// 	return rs
-// }
-
+func (rs *CustomRules) GetDefaultRule() *RuleConfig {
+	for _, r := range rs.Rules {
+		if r.Name == "default" {
+			return &r
+		}
+	}
+	return nil
+}
 func (rs *CustomRules) GetRule(name string) *RuleConfig {
 	for _, r := range rs.Rules {
 		if r.Name == name {

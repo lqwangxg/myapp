@@ -1,20 +1,8 @@
 package cmd
 
-import "regexp"
-
-type FlagConfig struct {
-	RuleName        string
-	ConfigFile      string
-	Pattern         string
-	ExportFlag      bool
-	Content         string
-	DestFile        string
-	DestDir         string
-	IncludeSuffix   string
-	ExcludeSuffix   string
-	ExportTemplate  string
-	ReplaceTemplate string
-}
+import (
+	"regexp"
+)
 
 type Regex struct {
 	R           *regexp.Regexp
@@ -27,21 +15,7 @@ type Regex struct {
 	ReplaceFlag bool
 	Rule        *RuleConfig
 }
-type RegexResult struct {
-	Pattern    string
-	GroupNames []string
-	Captures   []Capture
-	Params     map[string]string
-}
 
-type AppConfig struct {
-	EChars      map[string]string `yaml:"echars"`
-	RuleDir     string            `yaml:"ruledir"`
-	Params      []string          `yaml:"params"`
-	Indent      string            `yaml:"indent"`
-	Prefix      string            `yaml:"prefix"`
-	RedisOption RedisOption       `mapstructure:"redis"`
-}
 type RedisOption struct {
 	Enable   bool   `yaml:"enable"`
 	Addr     string `yaml:"addr"`

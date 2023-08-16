@@ -94,6 +94,7 @@ rule-define: &default-rule
 # write your custom rules below.
 #=========================
 custom-rules:
+  - <<: *default-rule  #default-rule
   - <<: *default-rule  #reference anchor defined above by *anchor-name
     name: "openMultiMessageDialog"
     # regex pattern   

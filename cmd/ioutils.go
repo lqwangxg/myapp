@@ -22,6 +22,7 @@ func IsDir(path string) (bool, error) {
 }
 
 func ReadAll(filePath string) (string, error) {
+
 	f, err := os.Open(filePath)
 	check(err)
 	defer f.Close()

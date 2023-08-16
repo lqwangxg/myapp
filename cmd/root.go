@@ -54,5 +54,5 @@ func initConfig() {
 
 	//NewDefaultRules()
 	fullPath := filepath.Join(config.RuleDir, "default.yaml")
-	LoadConfig(fullPath, &customRules)
+	LoadConfig(fullPath, &appRules)
 }

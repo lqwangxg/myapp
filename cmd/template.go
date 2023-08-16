@@ -62,3 +62,10 @@ func (t *StringTemplate) ReplaceByRegexResult(result RegexResult) string {
 	}
 	return t.Template
 }
+
+func (t *StringTemplate) ReplaceBy(m Capture) string {
+	if m.IsMatch && m.Params != nil {
+		t.Template = t.ReplaceByMap(m.Params)
+	}
+	return t.Template
+}
