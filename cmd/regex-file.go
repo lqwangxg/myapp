@@ -11,8 +11,10 @@ type RegexFile struct {
 }
 
 func NewRegexFile(ruleName string, filePath string) *RegexFile {
+	log.Printf("Regex %s file: %s", flags.Action, filePath)
 	rule := appRules.GetRule(ruleName)
 	if rule == nil {
+		log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
 		return nil
 	}
 	return &RegexFile{
@@ -34,14 +36,14 @@ func (rf *RegexFile) Match() *RegexResult {
 // write content to file
 func (rs *RegexFile) Write(result *RegexResult) {
 	if result == nil {
-		log.Print("No RegexResult, call Match firstly.")
+		log.Print("No Regex Result, No Write, Over :<.")
 		return
 	}
 	if rs.ToFile == "" && rs.FromFile != "" {
 		rs.ToFile = rs.FromFile
 	}
 	content := result.Export(&rs.Rule.ReplaceTemplate, false)
-	log.Printf("Writing To: %s", rs.ToFile)
+	config.Decode(&content)
 	WriteAll(rs.ToFile, content)
-	log.Printf("Written Completed: %s", rs.ToFile)
+	log.Printf("%s OK, Written file: %s", flags.Action, rs.ToFile)
 }
