@@ -1,5 +1,10 @@
 package cmd
 
+import (
+	"crypto/sha1"
+	"encoding/hex"
+)
+
 // import (
 // 	"crypto/sha1"
 // 	"encoding/hex"
@@ -56,12 +61,12 @@ package cmd
 // 	}
 // }
 
-// // get hashsum of (pattern + ": "+ input) to string.
-// func (rs *Regex) Hashsum(input string) string {
-// 	h := sha1.New()
-// 	h.Write([]byte(rs.Result.Pattern + ": " + input))
-// 	return hex.EncodeToString(h.Sum(nil))
-// }
+// get hashsum of (pattern + ": "+ input) to string.
+func (rs *Regex) Hashsum(input string) string {
+	h := sha1.New()
+	h.Write([]byte(rs.Result.Pattern + ": " + input))
+	return hex.EncodeToString(h.Sum(nil))
+}
 
 // func (rs *Regex) IsMatch(input string) bool {
 // 	return rs.R.MatchString(input)

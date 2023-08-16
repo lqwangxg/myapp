@@ -1,5 +1,7 @@
 package cmd
 
+import "regexp"
+
 // // split input by matches
 // func (rs *Regex) SplitMatches(input string) {
 // 	cpos := 0
@@ -56,12 +58,10 @@ func SplitMatchIndex(pattern, input string, matchOnly bool) *[]Capture {
 		captures = append(captures, *c)
 		return &captures
 	}
-
-	rs := NewRegexByPattern(pattern)
-	//r := regexp.MustCompile(pattern)
-	positions := rs.R.FindAllStringSubmatchIndex(input, -1)
+	config.Encode(&pattern)
+	rs := regexp.MustCompile(pattern)
+	positions := rs.FindAllStringSubmatchIndex(input, -1)
 	return SplitBy(&positions, input, matchOnly, captures)
-	//return &captures
 }
 
 // split positions
