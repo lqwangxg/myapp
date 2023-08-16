@@ -5,10 +5,12 @@ template-define: &default-template # define anchor for reference below by &ancho
     matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
     ===========================================================================================
   match : | 
+    ----------------------------------------
     [match[${index}]${match.start}:${match.end}]${match.value}
+    ----------------------------------------
   group : | 
-    [group[${index}]${group.start}:${group.end}]${group.key}=${group.value}
-  
+    [group[${index}]${group.start}:${group.end}][${group.key}]${group.value}
+    
   footer: | 
     ===========================================================================================
     ===="copyright lqwangxg@gmail.com 2023"====================================================
@@ -96,6 +98,50 @@ rule-define: &default-rule
 custom-rules:
   - <<: *default-rule  #default-rule
   - <<: *default-rule  #reference anchor defined above by *anchor-name
+    name: "dialog1"
+    # regex pattern   
+    # pattern: (?P<indent>[ \t]*)if\(!(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+    pattern: (?P<indent>[ \t]*)if\s*\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+    replace-template:
+      <<: *default-replace-template
+      match : |-  # |: has \n in last row, |- : no \n in last row.  
+        ${indent}${call}(${param}, function (res){
+        ${indent}  if(res){${process}}
+        ${indent}});
+  - <<: *default-rule  #reference anchor defined above by *anchor-name
+    name: "dialog1or"
+    # regex pattern   
+    # pattern: (?P<indent>[ \t]*)if\(!(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+    pattern: (?P<indent>[ \t]*)if\s*\((?P<andor>[^\(\)]+)(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+    replace-template:
+      <<: *default-replace-template
+      match : |-  # |: has \n in last row, |- : no \n in last row.  
+        ${indent}${call}(${param}, function (res){
+        ${indent}  if(${andor}res){${process}}
+        ${indent}});
+  - <<: *default-rule  #reference anchor defined above by *anchor-name
+    name: "dialog2if"
+    # regex pattern   
+    # pattern: (?P<indent>[ \t]*)if\(!(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+    #pattern: (?P<indent>[ \t]*)res\s*=\s*(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*;(?P<newline>[^\{\}]+)(?P<if>if\s*)\((?P<andor>[^\(\)]+)\)(?P<process>\s*\{[^}]+?\})
+    pattern: (?P<indent>[ \t]*)(var\s+)?(?P<var>\w+)\s*=\s*(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*;(?P<newline>[^\{\}]+)(?P<if>if\s*)\((?P<andor>[^\(\)]+)\)(?P<process>\s*\{[^}]+?\})
+    replace-template:
+      <<: *default-replace-template
+      match : |-  # |: has \n in last row, |- : no \n in last row.  
+        ${indent}${call}(${param}, function (${var}){${newline}${if}(${andor})${process}
+        ${indent}});
+  - <<: *default-rule  #reference anchor defined above by *anchor-name
+    name: "dialog2not"
+    # regex pattern   
+    pattern: (?P<indent>[ \t]*)if\s*\(!(?P<call>openMultiMessageDialog)\((?P<param>[^\r]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+    replace-template:
+      <<: *default-replace-template
+      match : |-  # |: has \n in last row, |- : no \n in last row.  
+        ${indent}${call}(${param}, function (res){
+        ${indent}  if(!res){${process}}
+        ${indent}});
+    
+  - <<: *default-rule  #reference anchor defined above by *anchor-name
     name: "openMultiMessageDialog"
     # regex pattern   
     pattern: (?P<indent>[ \t]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
@@ -117,7 +163,7 @@ custom-rules:
     name: "openMultiMessageDialog2"
     # regex pattern   
     #pattern: (?P<indent>[ \t]*)[\w\s]+=\s*(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*;[\n\r\t]+if\((?P<check>.+?)\)\{(?P<if>[^}]+?)\}\s*else\s*\{(?P<else>[^}]+?)\}
-    pattern: (?P<indent>[ \t]*)(?P<define>[\w\s]+)=\s*(?P<call>openMultiMessageDialog)\((?P<param>\w+)\)
+    pattern: '(?P<indent>[ \t]*)(?P<define>[^\r\n\t]+)=\s*(?P<call>openMultiMessageDialog)\((?P<param>[^;]+)\);(?P<endline>[\s\r\n\t]+)if\s*\((?P<check>[^\{\}]+)\)\s*\{(?P<if>[^\{\}]+)\}'
     #(?P<param>[^{]+)\)\s*\)\s*;
     range-start: \nfunction\s+(?P<function>\w+)
     range-end: '\n\}'

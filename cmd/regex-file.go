@@ -47,7 +47,7 @@ func (rf *RegexFile) Match() *RegexResult {
 	}
 	hand := NewRegexText(rf.Rule.Pattern, content)
 	result := reger.Match(hand)
-	if flags.Action == "match" {
+	if flags.Action != "replace" {
 		reger.Write(result, hand)
 		return nil
 	} else {

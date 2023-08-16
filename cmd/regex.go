@@ -16,10 +16,6 @@ var regexCmd = &cobra.Command{
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if flags.Action == "" {
-			fmt.Println("regex --action [match/replace] is required.")
-			return
-		}
 		fmt.Printf("regex %s called", flags.Action)
 		if flags.Pattern != "" {
 			if flags.Content != "" {
