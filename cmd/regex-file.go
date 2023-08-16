@@ -30,7 +30,13 @@ func (rf *RegexFile) Match() *RegexResult {
 		return nil
 	}
 	hand := NewRegexText(rf.Rule.Pattern, content)
-	return reger.Match(hand)
+	result := reger.Match(hand)
+	if flags.Action == "match" {
+		reger.Write(result, hand)
+		return nil
+	} else {
+		return result
+	}
 }
 
 // write content to file
@@ -43,6 +49,7 @@ func (rs *RegexFile) Write(result *RegexResult) {
 	if result.MatchCount == 0 {
 		return
 	}
+
 	if rs.ToFile == "" && rs.FromFile != "" {
 		rs.ToFile = rs.FromFile
 	}

@@ -5,9 +5,9 @@ template-define: &default-template # define anchor for reference below by &ancho
     matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
     ===========================================================================================
   match : | 
-    [${match.start}:${match.end}]${match.value}
+    [match[${index}]${match.start}:${match.end}]${match.value}
   group : | 
-    [${group.start}:${group.end}]${group.key}=${group.value}
+    [group[${index}]${group.start}:${group.end}]${group.key}=${group.value}
   
   footer: | 
     ===========================================================================================
@@ -106,6 +106,27 @@ custom-rules:
       match : |-  # |: has \n in last row, |- : no \n in last row.  
         ${indent}${call}(${param}, function (res){
         ${indent}  if(res){${process}}
+        ${indent}});
+      #update method-1: 
+      #match : | 
+      #  ${indent}${call}(${param}, "callbackForRetunWindow");
+      #  ${indent}window["callbackForRetunWindow"] = function (res){
+      #  ${indent}  if(res){${process}}
+      #  ${indent}}
+  - <<: *default-rule  #reference anchor defined above by *anchor-name
+    name: "openMultiMessageDialog2"
+    # regex pattern   
+    #pattern: (?P<indent>[ \t]*)[\w\s]+=\s*(?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*;[\n\r\t]+if\((?P<check>.+?)\)\{(?P<if>[^}]+?)\}\s*else\s*\{(?P<else>[^}]+?)\}
+    pattern: (?P<indent>[ \t]*)(?P<define>[\w\s]+)=\s*(?P<call>openMultiMessageDialog)\((?P<param>\w+)\)
+    #(?P<param>[^{]+)\)\s*\)\s*;
+    range-start: \nfunction\s+(?P<function>\w+)
+    range-end: '\n\}'
+    replace-template:
+      <<: *default-replace-template
+      match : |-  # |: has \n in last row, |- : no \n in last row.  
+        ${indent}${call}(${param}, function (${check}){
+        ${indent}  if(${check}){${if}}
+        ${indent}  else{${if}}
         ${indent}});
       #update method-1: 
       #match : | 

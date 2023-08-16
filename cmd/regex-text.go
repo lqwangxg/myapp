@@ -25,6 +25,10 @@ func (rs *RegexText) Match() *RegexResult {
 
 	r := regexp.MustCompile(rs.Pattern)
 	positions := r.FindAllStringSubmatchIndex(input, -1)
+	if len(positions) == 0 {
+		log.Print("No Matched.")
+		return nil
+	}
 	result := &RegexResult{
 		Pattern:    rs.Pattern,
 		GroupNames: r.SubexpNames(),
@@ -47,17 +51,23 @@ func (rs *RegexText) Match() *RegexResult {
 		match.Groups = make([]Capture, 0)
 		match.Params = make(map[string]string)
 		position := positions[x]
+		match.Params["index"] = strconv.Itoa(x)
+		match.Params["match.start"] = strconv.Itoa(match.Start)
+		match.Params["match.end"] = strconv.Itoa(match.End)
 
-		for x := 0; x < len(result.GroupNames); x++ {
-			gname := result.GroupNames[x]
-			if x == 0 {
+		for y := 0; y < len(result.GroupNames); y++ {
+			gname := result.GroupNames[y]
+			if y == 0 {
 				gname = "match.value"
 			}
-			group := &Capture{Start: position[x*2+0], End: position[x*2+1]}
+			group := &Capture{Start: position[y*2+0], End: position[y*2+1], IsMatch: true}
 			group.Value = input[group.Start:group.End]
 			if group.Params == nil {
 				group.Params = make(map[string]string)
 			}
+			group.Params["index"] = strconv.Itoa(y)
+			group.Params["group.start"] = strconv.Itoa(group.Start)
+			group.Params["group.end"] = strconv.Itoa(group.End)
 			group.Params["group.key"] = gname
 			group.Params["group.value"] = group.Value
 			match.Groups = append(match.Groups, *group)
@@ -82,7 +92,7 @@ func (rs *RegexText) Write(result *RegexResult) {
 	}
 
 	rule := appRules.GetDefaultRule()
-	content, changed := result.Export(&rule.ExportTemplate, false)
+	content, changed := result.Export(&rule.ExportTemplate, true)
 	if !changed {
 		log.Print("No changed.")
 	} else {
