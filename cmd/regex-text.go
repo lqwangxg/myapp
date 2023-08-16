@@ -54,7 +54,12 @@ func (rs *RegexText) Match() *RegexResult {
 				gname = "match.value"
 			}
 			group := &Capture{Start: position[x*2+0], End: position[x*2+1]}
-			group.SetValue(input)
+			group.Value = input[group.Start:group.End]
+			if group.Params == nil {
+				group.Params = make(map[string]string)
+			}
+			group.Params["group.key"] = gname
+			group.Params["group.value"] = group.Value
 			match.Groups = append(match.Groups, *group)
 			match.Params[gname] = group.Value
 		}

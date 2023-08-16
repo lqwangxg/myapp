@@ -100,7 +100,8 @@ func (rs *Regex) ScanMatches(input string) {
 				gname = "match.value"
 			}
 			group := &Capture{Start: position[x*2+0], End: position[x*2+1]}
-			group.SetValue(input)
+			//group.SetValue(input)
+			group.Value = input[group.Start:group.End]
 			match.Groups = append(match.Groups, *group)
 			match.Params[gname] = group.Value
 		}

@@ -8,7 +8,3 @@ type Capture struct {
 	Params  map[string]string
 	Groups  []Capture
 }
-
-func (cap *Capture) SetValue(input string) {
-	cap.Value = input[cap.Start:cap.End]
-}

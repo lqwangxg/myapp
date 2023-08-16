@@ -51,9 +51,9 @@ func SplitMatchIndex(pattern, input string, matchOnly bool) *[]Capture {
 	// return 0 ~ length when pattern is empty
 	captures := make([]Capture, 0)
 	if pattern == "" {
-		cap := &Capture{Start: 0, End: len(input)}
-		cap.SetValue(input)
-		captures = append(captures, *cap)
+		c := &Capture{Start: 0, End: len(input)}
+		c.Value = input[c.Start:c.End]
+		captures = append(captures, *c)
 		return &captures
 	}
 
@@ -93,7 +93,8 @@ func SplitBy(positions *[][]int, input string, matchOnly bool, captures []Captur
 		}
 	}
 	for i := 0; i < len(captures); i++ {
-		captures[i].SetValue(input)
+		c := &captures[i]
+		c.Value = input[c.Start:c.End]
 	}
 	return &captures
 }
@@ -108,18 +109,18 @@ func (rule *RuleConfig) MergeRangeStartEnd(input string) *[]Capture {
 		sb := *sBounds
 		for i := 0; i < len(*sBounds); i++ {
 			s := sb[i]
-			r := &Capture{Start: s.Start, End: len(input)}
+			c := &Capture{Start: s.Start, End: len(input)}
 			if i < len(*sBounds)-1 {
-				r.End = sb[i+1].Start
+				c.End = sb[i+1].Start
 			}
 			for _, e := range *eBounds {
-				if s.Start <= e.Start && e.End <= r.End {
-					r.End = e.End
+				if s.Start <= e.Start && e.End <= c.End {
+					c.End = e.End
 					break
 				}
 			}
-			r.SetValue(input)
-			rBounds = append(rBounds, *r)
+			c.Value = input[c.Start:c.End]
+			rBounds = append(rBounds, *c)
 		}
 		//last capture
 
@@ -128,13 +129,13 @@ func (rule *RuleConfig) MergeRangeStartEnd(input string) *[]Capture {
 		// on matches rangeEnd, len(*eBound)=1
 		eb := *eBounds
 		for i := 0; i < len(*eBounds); i++ {
-			r := &Capture{Start: 0, End: eb[i].End}
+			c := &Capture{Start: 0, End: eb[i].End}
 			if i > 1 {
-				r.Start = eb[i-1].End
-				r.End = eb[i].End
+				c.Start = eb[i-1].End
+				c.End = eb[i].End
 			}
-			r.SetValue(input)
-			rBounds = append(rBounds, *r)
+			c.Value = input[c.Start:c.End]
+			rBounds = append(rBounds, *c)
 		}
 	} else {
 		//rangeStart,rangeEnd
