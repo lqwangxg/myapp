@@ -39,11 +39,19 @@ func (rs *RegexFile) Write(result *RegexResult) {
 		log.Print("No Regex Result, No Write, Over :<.")
 		return
 	}
+	if result.MatchCount == 0 {
+		log.Print("No Regex Result, No Write, Over :<.")
+		return
+	}
 	if rs.ToFile == "" && rs.FromFile != "" {
 		rs.ToFile = rs.FromFile
 	}
-	content := result.Export(&rs.Rule.ReplaceTemplate, false)
-	config.Decode(&content)
-	WriteAll(rs.ToFile, content)
-	log.Printf("%s OK, Written file: %s", flags.Action, rs.ToFile)
+	content, changed := result.Export(&rs.Rule.ReplaceTemplate, false)
+	if !changed {
+		log.Print("No Changed.")
+	} else {
+		config.Decode(&content)
+		WriteAll(rs.ToFile, content)
+		log.Printf("%s OK, Written file: %s", flags.Action, rs.ToFile)
+	}
 }

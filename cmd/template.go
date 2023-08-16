@@ -1,6 +1,9 @@
 package cmd
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+)
 
 const (
 	anykey = `\$\{[\w\.\-]+\}`
@@ -32,40 +35,46 @@ func (t *StringTemplate) HasAnyKey() bool {
 	return IsMatchString(anykey, t.Template)
 }
 
-func (t *StringTemplate) ReplaceByKeyValue(key string, value string) string {
+func (t *StringTemplate) ReplaceByKeyValue(key string, value string) (string, bool) {
 	if !t.HasKey(key) {
-		return t.Template
+		return t.Template, false
 	}
 
-	regex := NewRegexByPattern(t.Pattern(key))
-	regex.ScanMatches(t.Template)
-	return regex.R.ReplaceAllString(t.Template, value)
+	regex := regexp.MustCompile(t.Pattern(key))
+	if regex.MatchString(t.Template) {
+		return regex.ReplaceAllString(t.Template, value), true
+	} else {
+		return t.Template, false
+	}
 }
 
-func (t *StringTemplate) ReplaceByMap(kvs map[string]string) string {
+func (t *StringTemplate) ReplaceByMap(kvs map[string]string) (string, bool) {
 	if !t.HasAnyKey() {
-		return t.Template
+		return t.Template, false
 	}
-
+	hasChanged := false
 	for key, val := range kvs {
-		t.Template = t.ReplaceByKeyValue(key, val)
-	}
-	return t.Template
-}
-
-func (t *StringTemplate) ReplaceByRegexResult(result RegexResult) string {
-	t.Template = t.ReplaceByMap(result.Params)
-	for _, m := range result.Captures {
-		if m.IsMatch && m.Params != nil {
-			t.Template = t.ReplaceByMap(m.Params)
+		_, changed := t.ReplaceByKeyValue(key, val)
+		if changed {
+			hasChanged = true
 		}
 	}
-	return t.Template
+	return t.Template, hasChanged
 }
 
-func (t *StringTemplate) ReplaceBy(m Capture) string {
+// func (t *StringTemplate) ReplaceByRegexResult(result RegexResult) string {
+// 	t.Template = t.ReplaceByMap(result.Params)
+// 	for _, m := range result.Captures {
+// 		if m.IsMatch && m.Params != nil {
+// 			t.Template = t.ReplaceByMap(m.Params)
+// 		}
+// 	}
+// 	return t.Template
+// }
+
+func (t *StringTemplate) ReplaceBy(m Capture) (string, bool) {
 	if m.IsMatch && m.Params != nil {
-		t.Template = t.ReplaceByMap(m.Params)
+		return t.ReplaceByMap(m.Params)
 	}
-	return t.Template
+	return t.Template, false
 }

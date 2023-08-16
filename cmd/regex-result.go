@@ -12,13 +12,18 @@ type RegexResult struct {
 	MatchCount int
 }
 
-func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) string {
+func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, bool) {
 	var sb strings.Builder
+	hasChanged := false
 	//---------------------------------------
 	// replace Footer: rs.Result.Params
 	if template != nil {
 		tHeader := NewTemplate(template.Header)
-		sb.WriteString(tHeader.ReplaceByMap(rs.Params))
+		header, changed := tHeader.ReplaceByMap(rs.Params)
+		sb.WriteString(header)
+		if changed {
+			hasChanged = true
+		}
 	}
 
 	//---------------------------------------
@@ -26,14 +31,20 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) string {
 		if item.IsMatch {
 			if template != nil && template.Match != "" {
 				tMatch := NewTemplate(template.Match)
-				tmp := tMatch.ReplaceBy(item)
+				tmp, changed := tMatch.ReplaceBy(item)
 				sb.WriteString(tmp)
+				if changed {
+					hasChanged = true
+				}
 				if template.Group != "" {
 					//replace by template.group
 					for _, g := range item.Groups {
 						tGroup := NewTemplate(template.Group)
-						tmp := tGroup.ReplaceBy(g)
+						tmp, changed := tGroup.ReplaceBy(g)
 						sb.WriteString(tmp)
+						if changed {
+							hasChanged = true
+						}
 					}
 				}
 			} else {
@@ -48,8 +59,12 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) string {
 	//---------------------------------------
 	if template != nil {
 		tFooter := NewTemplate(template.Footer)
-		sb.WriteString(tFooter.ReplaceByMap(rs.Params))
+		footer, changed := tFooter.ReplaceByMap(rs.Params)
+		sb.WriteString(footer)
+		if changed {
+			hasChanged = true
+		}
 	}
 	//---------------------------------------
-	return sb.String()
+	return sb.String(), hasChanged
 }

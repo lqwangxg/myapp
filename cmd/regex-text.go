@@ -82,7 +82,11 @@ func (rs *RegexText) Write(result *RegexResult) {
 	}
 
 	rule := appRules.GetDefaultRule()
-	content := result.Export(&rule.ExportTemplate, false)
-	config.Decode(&content)
-	log.Println(content)
+	content, changed := result.Export(&rule.ExportTemplate, false)
+	if !changed {
+		log.Print("No Changed.")
+	} else {
+		config.Decode(&content)
+		log.Println(content)
+	}
 }
