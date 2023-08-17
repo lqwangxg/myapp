@@ -32,7 +32,7 @@ func LoadConfig(configFilePath string, cfg any) bool {
 		return false
 	}
 
-	kind := result.Params["key"]
+	kind := result.FirstMatch().Params["key"]
 	switch kind {
 	case "app":
 		return ttManager.Execute(configFilePath, &config)

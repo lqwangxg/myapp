@@ -100,3 +100,14 @@ func (rs *RegexText) Write(result *RegexResult) {
 		log.Println(content)
 	}
 }
+func (rs *RegexResult) FirstMatch() *Capture {
+	if rs == nil || rs.MatchCount == 0 {
+		return nil
+	}
+	for _, c := range rs.Captures {
+		if c.IsMatch {
+			return &c
+		}
+	}
+	return nil
+}
