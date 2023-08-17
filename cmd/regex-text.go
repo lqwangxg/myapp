@@ -10,13 +10,17 @@ import (
 type RegexText struct {
 	Pattern string
 	Content string
+	Parent  *RegexFile
 }
 
 func NewRegexText(pattern, content string) *RegexText {
-	rs := &RegexText{pattern, content}
+	rs := &RegexText{pattern, content, nil}
 	return rs
 }
-
+func NewRegexTextByParent(parent *RegexFile, content string) *RegexText {
+	rs := &RegexText{parent.Rule.Pattern, content, parent}
+	return rs
+}
 func (rs *RegexText) Match() *RegexResult {
 	// before match
 	input := rs.Content
@@ -26,7 +30,7 @@ func (rs *RegexText) Match() *RegexResult {
 	r := regexp.MustCompile(rs.Pattern)
 	positions := r.FindAllStringSubmatchIndex(input, -1)
 	if len(positions) == 0 {
-		log.Print("No Matched.")
+		log.Printf("No Matched. pattern: %s", rs.Pattern)
 		return nil
 	}
 	result := &RegexResult{
@@ -90,8 +94,14 @@ func (rs *RegexText) Write(result *RegexResult) {
 		return
 	}
 
-	rule := appContext.RegexRules.GetDefaultRule()
-	content, changed := result.Export(&rule.ExportTemplate, true)
+	var rule RegexRule
+	if rs.Parent != nil {
+		rule = *rs.Parent.Rule
+	} else {
+		rule = *appContext.RegexRules.GetDefaultRule()
+	}
+	rule.ResetTemplate()
+	content, changed := result.Export(rule.ExportTemplate, true)
 	if !changed {
 		log.Print("No changed.")
 	} else {

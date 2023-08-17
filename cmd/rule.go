@@ -13,6 +13,7 @@ import (
 func (rs *RegexRules) GetDefaultRule() *RegexRule {
 	for _, r := range rs.Rules {
 		if r.Name == "default" {
+			r.ResetTemplate()
 			return &r
 		}
 	}
@@ -21,17 +22,36 @@ func (rs *RegexRules) GetDefaultRule() *RegexRule {
 func (rs *RegexRules) GetRule(name string) *RegexRule {
 	for _, r := range rs.Rules {
 		if r.Name == name {
+			r.ResetTemplate()
 			return &r
 		}
 	}
 	return nil
 }
-
-//	func LoadRule(fullPath string) (bool, *RuleConfig) {
-//		var rule RuleConfig
-//		ok := LoadConfig(fullPath, &rule)
-//		return ok, &rule
-//	}
+func (rule *RegexRule) ResetTemplate() {
+	if rule.ExportTemplate == nil {
+		if rule.ExportTemplateName == "" {
+			rule.ExportTemplateName = "default"
+		}
+		for _, t := range appContext.RegexTemplates.Templates {
+			if t.Name == rule.ExportTemplateName {
+				rule.ExportTemplate = &t
+				break
+			}
+		}
+	}
+	if rule.ReplaceTemplate == nil {
+		if rule.ReplaceTemplateName == "" {
+			rule.ReplaceTemplateName = "default"
+		}
+		for _, t := range appContext.RegexTemplates.Templates {
+			if t.Name == rule.ReplaceTemplateName {
+				rule.ReplaceTemplate = &t
+				break
+			}
+		}
+	}
+}
 func (rule *RegexRule) findByName(ruleName string) bool {
 	return rule.findRule(config.RuleDir, ruleName)
 }

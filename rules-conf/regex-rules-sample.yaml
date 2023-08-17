@@ -6,7 +6,10 @@ kind: regex-rules
 regex-rules:
   - name: "sample"
     # regex pattern   
-    pattern: 
-    replace-template: &sample
-      match : |-  # |: has \n in last row, |- : no \n in last row.  
-        ${match.value}
+    range-start: \<html:text\s+
+    range-end: \/\>
+    pattern: size="(?P<size>\d+)"(?P<p2>.*?)maxlength="(?P<maxlength>\d+)"
+    replace-template-name: default
+    #replace-template: 
+    #  match : |-  # |: has \n in last row, |- : no \n in last row.  
+    #    ${match.value}

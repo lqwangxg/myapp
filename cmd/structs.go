@@ -37,15 +37,17 @@ type RegexRules struct {
 }
 
 type RegexRule struct {
-	Name            string        `mapstructure:"name"`
-	Group           string        `mapstructure:"group"`
-	IncludeFile     string        `mapstructure:"include-file"`
-	ExcludeFile     string        `mapstructure:"exclude-file"`
-	RangeStart      string        `mapstructure:"range-start"`
-	RangeEnd        string        `mapstructure:"range-end"`
-	Pattern         string        `mapstructure:"pattern"`
-	ExportTemplate  RegexTemplate `mapstructure:"export-template"`
-	ReplaceTemplate RegexTemplate `mapstructure:"replace-template"`
+	Name                string         `mapstructure:"name"`
+	Group               string         `mapstructure:"group"`
+	IncludeFile         string         `mapstructure:"include-file"`
+	ExcludeFile         string         `mapstructure:"exclude-file"`
+	RangeStart          string         `mapstructure:"range-start"`
+	RangeEnd            string         `mapstructure:"range-end"`
+	Pattern             string         `mapstructure:"pattern"`
+	ExportTemplate      *RegexTemplate `mapstructure:"export-template"`
+	ExportTemplateName  string         `mapstructure:"export-template-name"`
+	ReplaceTemplate     *RegexTemplate `mapstructure:"replace-template"`
+	ReplaceTemplateName string         `mapstructure:"replace-template-name"`
 
 	FullCheckName  string `mapstructure:"full-check-name"`
 	RangeCheckName string `mapstructure:"range-check-name"`

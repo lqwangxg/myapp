@@ -45,7 +45,7 @@ func (rf *RegexFile) Match() *RegexResult {
 		log.Fatal(err)
 		return nil
 	}
-	hand := NewRegexText(rf.Rule.Pattern, content)
+	hand := NewRegexTextByParent(rf, content)
 	result := reger.Match(hand)
 	if flags.Action != "replace" {
 		reger.Write(result, hand)
@@ -68,7 +68,7 @@ func (rs *RegexFile) Write(result *RegexResult) {
 	if rs.ToFile == "" && rs.FromFile != "" {
 		rs.ToFile = rs.FromFile
 	}
-	content, changed := result.Export(&rs.Rule.ReplaceTemplate, false)
+	content, changed := result.Export(rs.Rule.ReplaceTemplate, false)
 	if !changed {
 		log.Print("No changed.")
 	} else {
