@@ -68,6 +68,7 @@ func (rs *RegexFile) Write(result *RegexResult) {
 	if rs.ToFile == "" && rs.FromFile != "" {
 		rs.ToFile = rs.FromFile
 	}
+	//TODO: add check-rule
 	content, changed := result.Export(rs.Rule.ReplaceTemplate, false)
 	if !changed {
 		log.Print("No changed.")
