@@ -1,0 +1,12 @@
+kind: regex-rules
+
+#=========================
+# write your custom rules below.
+#=========================
+custom-rules:
+  - name: "sample"
+    # regex pattern   
+    pattern: 
+    replace-template: &sample
+      match : |-  # |: has \n in last row, |- : no \n in last row.  
+        ${match.value}

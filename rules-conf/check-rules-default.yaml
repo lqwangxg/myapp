@@ -1,0 +1,25 @@
+kind: check-rules
+
+check-define: &check-define
+  name: default
+  isor: true #default: or 
+  skip: true #default: skip
+  # regex match pattern
+  patterns: [] 
+  # eval formula return bool 
+  formulas: []
+
+custom-checks:
+  - <<: *check-define #default equals skipifany
+  - <<: *check-define
+    name: skipifany
+  - <<: *check-define
+    name: skipifall
+    isor: false 
+  - <<: *check-define
+    name: doifany
+    skip: false 
+  - <<: *check-define
+    name: doifall
+    isor: false 
+    skip: false 

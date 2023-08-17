@@ -1,0 +1,20 @@
+# using filename as name 
+# using default.value on no define below. 
+kind: template
+
+# export match template
+header: | 
+  === This is match header. match.count: ${matches.count}
+  ==========================================================================
+match : | 
+  ----------------------------------------
+  [match[${index}]${match.start}: ${match.end}]${match.value}
+  ----------------------------------------
+  group.count: ${group.count}  
+  ----------------------------------------
+group : | 
+  [group[${index}]${group.start}:${group.end}] [${group.key}]${group.value}
+  
+footer: | 
+  ==========================================================================
+  === This is match footer. 

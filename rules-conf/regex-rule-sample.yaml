@@ -3,7 +3,7 @@
 kind: regex-rule
 
 # regex pattern   
-pattern: (?P<indent>[ ]*)if\((?P<call>openMultiMessageDialog)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
+pattern: (?P<indent>[ ]*)if\((?P<call>\w+)\((?P<param>[^{]+)\)\s*\)\s*\{(?P<process>[^}]+?)\}
 
 # replace match template
 replace-template: 
@@ -12,3 +12,7 @@ replace-template:
     ${indent}window["callbackForRetunWindow"] = function (res){
     ${indent}  if(res){${process}}
     ${indent}}
+
+#.myapp.yaml is not included.
+include-file: '\w+\.(html|jsp|java|js|css)$'
+exclude-file: '^(log|bak|back|org|\d+).+(log|bak|back|org|\d+)$'  
