@@ -98,7 +98,7 @@ func SplitBy(positions *[][]int, input string, matchOnly bool, captures []Captur
 	}
 	return &captures
 }
-func (rule *RuleConfig) MergeRangeStartEnd(input string) *[]Capture {
+func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
 	sBounds := SplitMatchIndex(rule.RangeStart, input, true)
 	eBounds := SplitMatchIndex(rule.RangeEnd, input, true)
 

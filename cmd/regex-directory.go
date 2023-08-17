@@ -7,7 +7,7 @@ import (
 )
 
 type RegexDirectory struct {
-	Rule      *RuleConfig
+	Rule      *RegexRule
 	Result    *RegexResult
 	DirPath   string
 	ToDirPath string

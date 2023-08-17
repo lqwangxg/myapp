@@ -1,6 +1,6 @@
 kind: check-rules
 
-check-define: &check-define
+check-rule-define: &check-define
   name: default
   isor: true #default: or 
   skip: true #default: skip
@@ -9,7 +9,7 @@ check-define: &check-define
   # eval formula return bool 
   formulas: []
 
-custom-checks:
+check-rules:
   - <<: *check-define #default equals skipifany
   - <<: *check-define
     name: skipifany

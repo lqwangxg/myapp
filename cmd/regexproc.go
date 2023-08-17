@@ -5,9 +5,7 @@ type IRegexHandler interface {
 	Write(result *RegexResult)
 }
 
-type RegexManager struct {
-	RegexResult
-}
+type RegexManager struct{}
 
 var reger RegexManager
 

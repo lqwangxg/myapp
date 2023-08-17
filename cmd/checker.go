@@ -56,23 +56,23 @@ func (rs *Regex) IsDestMatch(match Capture, content string) bool {
 /*
  * is skip check
  */
-func (rule *RuleConfig) IsFullSkip(src string) bool {
+func (rule *RegexRule) IsFullSkip(src string) bool {
 	return rule.FullPatterns.IsSkip(src)
 }
-func (rule *RuleConfig) IsFullDest(src string) bool {
+func (rule *RegexRule) IsFullDest(src string) bool {
 	return rule.FullPatterns.IsDest(src)
 }
-func (rule *RuleConfig) IsRangeSkip(src string) bool {
+func (rule *RegexRule) IsRangeSkip(src string) bool {
 	return rule.RangePatterns.IsSkip(src)
 }
-func (rule *RuleConfig) IsRangeDest(src string) bool {
+func (rule *RegexRule) IsRangeDest(src string) bool {
 	return rule.RangePatterns.IsDest(src)
 }
 
-func (rule *RuleConfig) IsMatchSkip(src string) bool {
+func (rule *RegexRule) IsMatchSkip(src string) bool {
 	return rule.MatchPatterns.IsSkip(src)
 }
-func (rule *RuleConfig) IsMatchDest(src string) bool {
+func (rule *RegexRule) IsMatchDest(src string) bool {
 	return rule.MatchPatterns.IsDest(src)
 }
 

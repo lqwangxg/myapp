@@ -3,7 +3,7 @@ kind: regex-rules
 #=========================
 # write your custom rules below.
 #=========================
-custom-rules:
+regex-rules:
   - name: "sample"
     # regex pattern   
     pattern: 

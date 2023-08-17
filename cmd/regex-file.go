@@ -5,7 +5,7 @@ import (
 )
 
 type RegexFile struct {
-	Rule     *RuleConfig
+	Rule     *RegexRule
 	FromFile string
 	ToFile   string
 }

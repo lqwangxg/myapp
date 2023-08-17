@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	anykey = `\$\{[\w\.\-]+\}`
-	fmtkey = `\$\{(?P<key>%s)\}`
+	anykey  = `\$\{[\w\.\-]+\}`
+	fmtkey  = `\$\{(?P<key>%s)\}`
+	kindkey = `kind:\s*(?P<key>[\w\.\-]+)`
 )
 
 type StringTemplate struct {

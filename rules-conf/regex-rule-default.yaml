@@ -1,14 +1,6 @@
 kind: regex-rules
 
-# check content skip or do on condition
-# priority descend: skip_ifany, skip_when, do_ifany, do_when
-check-patterns-define: &default_check_patterns
-  skip_ifany: []
-  skip_when: []
-  do_ifany: []
-  do_when: []
-
-rule-define: &default-rule
+regex-rule-define: &default-rule
   # rule-name
   name: default
   # rule-group
@@ -62,7 +54,7 @@ rule-define: &default-rule
 #=========================
 # write your custom rules below.
 #=========================
-custom-rules:
+regex-rules:
   - <<: *default-rule  #default-rule
   - <<: *default-rule  #reference anchor defined above by *anchor-name
     name: "dialog1"

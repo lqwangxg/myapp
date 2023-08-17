@@ -10,9 +10,9 @@ import (
 	"regexp"
 )
 
-var appRules CustomRules
+var appRules RegexRules
 
-func (rs *CustomRules) GetDefaultRule() *RuleConfig {
+func (rs *RegexRules) GetDefaultRule() *RegexRule {
 	for _, r := range rs.Rules {
 		if r.Name == "default" {
 			return &r
@@ -20,7 +20,7 @@ func (rs *CustomRules) GetDefaultRule() *RuleConfig {
 	}
 	return nil
 }
-func (rs *CustomRules) GetRule(name string) *RuleConfig {
+func (rs *RegexRules) GetRule(name string) *RegexRule {
 	for _, r := range rs.Rules {
 		if r.Name == name {
 			return &r
@@ -34,10 +34,10 @@ func (rs *CustomRules) GetRule(name string) *RuleConfig {
 //		ok := LoadConfig(fullPath, &rule)
 //		return ok, &rule
 //	}
-func (rule *RuleConfig) findByName(ruleName string) bool {
+func (rule *RegexRule) findByName(ruleName string) bool {
 	return rule.findRule(config.RuleDir, ruleName)
 }
-func (rule *RuleConfig) findRule(dirPath string, ruleName string) bool {
+func (rule *RegexRule) findRule(dirPath string, ruleName string) bool {
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return false

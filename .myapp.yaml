@@ -1,3 +1,6 @@
+#myapp global config. 
+kind: app
+
 # begin: replace these chars key -> val
 # end  : restore these chars val -> key  
 echars:
@@ -5,15 +8,11 @@ echars:
   '\r': '刂'
 #  '\t': '亠'
 ruledir: rules-conf
+
 # get params by match input contents.
 params:
-  - title: '[\s"]*(?<title>.+?)[\s"]*'
   - author: lqwangxg
-  - size: 7
-  - maxlength: 8
-  - isfalse: '1>2'
-  - istrue: '3 > 1 + 1'
-  - istrue2: '${size}*2 > ${maxlength}'
+  - mail: lqwangxg@gmail.com
   
 
 indent: "  " #space(2)

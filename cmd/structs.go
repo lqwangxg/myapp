@@ -13,7 +13,7 @@ type Regex struct {
 	ToFile      string
 	ExportFlag  bool
 	ReplaceFlag bool
-	Rule        *RuleConfig
+	Rule        *RegexRule
 }
 
 type RedisOption struct {
@@ -23,11 +23,11 @@ type RedisOption struct {
 	DB       int    `yaml:"db"`
 }
 
-type CustomRules struct {
-	Rules []RuleConfig `mapstructure:"custom-rules"`
+type RegexRules struct {
+	Rules []RegexRule `mapstructure:"regex-rules"`
 }
 
-type RuleConfig struct {
+type RegexRule struct {
 	Name            string        `mapstructure:"name"`
 	Group           string        `mapstructure:"group"`
 	IncludeFile     string        `mapstructure:"include-file"`
@@ -51,9 +51,20 @@ type RegexTemplate struct {
 	Group  string `mapstructure:"group"`
 	Footer string `mapstructure:"footer"`
 }
+
 type CheckPatternConfig struct {
 	SkipIfany []string `mapstructure:"skip_ifany"`
 	SkipWhen  []string `mapstructure:"skip_when"`
 	DoIfany   []string `mapstructure:"do_ifany"`
 	DoWhen    []string `mapstructure:"do_when"`
+}
+type CheckRules struct {
+	Rules []CheckRule `mapstructure:"check-rules"`
+}
+type CheckRule struct {
+	Name     string   `mapstructure:"name"`
+	IsOr     bool     `mapstructure:"isor"`
+	Skip     bool     `mapstructure:"skip"`
+	Patterns []string `mapstructure:"patterns"`
+	Formulas []string `mapstructure:"formulas"`
 }

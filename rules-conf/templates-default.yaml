@@ -18,15 +18,12 @@ template-define: &default-template # define anchor for reference below by &ancho
     ===="copyright lqwangxg@gmail.com 2023"====================================================
 
 replace-template: &default-replace-template
-  range :       # range slice from [range-start:range-end]
+  #range : ""   # range slice from [range-start:range-end]
   match :       # match slice from [match-start:match-end]
   group :       # group slice from [group-start:group-end]
   
 templates:
   - <<: *default-template # name=default
-  - <<: *default-replace-template
-    name: delete.range # for delete all the range
-    range: ${range.delete}
   - <<: *default-replace-template
     name: delete.match # for delete all the match
     match: ${match.delete}

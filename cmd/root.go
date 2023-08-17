@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -52,7 +51,5 @@ func initConfig() {
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv() // read in environment variables that match
 
-	//NewDefaultRules()
-	fullPath := filepath.Join(config.RuleDir, "default.yaml")
-	LoadConfig(fullPath, &appRules)
+	//LoadAllConfigs()
 }
