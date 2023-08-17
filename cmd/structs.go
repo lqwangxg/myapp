@@ -4,6 +4,15 @@ import (
 	"regexp"
 )
 
+type AppConfig struct {
+	EChars      map[string]string `yaml:"echars"`
+	RuleDir     string            `yaml:"ruledir"`
+	Params      map[string]string `yaml:"params"`
+	Indent      string            `yaml:"indent"`
+	Prefix      string            `yaml:"prefix"`
+	RedisOption RedisOption       `mapstructure:"redis"`
+}
+
 type Regex struct {
 	R           *regexp.Regexp
 	Result      RegexResult

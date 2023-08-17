@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -15,6 +14,9 @@ var rootCmd = &cobra.Command{
 	Use:   "myapp",
 	Short: "read params and flags in cui",
 }
+
+var config AppConfig
+var appContext AppContext = *NewContext(&config)
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -40,16 +42,16 @@ func initConfig() {
 	if flags.ConfigFile != "" {
 		// Use config file from the flag.
 		//viper.SetConfigFile(flags.ConfigFile)
-		LoadConfig(flags.ConfigFile, &config)
+		appContext.LoadConfig(flags.ConfigFile)
 	}
-	// Find home directory.
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	// // Find home directory.
+	// home, err := os.UserHomeDir()
+	// cobra.CheckErr(err)
 
-	// Search config in home directory with name ".myapp" (without extension).
-	viper.AddConfigPath(home)
-	viper.SetConfigType("yaml")
-	viper.AutomaticEnv() // read in environment variables that match
+	// // Search config in home directory with name ".myapp" (without extension).
+	// viper.AddConfigPath(home)
+	// viper.SetConfigType("yaml")
+	// viper.AutomaticEnv() // read in environment variables that match
 
-	//LoadAllConfigs()
+	appContext.LoadAllConfigs(appContext.AppConfig.RuleDir)
 }

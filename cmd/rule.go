@@ -61,7 +61,8 @@ func (rule *RegexRule) findRule(dirPath string, ruleName string) bool {
 			continue
 		}
 		//=============================
-		return LoadConfig(fullPath, &rule)
+		//TODO
+		//return LoadConfig(fullPath, &rule)
 	}
 	return false
 }
