@@ -91,7 +91,7 @@ func (rs *RegexText) Write(result *RegexResult) {
 		return
 	}
 
-	rule := appRules.GetDefaultRule()
+	rule := appContext.RegexRules.GetDefaultRule()
 	content, changed := result.Export(&rule.ExportTemplate, true)
 	if !changed {
 		log.Print("No changed.")

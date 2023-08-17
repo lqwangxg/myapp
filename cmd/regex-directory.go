@@ -14,8 +14,9 @@ type RegexDirectory struct {
 }
 
 func NewRegexDirectory(ruleName, dirPath string) *RegexDirectory {
-	rule := appRules.GetRule(ruleName)
+	rule := appContext.RegexRules.GetRule(ruleName)
 	if rule == nil {
+		log.Printf("RegexRule not found by ruleName: %s", ruleName)
 		return nil
 	}
 	return &RegexDirectory{
@@ -24,6 +25,7 @@ func NewRegexDirectory(ruleName, dirPath string) *RegexDirectory {
 	}
 }
 func (rf *RegexDirectory) Match() *RegexResult {
+	log.Printf("start matching file: %s", rf.DirPath)
 	files, err := os.ReadDir(rf.DirPath)
 	if err != nil {
 		log.Fatal(err)

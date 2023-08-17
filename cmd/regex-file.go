@@ -12,7 +12,7 @@ type RegexFile struct {
 
 func NewRegexFile(ruleName string, filePath string) *RegexFile {
 	log.Printf("Regex %s file: %s", flags.Action, filePath)
-	rule := appRules.GetRule(ruleName)
+	rule := appContext.RegexRules.GetRule(ruleName)
 	if rule == nil {
 		log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
 		return nil
@@ -27,7 +27,7 @@ func NewRegexFileByPattern(pattern, ruleName string, filePath string) *RegexFile
 	if ruleName == "" {
 		ruleName = "default"
 	}
-	rule := appRules.GetRule(ruleName)
+	rule := appContext.RegexRules.GetRule(ruleName)
 	if rule == nil {
 		log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
 		return nil

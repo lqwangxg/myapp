@@ -10,8 +10,6 @@ import (
 	"regexp"
 )
 
-var appRules RegexRules
-
 func (rs *RegexRules) GetDefaultRule() *RegexRule {
 	for _, r := range rs.Rules {
 		if r.Name == "default" {
