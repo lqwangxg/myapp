@@ -21,7 +21,7 @@ func NewContext(config *AppConfig) *AppContext {
 	}
 }
 
-func (ctx *AppContext) LoadAllConfigs(rootPath string) {
+func (ctx *AppContext) LoadDirectory(rootPath string) {
 
 	files, err := os.ReadDir(rootPath)
 	if err != nil {
@@ -32,12 +32,9 @@ func (ctx *AppContext) LoadAllConfigs(rootPath string) {
 		ok, err := IsDir(fullPath)
 		if err == nil {
 			if ok {
-				ctx.LoadAllConfigs(fullPath)
-				// handler := NewRegexDirectory(flags.RuleName, fullPath)
-				// reger.Execute(handler)
+				ctx.LoadDirectory(fullPath)
 			} else {
-				// handler := NewRegexFile(flags.RuleName, fullPath)
-				// reger.Execute(handler)
+				ctx.LoadFile(fullPath)
 			}
 		}
 	}

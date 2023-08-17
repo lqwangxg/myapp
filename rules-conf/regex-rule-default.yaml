@@ -23,33 +23,12 @@ regex-rule-define: &default-rule
   pattern: 
 
   # check full content by regex match
-  full-patterns :
-    <<: *default_check_patterns
-    # write override here
-
+  full-check-name : 
   # check range content by regex match
-  range-patterns: 
-    <<: *default_check_patterns
-    # write override here
-
+  range-check-name: 
 
   # check match content by regex match
-  match-patterns: 
-    <<: *default_check_patterns
-    # write override here
-
-
-  # check match content by evaluate
-  match-vals: 
-    <<: *default_check_patterns
-    # write override here
-
-  # process for refreshing params
-  # support functions: 
-  #  string: len(string), ucase(string), lcase(string)
-  #  number: +,-,*,/
-  #  compare: <, <=, >, >=, ==
-  match-formulas: []
+  match-check-name:
 
 #=========================
 # write your custom rules below.

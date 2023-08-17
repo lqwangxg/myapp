@@ -10,13 +10,13 @@ import (
 // check whether the content is should be skiped by skip-pattern,
 // or is required by dest-pattern
 func (rs *Regex) FullCheck(content string) bool {
-	rule := rs.Rule
-	if rule.IsFullSkip(content) {
-		return false
-	}
-	if !rule.IsFullDest(content) {
-		return false
-	}
+	// rule := rs.Rule
+	// if rule.IsFullSkip(content) {
+	// 	return false
+	// }
+	// if !rule.IsFullDest(content) {
+	// 	return false
+	// }
 	return true
 }
 
@@ -33,76 +33,77 @@ func (rs *Regex) IsDestMatch(match Capture, content string) bool {
 			break
 		}
 	}
-
-	// return false if not included in any range.
-	if !inRange {
-		return false
-	}
-	if rs.Rule.IsRangeSkip(rangeValue) {
-		return false
-	}
-	if !rs.Rule.IsRangeDest(rangeValue) {
-		return false
-	}
-	if rs.Rule.IsMatchSkip(match.Value) {
-		return false
-	}
-	if !rs.Rule.IsMatchDest(match.Value) {
-		return false
-	}
-	return true
+	log.Printf("rangeValue:%s", rangeValue)
+	return inRange
+	// // return false if not included in any range.
+	// if !inRange {
+	// 	return false
+	// }
+	// if rs.Rule.IsRangeSkip(rangeValue) {
+	// 	return false
+	// }
+	// if !rs.Rule.IsRangeDest(rangeValue) {
+	// 	return false
+	// }
+	// if rs.Rule.IsMatchSkip(match.Value) {
+	// 	return false
+	// }
+	// if !rs.Rule.IsMatchDest(match.Value) {
+	// 	return false
+	// }
+	//return true
 }
 
-/*
- * is skip check
- */
-func (rule *RegexRule) IsFullSkip(src string) bool {
-	return rule.FullPatterns.IsSkip(src)
-}
-func (rule *RegexRule) IsFullDest(src string) bool {
-	return rule.FullPatterns.IsDest(src)
-}
-func (rule *RegexRule) IsRangeSkip(src string) bool {
-	return rule.RangePatterns.IsSkip(src)
-}
-func (rule *RegexRule) IsRangeDest(src string) bool {
-	return rule.RangePatterns.IsDest(src)
-}
+// /*
+//  * is skip check
+//  */
+// func (rule *RegexRule) IsFullSkip(src string) bool {
+// 	return rule.FullPatterns.IsSkip(src)
+// }
+// func (rule *RegexRule) IsFullDest(src string) bool {
+// 	return rule.FullPatterns.IsDest(src)
+// }
+// func (rule *RegexRule) IsRangeSkip(src string) bool {
+// 	return rule.RangePatterns.IsSkip(src)
+// }
+// func (rule *RegexRule) IsRangeDest(src string) bool {
+// 	return rule.RangePatterns.IsDest(src)
+// }
 
-func (rule *RegexRule) IsMatchSkip(src string) bool {
-	return rule.MatchPatterns.IsSkip(src)
-}
-func (rule *RegexRule) IsMatchDest(src string) bool {
-	return rule.MatchPatterns.IsDest(src)
-}
+// func (rule *RegexRule) IsMatchSkip(src string) bool {
+// 	return rule.MatchPatterns.IsSkip(src)
+// }
+// func (rule *RegexRule) IsMatchDest(src string) bool {
+// 	return rule.MatchPatterns.IsDest(src)
+// }
 
-/*
- * is skip check
- */
-func (checker *CheckPatternConfig) IsSkip(src string) bool {
+// /*
+//  * is skip check
+//  */
+// func (checker *CheckPatternConfig) IsSkip(src string) bool {
 
-	if IfAnyMatch(src, checker.SkipIfany, false) {
-		return true
-	}
-	if WhenMatch(src, checker.SkipWhen, false) {
-		return true
-	}
-	return false
-}
+// 	if IfAnyMatch(src, checker.SkipIfany, false) {
+// 		return true
+// 	}
+// 	if WhenMatch(src, checker.SkipWhen, false) {
+// 		return true
+// 	}
+// 	return false
+// }
 
-/*
- * is dest check
- */
-func (checker *CheckPatternConfig) IsDest(src string) bool {
+// /*
+//  * is dest check
+//  */
+// func (checker *CheckPatternConfig) IsDest(src string) bool {
 
-	if IfAnyMatch(src, checker.DoIfany, true) {
-		return true
-	}
-	if WhenMatch(src, checker.DoWhen, true) {
-		return true
-	}
-	return false
-}
+// 	if IfAnyMatch(src, checker.DoIfany, true) {
+// 		return true
+// 	}
+// 	if WhenMatch(src, checker.DoWhen, true) {
+// 		return true
+// 	}
+// 	return false
+// }
 
 /*
  * if empty, return emptyFlag

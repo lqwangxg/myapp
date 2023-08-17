@@ -47,11 +47,9 @@ type RegexRule struct {
 	ExportTemplate  RegexTemplate `mapstructure:"export-template"`
 	ReplaceTemplate RegexTemplate `mapstructure:"replace-template"`
 
-	FullPatterns  CheckPatternConfig `mapstructure:"full-patterns"`
-	RangePatterns CheckPatternConfig `mapstructure:"range-patterns"`
-	MatchPatterns CheckPatternConfig `mapstructure:"match-patterns"`
-	MatchFormulas []string           `mapstructure:"match-formulas"`
-	MatchEvals    CheckPatternConfig `mapstructure:"match-evals"`
+	FullCheckName  string `mapstructure:"full-check-name"`
+	RangeCheckName string `mapstructure:"range-check-name"`
+	MatchCheckName string `mapstructure:"match-check-name"`
 }
 type RegexTemplate struct {
 	Name   string `mapstructure:"name"`
@@ -61,12 +59,12 @@ type RegexTemplate struct {
 	Footer string `mapstructure:"footer"`
 }
 
-type CheckPatternConfig struct {
-	SkipIfany []string `mapstructure:"skip_ifany"`
-	SkipWhen  []string `mapstructure:"skip_when"`
-	DoIfany   []string `mapstructure:"do_ifany"`
-	DoWhen    []string `mapstructure:"do_when"`
-}
+//	type CheckPatternConfig struct {
+//		SkipIfany []string `mapstructure:"skip_ifany"`
+//		SkipWhen  []string `mapstructure:"skip_when"`
+//		DoIfany   []string `mapstructure:"do_ifany"`
+//		DoWhen    []string `mapstructure:"do_when"`
+//	}
 type CheckRules struct {
 	Rules []CheckRule `mapstructure:"check-rules"`
 }

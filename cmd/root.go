@@ -42,7 +42,7 @@ func initConfig() {
 	if flags.ConfigFile != "" {
 		// Use config file from the flag.
 		//viper.SetConfigFile(flags.ConfigFile)
-		appContext.LoadConfig(flags.ConfigFile)
+		appContext.LoadFile(flags.ConfigFile)
 	}
 	// // Find home directory.
 	// home, err := os.UserHomeDir()
@@ -53,5 +53,5 @@ func initConfig() {
 	// viper.SetConfigType("yaml")
 	// viper.AutomaticEnv() // read in environment variables that match
 
-	appContext.LoadAllConfigs(appContext.AppConfig.RuleDir)
+	appContext.LoadDirectory(appContext.AppConfig.RuleDir)
 }

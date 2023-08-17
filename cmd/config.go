@@ -4,12 +4,12 @@ import (
 	"log"
 )
 
-func (appContext *AppContext) LoadConfig(configFilePath string) bool {
-	if !IsExists(configFilePath) {
-		log.Printf("Not found configfile:%s", configFilePath)
+func (appContext *AppContext) LoadFile(configFile string) bool {
+	if !IsExists(configFile) {
+		log.Printf("Not found configfile:%s", configFile)
 		return false
 	}
-	content, err := ReadAll(configFilePath)
+	content, err := ReadAll(configFile)
 	if err != nil {
 		return false
 	}
@@ -23,25 +23,25 @@ func (appContext *AppContext) LoadConfig(configFilePath string) bool {
 	loaded := false
 	switch kind {
 	case "app":
-		return ttManager.Execute(configFilePath, appContext.AppConfig)
+		return ttManager.Execute(configFile, appContext.AppConfig)
 	case "templates":
-		loaded = ttManager.Execute(configFilePath, appContext.RegexTemplates)
+		loaded = ttManager.Execute(configFile, appContext.RegexTemplates)
 	case "template":
 		hand := &RegexTemplate{}
 		appContext.RegexTemplates.Templates = append(appContext.RegexTemplates.Templates, *hand)
-		loaded = ttManager.Execute(configFilePath, hand)
+		loaded = ttManager.Execute(configFile, hand)
 	case "regex-rules":
-		loaded = ttManager.Execute(configFilePath, appContext.RegexRules)
+		loaded = ttManager.Execute(configFile, appContext.RegexRules)
 	case "regex-rule":
 		hand := &RegexRule{}
 		appContext.RegexRules.Rules = append(appContext.RegexRules.Rules, *hand)
-		loaded = ttManager.Execute(configFilePath, hand)
+		loaded = ttManager.Execute(configFile, hand)
 	case "check-rules":
-		loaded = ttManager.Execute(configFilePath, appContext.CheckRules)
+		loaded = ttManager.Execute(configFile, appContext.CheckRules)
 	case "check-rule":
 		hand := &CheckRule{}
 		appContext.CheckRules.Rules = append(appContext.CheckRules.Rules, *hand)
-		loaded = ttManager.Execute(configFilePath, hand)
+		loaded = ttManager.Execute(configFile, hand)
 	}
 	return loaded
 }
