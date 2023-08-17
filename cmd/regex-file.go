@@ -11,7 +11,7 @@ type RegexFile struct {
 }
 
 func NewRegexFile(ruleName string, filePath string) *RegexFile {
-	log.Printf("Regex %s file: %s", flags.Action, filePath)
+	log.Printf("%s Destfile: %s", flags.Action, filePath)
 	rule := appContext.RegexRules.GetRule(ruleName)
 	if rule == nil {
 		log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
@@ -23,7 +23,7 @@ func NewRegexFile(ruleName string, filePath string) *RegexFile {
 	}
 }
 func NewRegexFileByPattern(pattern, ruleName string, filePath string) *RegexFile {
-	log.Printf("Regex %s file: %s", flags.Action, filePath)
+	log.Printf("%s Destfile: %s", flags.Action, filePath)
 	if ruleName == "" {
 		ruleName = "default"
 	}
@@ -58,7 +58,6 @@ func (rf *RegexFile) Match() *RegexResult {
 // write content to file
 func (rs *RegexFile) Write(result *RegexResult) {
 	if result == nil {
-		log.Print("No Result.")
 		return
 	}
 	log.Printf("Match.Count=%d", result.MatchCount)

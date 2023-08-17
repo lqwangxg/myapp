@@ -83,7 +83,6 @@ func (rs *RegexText) Match() *RegexResult {
 // write content to file
 func (rs *RegexText) Write(result *RegexResult) {
 	if result == nil {
-		log.Print("No Result.")
 		return
 	}
 	log.Printf("Match.Count=%d", result.MatchCount)

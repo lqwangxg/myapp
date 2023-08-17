@@ -25,7 +25,7 @@ func NewRegexDirectory(ruleName, dirPath string) *RegexDirectory {
 	}
 }
 func (rf *RegexDirectory) Match() *RegexResult {
-	log.Printf("start matching file: %s", rf.DirPath)
+	log.Printf("DirPath: %s", rf.DirPath)
 	files, err := os.ReadDir(rf.DirPath)
 	if err != nil {
 		log.Fatal(err)
@@ -50,5 +50,5 @@ func (rf *RegexDirectory) Match() *RegexResult {
 
 // write content to file
 func (rs *RegexDirectory) Write(result *RegexResult) {
-	log.Printf("Written Completed: %s", rs.DirPath)
+	//log.Printf("Written Completed: %s", rs.DirPath)
 }
