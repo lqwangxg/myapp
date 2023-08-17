@@ -49,9 +49,12 @@ type RegexRule struct {
 	ReplaceTemplate     *RegexTemplate `mapstructure:"replace-template"`
 	ReplaceTemplateName string         `mapstructure:"replace-template-name"`
 
-	FullCheckName  string `mapstructure:"full-check-name"`
-	RangeCheckName string `mapstructure:"range-check-name"`
-	MatchCheckName string `mapstructure:"match-check-name"`
+	FullCheckName  string     `mapstructure:"full-check-name"`
+	FullCheckRule  *CheckRule `mapstructure:"full-check-rule"`
+	RangeCheckName string     `mapstructure:"range-check-name"`
+	RangeCheckRule *CheckRule `mapstructure:"range-check-rule"`
+	MatchCheckName string     `mapstructure:"match-check-name"`
+	MatchCheckRule *CheckRule `mapstructure:"match-check-rule"`
 }
 type RegexTemplate struct {
 	Name   string `mapstructure:"name"`

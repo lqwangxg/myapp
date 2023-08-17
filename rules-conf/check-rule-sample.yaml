@@ -2,10 +2,11 @@
 # using default.value on no define below. 
 kind: check-rule
 
-#name: sample
-#isor: true #default: or 
-#skip: true #default: skip
+name: sample
+#isor: false #default: and 
+#skip: false #default: do on true
 # regex match pattern
 patterns: [] 
 # eval formula return bool 
-#formulas: []
+formulas: 
+  - ${size} > ${maxlength}

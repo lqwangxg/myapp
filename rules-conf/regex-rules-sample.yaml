@@ -10,6 +10,7 @@ regex-rules:
     range-end: \/\>
     pattern: size="(?P<size>\d+)"(?P<p2>.*?)maxlength="(?P<maxlength>\d+)"
     replace-template-name: default
+    match-check-name: size-maxlength
     #replace-template: 
     #  match : |-  # |: has \n in last row, |- : no \n in last row.  
     #    ${match.value}
