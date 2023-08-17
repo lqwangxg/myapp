@@ -7,7 +7,14 @@ echars:
 ruledir: rules-conf
 # get params by match input contents.
 params:
-  - 'title=[\s"]*(?<title>.+?)[\s"]*'
+  - title: '[\s"]*(?<title>.+?)[\s"]*'
+  - author: lqwangxg
+  - size: 7
+  - maxlength: 8
+  - isfalse: '1>2'
+  - istrue: '3 > 1 + 1'
+  - istrue2: '${size}*2 > ${maxlength}'
+  
 
 indent: "  " #space(2)
 prefix: ""

@@ -2,7 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
+
+	"github.com/maja42/goval"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -64,19 +68,27 @@ func (t *StringTemplate) ReplaceByMap(kvs map[string]string) (string, bool) {
 	return t.Template, hasChanged
 }
 
-// func (t *StringTemplate) ReplaceByRegexResult(result RegexResult) string {
-// 	t.Template = t.ReplaceByMap(result.Params)
-// 	for _, m := range result.Captures {
-// 		if m.IsMatch && m.Params != nil {
-// 			t.Template = t.ReplaceByMap(m.Params)
-// 		}
-// 	}
-// 	return t.Template
-// }
-
 func (t *StringTemplate) ReplaceBy(m Capture) (string, bool) {
 	if m.IsMatch && m.Params != nil {
 		return t.ReplaceByMap(m.Params)
 	}
 	return t.Template, false
+}
+
+func (t *StringTemplate) EvalTrue() (bool, error) {
+	eval := goval.NewEvaluator()
+	result, err := eval.Evaluate(t.Template, nil, nil)
+	if err != nil {
+		//fmt.Printf("Error: %s\n", err)
+		return false, err
+	}
+
+	fmt.Printf("%v (%s)\n\n", result, reflect.TypeOf(result))
+	if reflect.TypeOf(result).Kind() != reflect.Bool {
+		return false, errors.Errorf("result %v is not bool.", result)
+	}
+	v := reflect.ValueOf(&result).Elem()
+	ret := v.Interface().(bool)
+	//fmt.Printf("eval(%s)=%v", t.Template, ret)
+	return ret, nil
 }
