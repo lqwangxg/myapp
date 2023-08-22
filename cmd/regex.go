@@ -5,9 +5,12 @@ package cmd
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/spf13/cobra"
 )
+
+var wg sync.WaitGroup
 
 // regexCmd represents the regex command
 var regexCmd = &cobra.Command{
@@ -19,16 +22,17 @@ and usage of using your command. `,
 		fmt.Printf("regex %s called", flags.Action)
 		if flags.Pattern != "" {
 			if flags.Content != "" {
-				NewRegexText(flags.Pattern, flags.Content).Execute()
+				Exec(NewRegexText(flags.Pattern, flags.Content))
 			} else if flags.DestFile != "" {
-				NewRegexFileByPattern(flags.Pattern, flags.RuleName, flags.DestFile).Execute()
+				Exec(NewRegexFileByPattern(flags.Pattern, flags.RuleName, flags.DestFile))
 			}
 		} else if flags.RuleName != "" && flags.DestFile != "" {
-			NewRegexFile(flags.RuleName, flags.DestFile).Execute()
+			Exec(NewRegexFile(flags.RuleName, flags.DestFile))
 		}
 		if flags.RuleName != "" && flags.DestDir != "" {
-			NewRegexDirectory(flags.RuleName, flags.DestDir).Execute()
+			Exec(NewRegexDirectory(flags.RuleName, flags.DestDir))
 		}
+		wg.Wait()
 	},
 }
 

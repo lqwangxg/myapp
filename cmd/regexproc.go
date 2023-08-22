@@ -1,32 +1,11 @@
 package cmd
 
-// type IRegexHandler interface {
-// 	Match() *RegexResult
-// 	Write(result *RegexResult)
-// }
+type IRegexHandler interface {
+	Execute()
+}
 
-// type RegexManager struct{}
-
-// var reger RegexManager
-
-// func (manager *RegexManager) Execute(hand IRegexHandler) {
-// 	if manager == nil {
-// 		manager = &RegexManager{}
-// 	}
-// 	hand.Match()
-// 	// result := hand.Match()
-// 	//hand.Write(result)
-// }
-
-// func (manager *RegexManager) Match(hand IRegexHandler) *RegexResult {
-// 	if manager == nil {
-// 		manager = &RegexManager{}
-// 	}
-// 	return hand.Match()
-// }
-// func (manager *RegexManager) Write(result *RegexResult, hand IRegexHandler) {
-// 	if manager == nil {
-// 		manager = &RegexManager{}
-// 	}
-// 	hand.Write(result)
-// }
+func Exec(hand IRegexHandler) {
+	wg.Add(1)
+	defer wg.Done()
+	hand.Execute()
+}

@@ -37,9 +37,9 @@ func (rf *RegexDirectory) Execute() {
 		ok, err := IsDir(fullPath)
 		if err == nil {
 			if ok {
-				NewRegexDirectory(flags.RuleName, fullPath).Execute()
+				go Exec(NewRegexDirectory(flags.RuleName, fullPath))
 			} else {
-				NewRegexFile(flags.RuleName, fullPath).Execute()
+				go Exec(NewRegexFile(flags.RuleName, fullPath))
 			}
 		}
 	}

@@ -61,7 +61,11 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 	r := regexp.MustCompile(rs.Pattern)
 	positions := r.FindAllStringSubmatchIndex(rs.Content, -1)
 	if len(positions) == 0 {
-		log.Printf("No Matched. pattern: %s", rs.Pattern)
+		if rs.Parent != nil {
+			log.Printf("No Matched. file:%s", rs.Parent.FromFile)
+		} else {
+			log.Print("No Matched.")
+		}
 		return false, nil
 	}
 	result := &RegexResult{
@@ -70,7 +74,13 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 		Params:     make(map[string]string),
 		Positions:  positions,
 	}
-
+	if rs.Parent != nil {
+		result.Params["from.file"] = rs.Parent.FromFile
+		result.Params["to.file"] = rs.Parent.ToFile
+	}
+	if rs.RegexRule != nil {
+		result.Params["rule.name"] = rs.RegexRule.Name
+	}
 	result.Params["pattern"] = rs.Pattern
 	result.Params["matches.count"] = strconv.Itoa(0)
 	result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
@@ -83,6 +93,7 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 // write content to file
 func (rs *RegexText) Write(result *RegexResult) {
 	if result == nil || result.MatchCount == 0 {
+		log.Printf("result:%v", result)
 		return
 	}
 
