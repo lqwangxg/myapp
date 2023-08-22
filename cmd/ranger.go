@@ -1,7 +1,5 @@
 package cmd
 
-import "regexp"
-
 // // split input by matches
 // func (rs *Regex) SplitMatches(input string) {
 // 	cpos := 0
@@ -59,45 +57,51 @@ func SplitMatchIndex(pattern, input string, matchOnly bool) *[]Capture {
 		return &captures
 	}
 	config.Encode(&pattern)
-	rs := regexp.MustCompile(pattern)
-	positions := rs.FindAllStringSubmatchIndex(input, -1)
-	return SplitBy(&positions, input, matchOnly, captures)
+	config.EncodePattern(&pattern)
+	// rs := regexp.MustCompile(pattern)
+	r := NewRegexText(pattern, input)
+	result := r.GetMatchResult()
+	//result.Positions
+	// positions := rs.FindAllStringSubmatchIndex(input, -1)
+	return result.SplitBy(input, matchOnly)
 }
 
 // split positions
 // if matchOnly=true, will get matches Capture[Start:End] only.
-func SplitBy(positions *[][]int, input string, matchOnly bool, captures []Capture) *[]Capture {
-	//captures := make([]Capture, 0)
-	if captures == nil {
-		captures = make([]Capture, 0)
-	}
-	if len(*positions) == 0 {
-		captures = append(captures, Capture{Start: 0, End: len(input)})
+func (result *RegexResult) SplitBy(input string, matchOnly bool) *[]Capture {
+	// no alias, because no update, reference only.
+	positions := result.Positions
+	//alias result.Captures for updating itself
+	captures := &result.Captures
+	if len(positions) == 0 {
+		*captures = append(*captures, Capture{Start: 0, End: len(input)})
 	} else {
 		cpos := 0
 		epos := len(input)
-		for _, pos := range *positions {
+		for _, pos := range positions {
 			// match Capture
 			match := Capture{Start: pos[0], End: pos[1], IsMatch: true}
 			// append the ahead of match
 			if !matchOnly && cpos < epos && cpos < match.Start {
-				captures = append(captures, Capture{Start: cpos, End: match.Start})
+				*captures = append(*captures, Capture{Start: cpos, End: match.Start})
 			}
 			// append match.value
-			captures = append(captures, match)
+			*captures = append(*captures, match)
 			cpos = match.End
 		}
 		// append last string
 		if !matchOnly && cpos < epos {
-			captures = append(captures, Capture{Start: cpos, End: epos})
+			*captures = append(*captures, Capture{Start: cpos, End: epos})
 		}
 	}
-	for i := 0; i < len(captures); i++ {
-		c := &captures[i]
+	//refresh result.Captures.value
+	for i := 0; i < len(result.Captures); i++ {
+		c := &result.Captures[i]
 		c.Value = input[c.Start:c.End]
 	}
-	return &captures
+	return captures
 }
+
 func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
 	sBounds := SplitMatchIndex(rule.RangeStart, input, true)
 	eBounds := SplitMatchIndex(rule.RangeEnd, input, true)

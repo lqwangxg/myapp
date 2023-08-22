@@ -8,8 +8,18 @@ regex-rules:
     # regex pattern   
     range-start: \<html:text\s+
     range-end: \/\>
-    pattern: size="(?P<size>\d+)"(?P<p2>.*?)maxlength="(?P<maxlength>\d+)"
-    replace-template-name: default
+    pattern: size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
+    param-patterns:
+      full: [] # get params from full content.value
+      range: [] # get params from range.value 
+      match: [] # get params from match.value
+         
+    formulas:
+      - if: ${size} > ${maxlength} 
+        do: ${size} = ${maxlength}
+
+    replace-template: 
+      match: size="${size}"${p2}maxlength="${maxlength}"
     match-check-name: size-maxlength
     #replace-template: 
     #  match : |-  # |: has \n in last row, |- : no \n in last row.  

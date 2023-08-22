@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"log"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -10,6 +13,30 @@ type RegexResult struct {
 	Captures   []Capture
 	Params     map[string]string
 	MatchCount int
+	Positions  [][]int
+}
+
+func (rs *RegexText) GetMatchResult() *RegexResult {
+	r := regexp.MustCompile(rs.Pattern)
+	positions := r.FindAllStringSubmatchIndex(rs.Content, -1)
+	if len(positions) == 0 {
+		log.Printf("No Matched. pattern: %s", rs.Pattern)
+		return nil
+	}
+	result := &RegexResult{
+		Pattern:    rs.Pattern,
+		GroupNames: r.SubexpNames(),
+		Params:     make(map[string]string),
+		Positions:  positions,
+	}
+
+	result.Params["pattern"] = rs.Pattern
+	result.Params["matches.count"] = strconv.Itoa(0)
+	result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
+	result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
+
+	result.SplitBy(rs.Content, false)
+	return result
 }
 
 func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, bool) {

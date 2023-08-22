@@ -37,13 +37,17 @@ type RegexRules struct {
 }
 
 type RegexRule struct {
-	Name                string         `mapstructure:"name"`
-	Group               string         `mapstructure:"group"`
-	IncludeFile         string         `mapstructure:"include-file"`
-	ExcludeFile         string         `mapstructure:"exclude-file"`
-	RangeStart          string         `mapstructure:"range-start"`
-	RangeEnd            string         `mapstructure:"range-end"`
-	Pattern             string         `mapstructure:"pattern"`
+	Name        string `mapstructure:"name"`
+	Group       string `mapstructure:"group"`
+	IncludeFile string `mapstructure:"include-file"`
+	ExcludeFile string `mapstructure:"exclude-file"`
+	RangeStart  string `mapstructure:"range-start"`
+	RangeEnd    string `mapstructure:"range-end"`
+	Pattern     string `mapstructure:"pattern"`
+
+	ParamPatterns `mapstructure:"param-patterns"`
+	Formulas      `mapstructure:"formulas"`
+
 	ExportTemplate      *RegexTemplate `mapstructure:"export-template"`
 	ExportTemplateName  string         `mapstructure:"export-template-name"`
 	ReplaceTemplate     *RegexTemplate `mapstructure:"replace-template"`
@@ -63,13 +67,18 @@ type RegexTemplate struct {
 	Group  string `mapstructure:"group"`
 	Footer string `mapstructure:"footer"`
 }
+type Formulas []Formula
 
-//	type CheckPatternConfig struct {
-//		SkipIfany []string `mapstructure:"skip_ifany"`
-//		SkipWhen  []string `mapstructure:"skip_when"`
-//		DoIfany   []string `mapstructure:"do_ifany"`
-//		DoWhen    []string `mapstructure:"do_when"`
-//	}
+type Formula struct {
+	If string `mapstructure:"if"`
+	Do string `mapstructure:"do"`
+}
+
+type ParamPatterns struct {
+	Fulls   []string `mapstructure:"full"`
+	Ranges  []string `mapstructure:"range"`
+	Matches []string `mapstructure:"match"`
+}
 type CheckRules struct {
 	Rules []CheckRule `mapstructure:"check-rules"`
 }

@@ -21,6 +21,13 @@ regex-rule-define: &default-rule
 
   # regex pattern   
   pattern: 
+  param-patterns:
+    full: [] # get params from full content.value
+    range: [] # get params from range.value 
+    match: [] # get params from match.value
+        
+  formulas:
+    - {}
 
   # check full content by regex match
   full-check-name : 

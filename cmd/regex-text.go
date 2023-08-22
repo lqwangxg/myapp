@@ -2,47 +2,50 @@ package cmd
 
 import (
 	"log"
-	"regexp"
 	"strconv"
-	"strings"
 )
 
 type RegexText struct {
 	Pattern string
 	Content string
 	Parent  *RegexFile
+	*RegexRule
 }
 
 func NewRegexText(pattern, content string) *RegexText {
-	rs := &RegexText{pattern, content, nil}
+	rs := &RegexText{pattern, content, nil, nil}
 	return rs
 }
 func NewRegexTextByParent(parent *RegexFile, content string) *RegexText {
-	rs := &RegexText{parent.Rule.Pattern, content, parent}
+	var rule *RegexRule
+	if parent != nil {
+		rule = parent.Rule
+	}
+	rs := &RegexText{
+		Pattern:   parent.Rule.Pattern,
+		Content:   content,
+		Parent:    parent,
+		RegexRule: rule}
 	return rs
+}
+func (rs *RegexText) refreshRule(ruleName string) {
+
+	if ruleName == "" {
+		ruleName = "default"
+	}
+	rule := appContext.RegexRules.GetRule(ruleName)
+	if rule == nil {
+		log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
+		return
+	}
+	rs.RegexRule = rule
 }
 func (rs *RegexText) Match() *RegexResult {
 	// before match
-	input := rs.Content
-	config.Encode(&input)
+	config.Encode(&rs.Content)
 	config.EncodePattern(&rs.Pattern)
 
-	r := regexp.MustCompile(rs.Pattern)
-	positions := r.FindAllStringSubmatchIndex(input, -1)
-	if len(positions) == 0 {
-		log.Printf("No Matched. pattern: %s", rs.Pattern)
-		return nil
-	}
-	result := &RegexResult{
-		Pattern:    rs.Pattern,
-		GroupNames: r.SubexpNames(),
-		Captures:   make([]Capture, 0),
-		Params:     make(map[string]string),
-	}
-	result.Captures = *SplitBy(&positions, input, false, result.Captures)
-	result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
-	result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
-
+	result := rs.GetMatchResult()
 	// match.Index.
 	x := 0
 	for i, c := range result.Captures {
@@ -54,7 +57,7 @@ func (rs *RegexText) Match() *RegexResult {
 		match := &result.Captures[i]
 		match.Groups = make([]Capture, 0)
 		match.Params = make(map[string]string)
-		position := positions[x]
+		position := result.Positions[x]
 		match.Params["index"] = strconv.Itoa(x)
 		match.Params["match.start"] = strconv.Itoa(match.Start)
 		match.Params["match.end"] = strconv.Itoa(match.End)
@@ -65,7 +68,7 @@ func (rs *RegexText) Match() *RegexResult {
 				gname = "match.value"
 			}
 			group := &Capture{Start: position[y*2+0], End: position[y*2+1], IsMatch: true}
-			group.Value = input[group.Start:group.End]
+			group.Value = rs.Content[group.Start:group.End]
 			if group.Params == nil {
 				group.Params = make(map[string]string)
 			}

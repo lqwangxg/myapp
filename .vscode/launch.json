@@ -16,7 +16,7 @@
             "args": ["regex", 
                     //"match",
                     //"replace",
-                    "--action","replace", 
+                    //"--action","replace", 
                     "--name","sample", 
                     //"-p","if\\((?P<call>openMultiMessageDialog)\\((?P<param>[^{]+)\\)\\s*\\)\\s*\\{(?P<process>[^}]+?)\\}",
                     //"-f","C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main\\public\\pages\\jsp\\d01\\D01W003P00.jsp",

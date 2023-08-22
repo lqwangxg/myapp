@@ -3,7 +3,8 @@ kind: templates
 # default export template define
 template-define: &default-template # define anchor for reference below by &anchor-name
   name: default
-  header: | 
+  header: |
+    pattern: ${pattern}
     matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
     ===========================================================================================
   match : | 
