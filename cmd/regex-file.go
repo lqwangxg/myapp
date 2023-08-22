@@ -39,29 +39,25 @@ func NewRegexFileByPattern(pattern, ruleName string, filePath string) *RegexFile
 	}
 }
 
-func (rf *RegexFile) Match() *RegexResult {
+func (rf *RegexFile) Execute() {
 	content, err := ReadAll(rf.FromFile)
 	if err != nil {
 		log.Fatal(err)
-		return nil
+		return
 	}
 	hand := NewRegexTextByParent(rf, content)
-	result := reger.Match(hand)
-	if flags.Action != "replace" {
-		reger.Write(result, hand)
-		return nil
-	} else {
-		return result
+	if isMatched, result := hand.Match(); isMatched {
+		if flags.Action == "replace" {
+			rf.Write(result)
+		} else {
+			hand.Write(result)
+		}
 	}
 }
 
 // write content to file
 func (rs *RegexFile) Write(result *RegexResult) {
-	if result == nil {
-		return
-	}
-	log.Printf("Match.Count=%d", result.MatchCount)
-	if result.MatchCount == 0 {
+	if result == nil || result.MatchCount == 0 {
 		return
 	}
 

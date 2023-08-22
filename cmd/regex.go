@@ -19,19 +19,15 @@ and usage of using your command. `,
 		fmt.Printf("regex %s called", flags.Action)
 		if flags.Pattern != "" {
 			if flags.Content != "" {
-				handler := NewRegexText(flags.Pattern, flags.Content)
-				reger.Execute(handler)
+				NewRegexText(flags.Pattern, flags.Content).Execute()
 			} else if flags.DestFile != "" {
-				handler := NewRegexFileByPattern(flags.Pattern, flags.RuleName, flags.DestFile)
-				reger.Execute(handler)
+				NewRegexFileByPattern(flags.Pattern, flags.RuleName, flags.DestFile).Execute()
 			}
 		} else if flags.RuleName != "" && flags.DestFile != "" {
-			handler := NewRegexFile(flags.RuleName, flags.DestFile)
-			reger.Execute(handler)
+			NewRegexFile(flags.RuleName, flags.DestFile).Execute()
 		}
 		if flags.RuleName != "" && flags.DestDir != "" {
-			handler := NewRegexDirectory(flags.RuleName, flags.DestDir)
-			reger.Execute(handler)
+			NewRegexDirectory(flags.RuleName, flags.DestDir).Execute()
 		}
 	},
 }

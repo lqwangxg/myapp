@@ -42,16 +42,19 @@ func (rs *RegexText) refreshRule(ruleName string) {
 	}
 	rs.RegexRule = rule
 }
-func (rs *RegexText) Match() *RegexResult {
+func (rs *RegexText) Execute() {
+	isMatched, result := rs.Match()
+	if !isMatched {
+		return
+	}
+	rs.Write(result)
+}
+
+func (rs *RegexText) Match() (bool, *RegexResult) {
 	// before match
 	config.Encode(&rs.Content)
 	config.EncodePattern(&rs.Pattern)
-
-	isMatched, result := rs.GetMatchResult(false)
-	if !isMatched {
-		return nil
-	}
-	return result
+	return rs.GetMatchResult(false)
 }
 
 func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
@@ -79,10 +82,7 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 
 // write content to file
 func (rs *RegexText) Write(result *RegexResult) {
-	if result == nil {
-		return
-	}
-	if result.MatchCount == 0 {
+	if result == nil || result.MatchCount == 0 {
 		return
 	}
 

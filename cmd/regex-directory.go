@@ -24,12 +24,12 @@ func NewRegexDirectory(ruleName, dirPath string) *RegexDirectory {
 		DirPath: dirPath,
 	}
 }
-func (rf *RegexDirectory) Match() *RegexResult {
+func (rf *RegexDirectory) Execute() {
 	log.Printf("DirPath: %s", rf.DirPath)
 	files, err := os.ReadDir(rf.DirPath)
 	if err != nil {
 		log.Fatal(err)
-		return nil
+		return
 	}
 
 	for _, file := range files {
@@ -37,18 +37,10 @@ func (rf *RegexDirectory) Match() *RegexResult {
 		ok, err := IsDir(fullPath)
 		if err == nil {
 			if ok {
-				handler := NewRegexDirectory(flags.RuleName, fullPath)
-				reger.Execute(handler)
+				NewRegexDirectory(flags.RuleName, fullPath).Execute()
 			} else {
-				handler := NewRegexFile(flags.RuleName, fullPath)
-				reger.Execute(handler)
+				NewRegexFile(flags.RuleName, fullPath).Execute()
 			}
 		}
 	}
-	return nil
-}
-
-// write content to file
-func (rs *RegexDirectory) Write(result *RegexResult) {
-	//log.Printf("Written Completed: %s", rs.DirPath)
 }
