@@ -6,9 +6,9 @@ kind: regex-rules
 regex-rules:
   - name: "sample"
     # regex pattern   
-    range-start: \<(?P<eltype>(html:\w+|input))+)\s+
+    range-start: \<(?P<tag>(html:\w+|input))+)\s+
     range-end: \/\>
-    pattern: \<(?P<eltype>[^\<\s]+)\s+(?P<p1>[^\<\>]*)size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
+    pattern: (?P<tag>\<[^\<\s]+\s+)(?P<p1>[^\<\>]*)size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
     param-patterns:
       full: [] # get params from full content.value
       range: [] # get params from range.value 
@@ -22,8 +22,11 @@ regex-rules:
       - if: ${size} <= ${maxlength} 
         do: ${replace.match} = false
 
-    replace-template: 
-      match: size="${size}"${p2}maxlength="${maxlength}"
+    replace-template: &template
+      match: ${tag}${p1}size="${size}"${p2}maxlength="${maxlength}"
+    export-template: 
+      match: |
+        ${tag}${p1}size="${size}"${p2}maxlength="${maxlength}"
     match-check-name: size-maxlength
     #replace-template: 
     #  match : |-  # |: has \n in last row, |- : no \n in last row.  
