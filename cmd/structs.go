@@ -61,11 +61,16 @@ type RegexRule struct {
 	MatchCheckRule *CheckRule `mapstructure:"match-check-rule"`
 }
 type RegexTemplate struct {
-	Name   string `mapstructure:"name"`
-	Header string `mapstructure:"header"`
-	Match  string `mapstructure:"match"`
-	Group  string `mapstructure:"group"`
-	Footer string `mapstructure:"footer"`
+	Name        string `mapstructure:"name"`
+	Header      string `mapstructure:"header"`
+	Match       string `mapstructure:"match"`
+	GroupHeader string `mapstructure:"group-header"`
+	Group       string `mapstructure:"group"`
+	GroupFooter string `mapstructure:"group-footer"`
+	ParamHeader string `mapstructure:"param-header"`
+	Param       string `mapstructure:"param"`
+	ParamFooter string `mapstructure:"param-footer"`
+	Footer      string `mapstructure:"footer"`
 }
 
 type Formula struct {

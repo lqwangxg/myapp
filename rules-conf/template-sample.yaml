@@ -14,7 +14,8 @@ match : |
   ----------------------------------------
 group : | 
   [group[${index}]${group.start}:${group.end}] [${group.key}]${group.value}
-  
+param : | 
+  ${param.key}=${param.value}
 footer: | 
   ==========================================================================
   === This is match footer. 

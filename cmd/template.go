@@ -170,3 +170,10 @@ func (t *StringTemplate) ResetParam(origin map[string]string) {
 	key := FromParamKey(match.Params["key"])
 	origin[key] = strconv.Itoa(i)
 }
+func (t *StringTemplate) append(paramMap map[string]string) string {
+	if t.Template == "" {
+		return ""
+	}
+	header, _ := t.ReplaceByMap(paramMap)
+	return header
+}

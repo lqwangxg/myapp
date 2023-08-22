@@ -1,8 +1,5 @@
 package cmd
 
-type evalInterface interface {
-	Eval(*Formula)
-}
 type paramMap map[string]string
 
 func (p *paramMap) Eval(fomula *Formula) {

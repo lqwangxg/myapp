@@ -89,6 +89,8 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 	result.FillParams(rs.Content)
 	rs.FillParams(result)
 	rs.EvalFormulas(result)
+	//reset params.count
+	result.RefreshParams()
 	return true, result
 }
 

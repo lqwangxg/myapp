@@ -103,32 +103,38 @@ func (rs *RegexResult) MergeParams(fromMatch *Capture) {
 		}
 	}
 }
-
+func (rs *RegexResult) RefreshParams() {
+	for i := 0; i < len(rs.Captures); i++ {
+		if rs.Captures[i].IsMatch {
+			rs.Captures[i].Params["params.count"] = strconv.Itoa(len(rs.Captures[i].Params))
+		}
+	}
+}
 func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, bool) {
 	var sb strings.Builder
 	hasChanged := false
+	if template == nil {
+		return "", false
+	}
 	//---------------------------------------
 	// replace Footer: rs.Result.Params
-	if template != nil && template.Header != "" {
-		tHeader := NewTemplate(template.Header)
-		header, changed := tHeader.ReplaceByMap(rs.Params)
-		sb.WriteString(header)
-		if changed {
-			hasChanged = true
-		}
-	}
-
+	tmp := template.Header
+	tmp = NewTemplate(tmp).append(rs.Params)
+	sb.WriteString(tmp)
 	//---------------------------------------
 	for _, item := range rs.Captures {
 		if item.IsMatch {
-			if template != nil && template.Match != "" {
+			if template.Match != "" {
 				tMatch := NewTemplate(template.Match)
 				tmp, changed := tMatch.ReplaceBy(item)
+				hasChanged = hasChanged || changed
 				sb.WriteString(tmp)
-				if changed {
-					hasChanged = true
-				}
+
 				if template.Group != "" {
+					tmp = template.GroupHeader
+					tmp = NewTemplate(tmp).append(rs.Params)
+					tmp = NewTemplate(tmp).append(item.Params)
+					sb.WriteString(tmp)
 					//replace by template.group
 					for _, g := range item.Groups {
 						tGroup := NewTemplate(template.Group)
@@ -138,6 +144,35 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, 
 							hasChanged = true
 						}
 					}
+					tmp = template.GroupFooter
+					tmp = NewTemplate(tmp).append(rs.Params)
+					tmp = NewTemplate(tmp).append(item.Params)
+					sb.WriteString(tmp)
+				}
+				if template.Param != "" {
+					//replace by template.param
+					tmp = template.ParamHeader
+					tmp = NewTemplate(tmp).append(rs.Params)
+					tmp = NewTemplate(tmp).append(item.Params)
+					sb.WriteString(tmp)
+
+					x := 0
+					for key, val := range item.Params {
+						tmp = template.Param
+						tmp, keyChanged := NewTemplate(tmp).ReplaceByKeyValue("param.key", key)
+						tmp, valChanged := NewTemplate(tmp).ReplaceByKeyValue("param.value", val)
+						tmp, idxChanged := NewTemplate(tmp).ReplaceByKeyValue("index", strconv.Itoa(x))
+						sb.WriteString(tmp)
+						if keyChanged || valChanged || idxChanged {
+							hasChanged = true
+						}
+						x++
+					}
+
+					tmp = template.ParamFooter
+					tmp = NewTemplate(tmp).append(rs.Params)
+					tmp = NewTemplate(tmp).append(item.Params)
+					sb.WriteString(tmp)
 				}
 			} else {
 				//when template is empty, export match.value
@@ -149,14 +184,9 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, 
 		}
 	}
 	//---------------------------------------
-	if template != nil && template.Footer != "" {
-		tFooter := NewTemplate(template.Footer)
-		footer, changed := tFooter.ReplaceByMap(rs.Params)
-		sb.WriteString(footer)
-		if changed {
-			hasChanged = true
-		}
-	}
+	tmp = template.Footer
+	tmp = NewTemplate(tmp).append(rs.Params)
+	sb.WriteString(tmp)
 	//---------------------------------------
 	return sb.String(), hasChanged
 }
