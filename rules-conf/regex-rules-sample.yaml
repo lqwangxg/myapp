@@ -18,7 +18,9 @@ regex-rules:
          
     formulas:
       - if: ${size} > ${maxlength} 
-        do: ${size} = ${maxlength}
+        do: ${size} = ${maxlength} * 1
+      - if: ${size} <= ${maxlength} 
+        do: ${replace.match} = false
 
     replace-template: 
       match: size="${size}"${p2}maxlength="${maxlength}"

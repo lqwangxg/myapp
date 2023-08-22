@@ -1,13 +1,32 @@
 package cmd
 
-func (rule *RegexRule) Eval(rs *RegexResult) {
-	if rule.Formulas == nil || len(rule.Formulas) == 0 {
+type evalInterface interface {
+	Eval(*Formula)
+}
+type paramMap map[string]string
+
+func (p *paramMap) Eval(fomula *Formula) {
+	if fomula.If == "" {
 		return
 	}
-	for _, fomula := range rule.Formulas {
-		fomula.EvalTrue()
+	tmpIf, changed := NewTemplate(fomula.If).ReplaceByMap(*p)
+	if !changed {
+		return
 	}
+
+	isTrue, err := NewTemplate(tmpIf).EvalTrue()
+	if err != nil {
+		return
+	}
+	if !isTrue {
+		return
+	}
+	NewTemplate(fomula.Do).ResetParam(*p)
 }
-func (f *Formula) EvalTrue() bool {
-	return true
+func (rs *RegexResult) Eval(formula *Formula) {
+	(*paramMap)(&rs.Params).Eval(formula)
+}
+
+func (rs *Capture) Eval(formula *Formula) {
+	(*paramMap)(&rs.Params).Eval(formula)
 }

@@ -88,6 +88,7 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 	result.SplitBy(rs.Content, matchOnly)
 	result.FillParams(rs.Content)
 	rs.FillParams(result)
+	rs.EvalFormulas(result)
 	return true, result
 }
 
@@ -122,8 +123,19 @@ func (rs *RegexText) FillParams(result *RegexResult) {
 		}
 	}
 }
-func (rs *RegexText) EvalFormulas() {
-
+func (rs *RegexText) EvalFormulas(result *RegexResult) {
+	if rs.RegexRule == nil {
+		return
+	}
+	for _, formula := range *rs.RegexRule.Formulas {
+		result.Eval(&formula)
+		for x := 0; x < len(result.Captures); x++ {
+			if !result.Captures[x].IsMatch {
+				continue
+			}
+			result.Captures[x].Eval(&formula)
+		}
+	}
 }
 
 // write content to file

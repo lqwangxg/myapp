@@ -46,7 +46,7 @@ type RegexRule struct {
 	Pattern     string `mapstructure:"pattern"`
 
 	ParamPatterns `mapstructure:"param-patterns"`
-	Formulas      `mapstructure:"formulas"`
+	Formulas      *[]Formula `mapstructure:"formulas"`
 
 	ExportTemplate      *RegexTemplate `mapstructure:"export-template"`
 	ExportTemplateName  string         `mapstructure:"export-template-name"`
@@ -67,7 +67,6 @@ type RegexTemplate struct {
 	Group  string `mapstructure:"group"`
 	Footer string `mapstructure:"footer"`
 }
-type Formulas []Formula
 
 type Formula struct {
 	If string `mapstructure:"if"`
