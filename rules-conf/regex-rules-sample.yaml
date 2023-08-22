@@ -6,13 +6,15 @@ kind: regex-rules
 regex-rules:
   - name: "sample"
     # regex pattern   
-    range-start: \<html:text\s+
+    range-start: \<(?P<eltype>(html:\w+|input))+)\s+
     range-end: \/\>
-    pattern: size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
+    pattern: \<(?P<eltype>[^\<\s]+)\s+(?P<p1>[^\<\>]*)size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
     param-patterns:
       full: [] # get params from full content.value
       range: [] # get params from range.value 
-      match: [] # get params from match.value
+      match:  # get params from match.value
+         - property\s*=\s*"(?P<elementId>\w+)"
+         - styleId\s*=\s*"(?P<styleId>\w+)"
          
     formulas:
       - if: ${size} > ${maxlength} 

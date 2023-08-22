@@ -19,10 +19,10 @@ func (rs *Regex) IsMatchOK(match Capture, content string) bool {
 	return true
 }
 
-func (rs *RegexText) MergeRangeStartEnd(content string) *[]Capture {
-	Rule := rs.RegexRule
-	ranges := Rule.MergeRangeStartEnd(content)
-}
+// func (rs *RegexText) MergeRangeStartEnd(content string) *[]Capture {
+// 	Rule := rs.RegexRule
+// 	ranges := Rule.MergeRangeStartEnd(content)
+// }
 
 // check the given match[start,end] whether between the range of matches
 // by range-start and range-end

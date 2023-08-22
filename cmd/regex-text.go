@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"log"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 type RegexText struct {
@@ -45,46 +47,34 @@ func (rs *RegexText) Match() *RegexResult {
 	config.Encode(&rs.Content)
 	config.EncodePattern(&rs.Pattern)
 
-	result := rs.GetMatchResult()
-	// match.Index.
-	x := 0
-	for i, c := range result.Captures {
-		// skip if it's not match
-		if !c.IsMatch {
-			continue
-		}
-
-		match := &result.Captures[i]
-		match.Groups = make([]Capture, 0)
-		match.Params = make(map[string]string)
-		position := result.Positions[x]
-		match.Params["index"] = strconv.Itoa(x)
-		match.Params["match.start"] = strconv.Itoa(match.Start)
-		match.Params["match.end"] = strconv.Itoa(match.End)
-
-		for y := 0; y < len(result.GroupNames); y++ {
-			gname := result.GroupNames[y]
-			if y == 0 {
-				gname = "match.value"
-			}
-			group := &Capture{Start: position[y*2+0], End: position[y*2+1], IsMatch: true}
-			group.Value = rs.Content[group.Start:group.End]
-			if group.Params == nil {
-				group.Params = make(map[string]string)
-			}
-			group.Params["index"] = strconv.Itoa(y)
-			group.Params["group.start"] = strconv.Itoa(group.Start)
-			group.Params["group.end"] = strconv.Itoa(group.End)
-			group.Params["group.key"] = gname
-			group.Params["group.value"] = group.Value
-			match.Groups = append(match.Groups, *group)
-			match.Params[gname] = group.Value
-		}
-		x++
+	isMatched, result := rs.GetMatchResult(false)
+	if !isMatched {
+		return nil
 	}
-	result.MatchCount = x
-	result.Params["matches.count"] = strconv.Itoa(x)
 	return result
+}
+
+func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
+	r := regexp.MustCompile(rs.Pattern)
+	positions := r.FindAllStringSubmatchIndex(rs.Content, -1)
+	if len(positions) == 0 {
+		log.Printf("No Matched. pattern: %s", rs.Pattern)
+		return false, nil
+	}
+	result := &RegexResult{
+		Pattern:    rs.Pattern,
+		GroupNames: r.SubexpNames(),
+		Params:     make(map[string]string),
+		Positions:  positions,
+	}
+
+	result.Params["pattern"] = rs.Pattern
+	result.Params["matches.count"] = strconv.Itoa(0)
+	result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
+	result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
+	result.SplitBy(rs.Content, matchOnly)
+	result.FillParams(rs.Content)
+	return true, result
 }
 
 // write content to file
@@ -92,7 +82,6 @@ func (rs *RegexText) Write(result *RegexResult) {
 	if result == nil {
 		return
 	}
-	log.Printf("Match.Count=%d", result.MatchCount)
 	if result.MatchCount == 0 {
 		return
 	}

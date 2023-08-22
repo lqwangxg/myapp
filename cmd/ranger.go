@@ -1,113 +1,41 @@
 package cmd
 
-// // split input by matches
-// func (rs *Regex) SplitMatches(input string) {
-// 	cpos := 0
-// 	epos := len(input)
-// 	rs.Result.Ranges = rs.Result.Ranges[:cap(rs.Result.Ranges)]
-// 	for i, match := range rs.Result.Matches {
-// 		if cpos < epos && cpos < match.Start {
-// 			//append string before match
-// 			h := &RegexRange{
-// 				Capture: &Capture{
-// 					Start: cpos,
-// 					End:   match.Start,
-// 					Value: input[cpos:match.Start],
-// 					RType: UnMatchType,
-// 				},
-// 			}
-// 			rs.Result.Ranges = append(rs.Result.Ranges, *h)
-// 		}
-// 		// append match.value
-// 		m := &RegexRange{
-// 			Capture: &Capture{
-// 				Start: match.Start,
-// 				End:   match.End,
-// 				Value: input[match.Start:match.End],
-// 				RType: MatchType,
-// 			},
-// 			MatchIndex: i,
-// 		}
-// 		rs.Result.Ranges = append(rs.Result.Ranges, *m)
-// 		cpos = match.End
-// 	}
-// 	if cpos < epos {
-// 		//append last string
-// 		f := &RegexRange{
-// 			Capture: &Capture{
-// 				Start: cpos,
-// 				End:   epos,
-// 				Value: input[cpos:epos],
-// 				RType: UnMatchType,
-// 			},
-// 		}
-// 		rs.Result.Ranges = append(rs.Result.Ranges, *f)
-// 	}
-// }
-
 // split input by pattern matches
 // if matchOnly=true, will get matches Capture[Start:End] only.
-func SplitMatchIndex(pattern, input string, matchOnly bool) *[]Capture {
+func GetMatchCaptures(pattern, input string, matchOnly bool) (bool, *RegexResult) {
 	// return 0 ~ length when pattern is empty
-	captures := make([]Capture, 0)
+	result := &RegexResult{
+		Pattern:   pattern,
+		Positions: make([][]int, 0),
+		Captures:  make([]Capture, 0),
+	}
+	// return full text to capture.
 	if pattern == "" {
 		c := &Capture{Start: 0, End: len(input)}
 		c.Value = input[c.Start:c.End]
-		captures = append(captures, *c)
-		return &captures
+		result.Captures = append(result.Captures, *c)
+		return false, result
 	}
+
 	config.Encode(&pattern)
 	config.EncodePattern(&pattern)
-	// rs := regexp.MustCompile(pattern)
-	r := NewRegexText(pattern, input)
-	result := r.GetMatchResult()
-	//result.Positions
-	// positions := rs.FindAllStringSubmatchIndex(input, -1)
-	return result.SplitBy(input, matchOnly)
-}
 
-// split positions
-// if matchOnly=true, will get matches Capture[Start:End] only.
-func (result *RegexResult) SplitBy(input string, matchOnly bool) *[]Capture {
-	// no alias, because no update, reference only.
-	positions := result.Positions
-	//alias result.Captures for updating itself
-	captures := &result.Captures
-	if len(positions) == 0 {
-		*captures = append(*captures, Capture{Start: 0, End: len(input)})
+	r := NewRegexText(pattern, input)
+	isMatched, rsMatched := r.GetMatchResult(matchOnly)
+	if isMatched {
+		return true, rsMatched
 	} else {
-		cpos := 0
-		epos := len(input)
-		for _, pos := range positions {
-			// match Capture
-			match := Capture{Start: pos[0], End: pos[1], IsMatch: true}
-			// append the ahead of match
-			if !matchOnly && cpos < epos && cpos < match.Start {
-				*captures = append(*captures, Capture{Start: cpos, End: match.Start})
-			}
-			// append match.value
-			*captures = append(*captures, match)
-			cpos = match.End
-		}
-		// append last string
-		if !matchOnly && cpos < epos {
-			*captures = append(*captures, Capture{Start: cpos, End: epos})
-		}
+		return false, result
 	}
-	//refresh result.Captures.value
-	for i := 0; i < len(result.Captures); i++ {
-		c := &result.Captures[i]
-		c.Value = input[c.Start:c.End]
-	}
-	return captures
 }
 
 func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
-	sBounds := SplitMatchIndex(rule.RangeStart, input, true)
-	eBounds := SplitMatchIndex(rule.RangeEnd, input, true)
-
+	startMatched, rsStart := GetMatchCaptures(rule.RangeStart, input, true)
+	endMatched, rsEnd := GetMatchCaptures(rule.RangeEnd, input, true)
+	sBounds := &rsStart.Captures
+	eBounds := &rsEnd.Captures
 	rBounds := make([]Capture, 0)
-	if len(*sBounds) > 1 {
+	if startMatched {
 		//==================================
 		// on matches rangeStart, len(*sBound)>1
 		sb := *sBounds
@@ -128,7 +56,7 @@ func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
 		}
 		//last capture
 
-	} else if len(*eBounds) > 1 {
+	} else if endMatched {
 		//==================================
 		// on matches rangeEnd, len(*eBound)=1
 		eb := *eBounds

@@ -4,15 +4,15 @@ kind: templates
 template-define: &default-template # define anchor for reference below by &anchor-name
   name: default
   header: |
-    pattern: ${pattern}
+    rule-name:${rule.name}, pattern: ${pattern}
     matches.count: ${matches.count}, groups.count: ${groups.count}, groups.keys: ${groups.keys}
     ===========================================================================================
   match : | 
-    ----------------------------------------
+    --------------------------------------------------------------------------------
     [match[${index}]${match.start}:${match.end}]${match.value}
     ----------------------------------------
   group : | 
-    [group[${index}]${group.start}:${group.end}][${group.key}]${group.value}
+    [group[${index}]${group.start}:${group.end},key=${group.key}]value=${group.value}
     
   footer: | 
     ===========================================================================================
