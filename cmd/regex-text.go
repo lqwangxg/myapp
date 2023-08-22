@@ -87,7 +87,43 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 	result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
 	result.SplitBy(rs.Content, matchOnly)
 	result.FillParams(rs.Content)
+	rs.FillParams(result)
 	return true, result
+}
+
+func (rs *RegexText) FillParams(result *RegexResult) {
+	if rs.RegexRule == nil {
+		return
+	}
+	// match full content
+	for _, pattern := range rs.RegexRule.ParamPatterns.Fulls {
+		tmpRT := NewRegexText(pattern, rs.Content)
+		if tmpOK, tmpRS := tmpRT.GetMatchResult(true); tmpOK {
+			for _, m := range tmpRS.Captures {
+				result.MergeParams(&m)
+			}
+		}
+	}
+
+	//TODO: match range.value
+
+	// match match.value
+	for _, pattern := range rs.RegexRule.ParamPatterns.Matches {
+		for x := 0; x < len(result.Captures); x++ {
+			if !result.Captures[x].IsMatch {
+				continue
+			}
+			tmpRT := NewRegexText(pattern, result.Captures[x].Value)
+			if tmpOK, tmpRS := tmpRT.GetMatchResult(true); tmpOK {
+				for _, tm := range tmpRS.Captures {
+					result.Captures[x].MergeParams(&tm)
+				}
+			}
+		}
+	}
+}
+func (rs *RegexText) EvalFormulas() {
+
 }
 
 // write content to file

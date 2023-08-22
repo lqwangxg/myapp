@@ -91,6 +91,18 @@ func (rs *RegexResult) FillParams(input string) {
 	rs.MatchCount = x
 	rs.Params["matches.count"] = strconv.Itoa(x)
 }
+func (rs *RegexResult) MergeParams(fromMatch *Capture) {
+	if !fromMatch.IsMatch {
+		return
+	}
+	for key, fromValue := range fromMatch.Params {
+		// If the key not exists, add key/value
+		// if exists, do nothing
+		if _, ok := rs.Params[key]; !ok {
+			rs.Params[key] = fromValue
+		}
+	}
+}
 
 func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, bool) {
 	var sb strings.Builder
