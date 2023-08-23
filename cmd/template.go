@@ -57,7 +57,7 @@ func (t *StringTemplate) ReplaceByKeyValue(key string, value string) (string, bo
 	regex := regexp.MustCompile(ToParamKey(key))
 	changed := false
 	if regex.MatchString(t.Template) {
-		t.Template = regex.ReplaceAllString(t.Template, value)
+		t.Template = regex.ReplaceAllLiteralString(t.Template, value)
 		changed = true
 	}
 	return t.Template, changed
