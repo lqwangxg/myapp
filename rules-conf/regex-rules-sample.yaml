@@ -1,33 +1,33 @@
 kind: regex-rules
+regex-rule-define: &default-rule 
+  name: "input"
+  # regex pattern   
+  range-start: \<(?P<tag>(html:\w+|input))+)\s+
+  range-end: \/\>
+  pattern: (?P<tag>\<[^\<\s]+\s+)(?P<p1>[^\<\>]*)size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
+  param-patterns:
+    full: [] # get params from full content.value
+    range: [] # get params from range.value 
+    match:  # get params from match.value
+        - property\s*=\s*"(?P<elementId>\w+)"
+        - styleId\s*=\s*"(?P<styleId>\w+)"
+  formulas:
+    - if: ${size} > ${maxlength} * 2 
+      do: ${size} = ${maxlength} * 2
+    - do: ${replace.match} = false
 
+  replace-template: &template
+    match: ${tag}${p1}size="${size}"${p2}maxlength="${maxlength}"
 #=========================
 # write your custom rules below.
 #=========================
 regex-rules:
-  - name: "sample"
-    # regex pattern   
-    range-start: \<(?P<tag>(html:\w+|input))+)\s+
-    range-end: \/\>
-    pattern: (?P<tag>\<[^\<\s]+\s+)(?P<p1>[^\<\>]*)size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
-    param-patterns:
-      full: [] # get params from full content.value
-      range: [] # get params from range.value 
-      match:  # get params from match.value
-         - property\s*=\s*"(?P<elementId>\w+)"
-         - styleId\s*=\s*"(?P<styleId>\w+)"
-         
-    formulas:
-      - if: ${size} > ${maxlength} 
-        do: ${size} = ${maxlength} * 1
-      - if: ${size} <= ${maxlength} 
-        do: ${replace.match} = false
+  - <<: *default-rule 
+    name: "table"
+    pattern: (?P<tag>\<table\s+)(?P<p1>[^\<\>]*)width="(?P<width>\d+)px"
 
-    replace-template: &template
-      match: ${tag}${p1}size="${size}"${p2}maxlength="${maxlength}"
+    replace-template:
+      match: ${tag}${p1}width="${width}px"
     export-template: 
       match: |
-        ${tag}${p1}size="${size}"${p2}maxlength="${maxlength}"
-    match-check-name: size-maxlength
-    #replace-template: 
-    #  match : |-  # |: has \n in last row, |- : no \n in last row.  
-    #    ${match.value}
+        ${tag}${p1}width="${width}px"
