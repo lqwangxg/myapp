@@ -9,21 +9,18 @@ template-define: &default-template # define anchor for reference below by &ancho
     ===========================================================================================
   match : | 
     --------------------------------------------------------------------------------
-    match[${index}]${match.start}:${match.end}]${match.value}
+    match[${index}][${match.start}:${match.end}]${match.value}
     ----------------
   group-header: |
-    --group-header: groups.count: ${groups.count}, groups.keys: ${groups.keys}-----
+    -- groups.count: ${groups.count}, groups.keys: ${groups.keys}-----
   group : | 
-    group[${index}]${group.start}:${group.end},key=${group.key}]value=${group.value}
-  group-footer: |
-    --group-footer↑↑↑--------------
+    group[${index}][${group.start}:${group.end},key=${group.key}]value=${group.value}
+  group-footer:
   param-header: |
-    --param-header: params.count: ${params.count}--------------
+    -- params.count: ${params.count}--------------
   param : | 
     param[${index}]${param.key}=${param.value}
-  param-footer: |
-    --param-footer↑↑↑--------------
-
+  param-footer: 
   footer: | 
     ===========================================================================================
     ===="copyright lqwangxg@gmail.com 2023"====================================================

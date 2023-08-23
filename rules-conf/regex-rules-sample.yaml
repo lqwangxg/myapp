@@ -24,10 +24,10 @@ regex-rule-define: &default-rule
 regex-rules:
   - <<: *default-rule 
     name: "table"
-    pattern: (?P<tag>\<table\s+)(?P<p1>[^\<\>]*)width="(?P<width>\d+)px"
+    pattern: (?P<tag>\<table\s+)(?P<p1>[^\<\>]*)width="(?P<width>\d+)px"(?P<p2>[^\<\>]*)(?P<end>\>)
 
     replace-template:
-      match: ${tag}${p1}width="${width}px"
-    export-template: 
-      match: |
-        ${tag}${p1}width="${width}px"
+      match: ${tag}${p1}width="${width}px"${p2}${end}
+    #export-template: 
+    #  match: |
+    #    ${tag}${p1}width="${width}px"
