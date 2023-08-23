@@ -130,7 +130,7 @@ func (rs *RegexText) EvalFormulas(result *RegexResult) {
 		return
 	}
 	for _, formula := range *rs.RegexRule.Formulas {
-		result.Eval(&formula)
+		//result.Eval(&formula)
 		for x := 0; x < len(result.Captures); x++ {
 			if !result.Captures[x].IsMatch {
 				continue

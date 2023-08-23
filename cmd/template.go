@@ -15,7 +15,7 @@ const (
 	anykey       = `\$\{` + keypattern + `\}`
 	fmtkey       = `\$\{(?P<key>%s)\}`
 	kindkey      = `kind:\s*` + keypattern
-	asignformula = anykey + `\s*=\s*(?P<formula>.+)$`
+	asignformula = `[\$\{]?` + keypattern + `[\}]?` + `\s*=\s*(?P<formula>.+)$`
 )
 
 type StringTemplate struct {
@@ -85,54 +85,52 @@ func (t *StringTemplate) ReplaceBy(m Capture) (string, bool) {
 	return t.Template, false
 }
 
-func (t *StringTemplate) EvalTrue() (bool, error) {
-	// eval := goval.NewEvaluator()
-	// result, err := eval.Evaluate(t.Template, nil, nil)
-	// if err != nil {
-	// 	//fmt.Printf("Error: %s\n", err)
-	// 	return false, err
-	// }
-
-	// //fmt.Printf("%v (%s)\n\n", result, reflect.TypeOf(result))
-	// if reflect.TypeOf(result).Kind() != reflect.Bool {
-	// 	return false, errors.Errorf("result %v is not bool.", result)
-	// }
-	// v := reflect.ValueOf(&result).Elem()
-	// ret := v.Interface().(bool)
-	// //fmt.Printf("eval(%s)=%v", t.Template, ret)
-	// return ret, nil
-	v, err := t.Eval(reflect.Bool)
+func (t *StringTemplate) EvalTrue(p map[string]string) (bool, error) {
+	v, err := t.Eval2(reflect.Bool, p)
 	if err == nil {
 		return v.Interface().(bool), nil
 	} else {
 		return false, err
 	}
 }
-func (t *StringTemplate) EvalInt() (int, error) {
-	v, err := t.Eval(reflect.Int)
+func (t *StringTemplate) EvalInt(p map[string]string) (int, error) {
+	v, err := t.Eval2(reflect.Int, p)
 	if err == nil {
 		return v.Interface().(int), nil
 	} else {
 		return 0, err
 	}
 }
-func (t *StringTemplate) Eval(kind reflect.Kind) (reflect.Value, error) {
+
+func (t *StringTemplate) Eval2(kind reflect.Kind, params map[string]string) (reflect.Value, error) {
+	variables := make(map[string]any)
+	for key, val := range params {
+		if IsMatchString(`^\d+$`, val) {
+			if v, err := strconv.Atoi(val); err == nil {
+				variables[key] = v
+				continue
+			}
+		}
+		variables[key] = val
+	}
+	return t.Evaluate(kind, variables)
+}
+
+func (t *StringTemplate) Evaluate(kind reflect.Kind, variables map[string]any) (reflect.Value, error) {
 	eval := goval.NewEvaluator()
-	result, err := eval.Evaluate(t.Template, nil, nil)
+	result, err := eval.Evaluate(t.Template, variables, EvalFuncs())
 	if err != nil {
-		//fmt.Printf("Error: %s\n", err)
+		fmt.Printf("%v", err)
 		return reflect.ValueOf(result), err
 	}
 
-	//fmt.Printf("%v (%s)\n\n", result, reflect.TypeOf(result))
 	if reflect.TypeOf(result).Kind() != kind {
 		return reflect.ValueOf(result), errors.Errorf("result %v is not %s.", result, kind.String())
 	}
-	//v := reflect.ValueOf(&result).Elem()
-	//ret := v.Interface().(reflect.Value)
-	//fmt.Printf("eval(%s)=%v", t.Template, ret)
+
 	return reflect.ValueOf(&result).Elem(), nil
 }
+
 func (t *StringTemplate) GetMatchString(pattern string) string {
 	regex := regexp.MustCompile(pattern)
 	if regex.MatchString(t.Template) {
@@ -159,11 +157,8 @@ func (t *StringTemplate) ResetParam(origin map[string]string) {
 		return
 	}
 
-	evTemp, changed := NewTemplate(match.Params["formula"]).ReplaceByMap(origin)
-	if !changed {
-		return
-	}
-	i, err := NewTemplate(evTemp).EvalInt()
+	evTemp, _ := NewTemplate(match.Params["formula"]).ReplaceByMap(origin)
+	i, err := NewTemplate(evTemp).EvalInt(origin)
 	if err != nil {
 		return
 	}

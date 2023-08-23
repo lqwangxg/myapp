@@ -23,11 +23,41 @@ regex-rule-define: &default-rule
 #=========================
 regex-rules:
   - <<: *default-rule 
+    name: "buttonwidth"
+    pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)width:(?P<width>\d+)px(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
+    formulas:
+    - do: lenvalue=len(value) 
+    - do: lenUTF8value=lenUTF8(value) 
+    - if: lenUTF8value * 10 + 10 < width
+      do: width = lenUTF8value * 10 + 30
+
+    replace-template:
+      match: ${tag}${p1}type=${k1}button${k1}${p2}width:${width}px${p3}value=${k2}${value}${k2}${p4}${end}
+    export-template: 
+      match: |
+        ${match.value
+        --------------------------------------------------------------------------------
+  
+      group : | 
+        group[${index}]${group.key}=${group.value}
+      param : | 
+        param[${index}]${param.key}=${param.value}
+    
+  - <<: *default-rule 
     name: "table"
     pattern: (?P<tag>\<table\s+)(?P<p1>[^\<\>]*)width="(?P<width>\d+)px"(?P<p2>[^\<\>]*)(?P<end>\>)
 
     replace-template:
       match: ${tag}${p1}width="${width}px"${p2}${end}
+    export-template: 
+      match: |
+        ${match.value}
+  - <<: *default-rule 
+    name: "asign_element_value"
+    pattern: (?P<asign>\.value\s*=\s*document.getElementById)\("(?P<id>\w+)"\)\s*;
+    
+    replace-template:
+      match: ${asign}("${id}");
     #export-template: 
     #  match: |
-    #    ${tag}${p1}width="${width}px"
+    #    ${tag}${p1}width="${width}px"    
