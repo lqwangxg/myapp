@@ -50,7 +50,7 @@ func (rs *RegexResult) SplitBy(input string, matchOnly bool) *[]Capture {
 	return captures
 }
 
-func (rs *RegexResult) FillParams(input string) {
+func (rs *RegexResult) FillParams(input string, detail bool) {
 
 	// match.Index.
 	x := 0
@@ -64,32 +64,38 @@ func (rs *RegexResult) FillParams(input string) {
 		match.Groups = make([]Capture, 0)
 		match.Params = make(map[string]string)
 		position := rs.Positions[x]
-		match.Params["index"] = strconv.Itoa(x)
-		match.Params["match.start"] = strconv.Itoa(match.Start)
-		match.Params["match.end"] = strconv.Itoa(match.End)
+		if detail {
+			match.Params["match.index"] = strconv.Itoa(x)
+			match.Params["match.start"] = strconv.Itoa(match.Start)
+			match.Params["match.end"] = strconv.Itoa(match.End)
+		}
 
 		for y := 0; y < len(rs.GroupNames); y++ {
-			gname := rs.GroupNames[y]
-			if y == 0 {
-				gname = "match.value"
-			}
 			group := &Capture{Start: position[y*2+0], End: position[y*2+1], IsMatch: true}
 			group.Value = input[group.Start:group.End]
 			if group.Params == nil {
 				group.Params = make(map[string]string)
 			}
-			group.Params["index"] = strconv.Itoa(y)
-			group.Params["group.start"] = strconv.Itoa(group.Start)
-			group.Params["group.end"] = strconv.Itoa(group.End)
-			group.Params["group.key"] = gname
-			group.Params["group.value"] = group.Value
-			match.Groups = append(match.Groups, *group)
+			gname := rs.GroupNames[y]
+			if y == 0 {
+				gname = "match.value"
+			}
+			if detail {
+				group.Params["group.index"] = strconv.Itoa(y)
+				group.Params["group.start"] = strconv.Itoa(group.Start)
+				group.Params["group.end"] = strconv.Itoa(group.End)
+				group.Params["group.key"] = gname
+				group.Params["group.value"] = group.Value
+			}
 			match.Params[gname] = group.Value
+			match.Groups = append(match.Groups, *group)
 		}
 		x++
 	}
 	rs.MatchCount = x
-	rs.Params["matches.count"] = strconv.Itoa(x)
+	if detail {
+		rs.Params["group.count"] = strconv.Itoa(x)
+	}
 }
 func (rs *RegexResult) MergeParams(fromMatch *Capture) {
 	if !fromMatch.IsMatch {
@@ -106,7 +112,7 @@ func (rs *RegexResult) MergeParams(fromMatch *Capture) {
 func (rs *RegexResult) RefreshParams() {
 	for i := 0; i < len(rs.Captures); i++ {
 		if rs.Captures[i].IsMatch {
-			rs.Captures[i].Params["params.count"] = strconv.Itoa(len(rs.Captures[i].Params))
+			rs.Captures[i].Params["param.count"] = strconv.Itoa(len(rs.Captures[i].Params))
 		}
 	}
 }
@@ -161,7 +167,7 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, 
 						tmp = template.Param
 						tmp, keyChanged := NewTemplate(tmp).ReplaceByKeyValue("param.key", key)
 						tmp, valChanged := NewTemplate(tmp).ReplaceByKeyValue("param.value", val)
-						tmp, idxChanged := NewTemplate(tmp).ReplaceByKeyValue("index", strconv.Itoa(x))
+						tmp, idxChanged := NewTemplate(tmp).ReplaceByKeyValue("param.index", strconv.Itoa(x))
 						sb.WriteString(tmp)
 						if keyChanged || valChanged || idxChanged {
 							hasChanged = true

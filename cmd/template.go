@@ -19,6 +19,7 @@ const (
 	PATTERN_FORMULA_BOOL = `is\w+\(|\|\||\&\&|\!`
 	PATTERN_FORMULA_INT  = `\s*[\+\-\*\/\%]\s*`
 	PATTERN_FORMULA_WORD = `^\s*` + PATTERN_KEY + `\s*$`
+	PATTERN_RESERVED_KEY = `^(match|group|param).\w+$`
 )
 
 type StringTemplate struct {

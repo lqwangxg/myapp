@@ -55,10 +55,10 @@ func (rs *RegexText) Match() (bool, *RegexResult) {
 	// before match
 	config.Encode(&rs.Content)
 	config.EncodePattern(&rs.Pattern)
-	return rs.GetMatchResult(false)
+	return rs.GetMatchResult(false, true)
 }
 
-func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
+func (rs *RegexText) GetMatchResult(matchOnly, detail bool) (bool, *RegexResult) {
 	r := regexp.MustCompile(rs.Pattern)
 	positions := r.FindAllStringSubmatchIndex(rs.Content, -1)
 	if len(positions) == 0 {
@@ -75,23 +75,28 @@ func (rs *RegexText) GetMatchResult(matchOnly bool) (bool, *RegexResult) {
 		Params:     make(map[string]string),
 		Positions:  positions,
 	}
-	if rs.Parent != nil {
-		result.Params["from.file"] = rs.Parent.FromFile
-		result.Params["to.file"] = rs.Parent.ToFile
-	}
-	if rs.RegexRule != nil {
-		result.Params["rule.name"] = rs.RegexRule.Name
-	}
-	result.Params["pattern"] = rs.Pattern
-	result.Params["matches.count"] = strconv.Itoa(0)
-	result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
-	result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
 	result.SplitBy(rs.Content, matchOnly)
-	result.FillParams(rs.Content)
-	rs.FillParams(result)
-	rs.EvalFormulas(result)
-	//reset params.count
-	result.RefreshParams()
+	result.FillParams(rs.Content, true)
+
+	if detail {
+		if rs.Parent != nil {
+			result.Params["from.file"] = rs.Parent.FromFile
+			result.Params["to.file"] = rs.Parent.ToFile
+		}
+		if rs.RegexRule != nil {
+			result.Params["rule.name"] = rs.RegexRule.Name
+		}
+
+		result.Params["pattern"] = rs.Pattern
+		result.Params["matches.count"] = strconv.Itoa(0)
+		result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
+		result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
+
+		rs.FillParams(result)
+		rs.EvalFormulas(result)
+		//reset params.count
+		result.RefreshParams()
+	}
 	return true, result
 }
 
@@ -99,15 +104,16 @@ func (rs *RegexText) FillParams(result *RegexResult) {
 	if rs.RegexRule == nil {
 		return
 	}
+	initParams := make(map[string]string)
 	for _, pattern := range rs.RegexRule.ParamPatterns.Inits {
 		key, val := NewTemplate(pattern).ToKeyValue()
-		result.Params[key] = val
+		initParams[key] = val
 	}
 
 	// match full content
 	for _, pattern := range rs.RegexRule.ParamPatterns.Fulls {
 		tmpRT := NewRegexText(pattern, rs.Content)
-		if tmpOK, tmpRS := tmpRT.GetMatchResult(true); tmpOK {
+		if tmpOK, tmpRS := tmpRT.GetMatchResult(true, false); tmpOK {
 			for _, m := range tmpRS.Captures {
 				result.MergeParams(&m)
 			}
@@ -123,12 +129,13 @@ func (rs *RegexText) FillParams(result *RegexResult) {
 				continue
 			}
 			tmpRT := NewRegexText(pattern, result.Captures[x].Value)
-			if tmpOK, tmpRS := tmpRT.GetMatchResult(true); tmpOK {
+			if tmpOK, tmpRS := tmpRT.GetMatchResult(true, false); tmpOK {
 				for _, tm := range tmpRS.Captures {
 					result.Captures[x].MergeParams(&tm)
 				}
 			}
-			MergeMap(result.Params, result.Captures[x].Params, false)
+			// merge initparams to match.params for formula evalute.
+			MergeMap(initParams, result.Captures[x].Params, false)
 		}
 	}
 }

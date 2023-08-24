@@ -21,7 +21,7 @@ func GetMatchCaptures(pattern, input string, matchOnly bool) (bool, *RegexResult
 	config.EncodePattern(&pattern)
 
 	r := NewRegexText(pattern, input)
-	isMatched, rsMatched := r.GetMatchResult(matchOnly)
+	isMatched, rsMatched := r.GetMatchResult(matchOnly, false)
 	if isMatched {
 		return true, rsMatched
 	} else {

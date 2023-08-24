@@ -68,14 +68,16 @@ regex-rules:
     param-patterns:
       init: 
         - styleId=
+        - property=
       match:  # get params from match.value
-        - property\s*=\s*(?P<property>"\w+")
-        - styleId\s*=\s*(?P<styleId>"\w+")
+        - property\s*=\s*(?P<property>["']?\w+["']?)
+        - styleId\s*=\s*(?P<styleId>["']?\w+["']?)
 
     formulas:
-    - do: skip1 = !isEmpty(styleId)
+    - do: skip1 = isEmpty(styleId)
     - do: skip2 = isEmpty(property)
-    - do: match.skip = skip1 || skip2
+    - do: skip3 = ! skip1
+    - do: match.skip = skip3 || skip2
     - do: styleId = property
 
     replace-template:

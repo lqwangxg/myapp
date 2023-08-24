@@ -14,7 +14,7 @@ func (appContext *AppContext) LoadFile(configFile string) bool {
 		return false
 	}
 
-	isMatched, result := NewRegexText(PATTERN_KIND_KEY, content).GetMatchResult(true)
+	isMatched, result := NewRegexText(PATTERN_KIND_KEY, content).GetMatchResult(true, false)
 	if !isMatched {
 		return false
 	}
