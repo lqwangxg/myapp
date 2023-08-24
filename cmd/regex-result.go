@@ -123,7 +123,7 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, 
 	sb.WriteString(tmp)
 	//---------------------------------------
 	for _, item := range rs.Captures {
-		if item.IsMatch {
+		if !item.Skip() {
 			if template.Match != "" {
 				tMatch := NewTemplate(template.Match)
 				tmp, changed := tMatch.ReplaceBy(item)

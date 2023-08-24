@@ -11,11 +11,14 @@ import (
 )
 
 const (
-	keypattern   = `(?P<key>[\w\.\-]+)`
-	anykey       = `\$\{` + keypattern + `\}`
-	fmtkey       = `\$\{(?P<key>%s)\}`
-	kindkey      = `kind:\s*` + keypattern
-	asignformula = `[\$\{]?` + keypattern + `[\}]?` + `\s*=\s*(?P<formula>.+)$`
+	PATTERN_KEY          = `(?P<key>[\w\.\-]+)`
+	PATTERN_ANYKEY       = `\$\{` + PATTERN_KEY + `\}`
+	PATTERN_REFKEY       = `\$\{(?P<key>%s)\}`
+	PATTERN_KIND_KEY     = `kind:\s*` + PATTERN_KEY
+	PATTERN_FORMULA_DO   = `[\$\{]?` + PATTERN_KEY + `[\}]?` + `\s*=\s*(?P<formula>.+)$`
+	PATTERN_FORMULA_BOOL = `is\w+\(|\|\||\&\&|\!`
+	PATTERN_FORMULA_INT  = `\s*[\+\-\*\/\%]\s*`
+	PATTERN_FORMULA_WORD = `^\s*` + PATTERN_KEY + `\s*$`
 )
 
 type StringTemplate struct {
@@ -29,13 +32,13 @@ func NewTemplate(s string) *StringTemplate {
 	return &StringTemplate{s}
 }
 func ToParamKey(key string) string {
-	return fmt.Sprintf(fmtkey, key)
+	return fmt.Sprintf(PATTERN_REFKEY, key)
 }
 func FromParamKey(key string) string {
-	if !IsMatchString(anykey, key) {
+	if !IsMatchString(PATTERN_ANYKEY, key) {
 		return key
 	}
-	return NewTemplate(key).GetMatchString(keypattern)
+	return NewTemplate(key).GetMatchString(PATTERN_KEY)
 }
 
 // return true if contains ${key}.
@@ -46,7 +49,7 @@ func (t *StringTemplate) HasKey(key string) bool {
 // return true if contains any key.
 // key chars accept: \w+\.\-
 func (t *StringTemplate) HasAnyKey() bool {
-	return IsMatchString(anykey, t.Template)
+	return IsMatchString(PATTERN_ANYKEY, t.Template)
 }
 
 func (t *StringTemplate) ReplaceByKeyValue(key string, value string) (string, bool) {
@@ -110,6 +113,11 @@ func (t *StringTemplate) Eval2(kind reflect.Kind, params map[string]string) (ref
 				variables[key] = v
 				continue
 			}
+		} else if IsMatchString(`^true|false$`, val) {
+			if v, err := strconv.ParseBool(val); err == nil {
+				variables[key] = v
+				continue
+			}
 		}
 		variables[key] = val
 	}
@@ -147,23 +155,38 @@ func (t *StringTemplate) GetKey(pattern string) string {
 }
 func (t *StringTemplate) ResetParam(origin map[string]string) {
 	// ${key} = ${formula}
-	isMatched, matches := NewRegexText(asignformula, t.Template).GetMatchResult(true)
-	if !isMatched {
-		return
-	}
+	key, assign := t.ToKeyValue()
+	// isMatched, matches := NewRegexText(PATTERN_FORMULA_DO, t.Template).GetMatchResult(true)
+	// if !isMatched {
+	// 	return
+	// }
 
-	match := matches.FirstMatch()
-	if match == nil {
-		return
+	// match := matches.FirstMatch()
+	// if match == nil {
+	// 	return
+	// }
+	// assign := match.Params["formula"]
+	evTemp, _ := NewTemplate(assign).ReplaceByMap(origin)
+	// key := FromParamKey(match.Params["key"])
+	if IsMatchString(PATTERN_FORMULA_BOOL, assign) {
+		i, err := NewTemplate(evTemp).EvalTrue(origin)
+		if err != nil {
+			return
+		}
+		origin[key] = strconv.FormatBool(i)
+	} else if IsMatchString(PATTERN_FORMULA_INT, assign) {
+		i, err := NewTemplate(evTemp).EvalInt(origin)
+		if err != nil {
+			return
+		}
+		origin[key] = strconv.Itoa(i)
+	} else if IsMatchString(PATTERN_FORMULA_WORD, assign) {
+		if _, ok := origin[assign]; ok {
+			origin[key] = origin[assign]
+		}
+	} else {
+		fmt.Printf("nothing done about formula:%s", t.Template)
 	}
-
-	evTemp, _ := NewTemplate(match.Params["formula"]).ReplaceByMap(origin)
-	i, err := NewTemplate(evTemp).EvalInt(origin)
-	if err != nil {
-		return
-	}
-	key := FromParamKey(match.Params["key"])
-	origin[key] = strconv.Itoa(i)
 }
 func (t *StringTemplate) append(paramMap map[string]string) string {
 	if t.Template == "" {
@@ -171,4 +194,11 @@ func (t *StringTemplate) append(paramMap map[string]string) string {
 	}
 	header, _ := t.ReplaceByMap(paramMap)
 	return header
+}
+func (t *StringTemplate) ToKeyValue() (key, value string) {
+	r := regexp.MustCompile(`\s*=\s*`)
+	strArray := r.Split(t.Template, 2)
+	key = strArray[0]
+	value = strArray[1]
+	return key, value
 }

@@ -38,6 +38,19 @@ func EvalFuncs() EvalFunctions {
 			str := p1.(string)
 			return strconv.Atoi(str)
 		}
+		evalFuncs["isEmpty"] = func(args ...interface{}) (interface{}, error) {
+			p1 := args[0]
+			str := p1.(string)
+			if str == "" {
+				return true, nil
+			}
+			return false, nil
+		}
+		evalFuncs["not"] = func(args ...interface{}) (interface{}, error) {
+			p1 := args[0]
+			istrue := p1.(bool)
+			return !istrue, nil
+		}
 	}
 	return evalFuncs
 }

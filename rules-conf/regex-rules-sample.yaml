@@ -60,4 +60,33 @@ regex-rules:
       match: ${asign}("${id}");
     #export-template: 
     #  match: |
-    #    ${tag}${p1}width="${width}px"    
+    #    ${tag}${p1}width="${width}px"
+    
+  - <<: *default-rule 
+    name: "select-styleid"
+    pattern: (?P<tag>\<html:select\s+)(?P<p1>[^\<\>]*)(?P<end>\\?\>)
+    param-patterns:
+      init: 
+        - styleId=
+      match:  # get params from match.value
+        - property\s*=\s*(?P<property>"\w+")
+        - styleId\s*=\s*(?P<styleId>"\w+")
+
+    formulas:
+    - do: skip1 = !isEmpty(styleId)
+    - do: skip2 = isEmpty(property)
+    - do: match.skip = skip1 || skip2
+    - do: styleId = property
+
+    replace-template:
+      match: ${tag}${p1}styleId=${styleId}${end}
+    export-template: 
+      match: |
+        ${match.value}
+        --------------------------------------------------------------------------------
+  
+      group : | 
+        group[${index}]${group.key}=${group.value}
+      param : | 
+        param[${index}]${param.key}=${param.value}
+    

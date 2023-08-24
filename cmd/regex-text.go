@@ -30,18 +30,19 @@ func NewRegexTextByParent(parent *RegexFile, content string) *RegexText {
 		RegexRule: rule}
 	return rs
 }
-func (rs *RegexText) refreshRule(ruleName string) {
 
-	if ruleName == "" {
-		ruleName = "default"
-	}
-	rule := appContext.RegexRules.GetRule(ruleName)
-	if rule == nil {
-		log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
-		return
-	}
-	rs.RegexRule = rule
-}
+// func (rs *RegexText) refreshRule(ruleName string) {
+
+//		if ruleName == "" {
+//			ruleName = "default"
+//		}
+//		rule := appContext.RegexRules.GetRule(ruleName)
+//		if rule == nil {
+//			log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
+//			return
+//		}
+//		rs.RegexRule = rule
+//	}
 func (rs *RegexText) Execute() {
 	isMatched, result := rs.Match()
 	if !isMatched {
@@ -98,6 +99,11 @@ func (rs *RegexText) FillParams(result *RegexResult) {
 	if rs.RegexRule == nil {
 		return
 	}
+	for _, pattern := range rs.RegexRule.ParamPatterns.Inits {
+		key, val := NewTemplate(pattern).ToKeyValue()
+		result.Params[key] = val
+	}
+
 	// match full content
 	for _, pattern := range rs.RegexRule.ParamPatterns.Fulls {
 		tmpRT := NewRegexText(pattern, rs.Content)
@@ -122,6 +128,7 @@ func (rs *RegexText) FillParams(result *RegexResult) {
 					result.Captures[x].MergeParams(&tm)
 				}
 			}
+			MergeMap(result.Params, result.Captures[x].Params, false)
 		}
 	}
 }
