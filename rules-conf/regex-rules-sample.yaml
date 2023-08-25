@@ -4,44 +4,55 @@ regex-rule-define: &default-rule
   # regex pattern   
   range-start: \<(?P<tag>(html:\w+|input))+)\s+
   range-end: \/\>
-  pattern: (?P<tag>\<[^\<\s]+\s+)(?P<p1>[^\<\>]*)size="(?P<size>\d+)"(?P<p2>[^\<\>]*)maxlength="(?P<maxlength>\d+)"
-  param-patterns:
+  pattern: 
+  param-patterns:  
     full: [] # get params from full content.value
     range: [] # get params from range.value 
-    match:  # get params from match.value
-        - property\s*=\s*"(?P<elementId>\w+)"
-        - styleId\s*=\s*"(?P<styleId>\w+)"
+    match: [] # get params from match.value
   formulas:
-    - if: ${size} > ${maxlength} * 2 
-      do: ${size} = ${maxlength} * 2
-    - do: ${replace.match} = false
-
-  replace-template: &template
-    match: ${tag}${p1}size="${size}"${p2}maxlength="${maxlength}"
+    - if: 
+      do: 
+    - do:
+  replace-template: 
+    match: 
 #=========================
 # write your custom rules below.
 #=========================
 regex-rules:
   - <<: *default-rule 
+    name: "hidden"
+    range-start: \<logic:iterate
+    range-end: \<\/logic:iterate\>
+    pattern: (?P<tag>\<html:hidden\s+)(?P<p1>[^\<\>]*)(?P<styleId>\s+styleId\s*=\s*["']?[^"']+["']?)(?P<p2>[^\<\>]*)(?P<end>\\?\>)
+    replace-template:
+      match: |- 
+        ${tag}${p1}${p2}${end}
+    
+    
+  - <<: *default-rule 
     name: "buttonwidth"
-    pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)width:(?P<width>\d+)px(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
+    pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
     formulas:
-    - do: lenvalue=len(value) 
-    - do: lenUTF8value=lenUTF8(value) 
-    - if: lenUTF8value * 10 + 10 < width
-      do: width = lenUTF8value * 10 + 30
+    - do: minWidth=lenUTF8(value) * 10 + 20 
+    - if: minWidth < width
+      do: match.skip = minWidth < width
+    - if: minWidth > width
+      do: width = minWidth
 
     replace-template:
-      match: ${tag}${p1}type=${k1}button${k1}${p2}width:${width}px${p3}value=${k2}${value}${k2}${p4}${end}
+      match: |- 
+        ${tag}${p1}type=${k1}button${k1}${p2}${wlabel}${width}${p3}value=${k2}${value}${k2}${p4}${end}
     export-template: 
       match: |
-        ${match.value
+        ${match.value}
         --------------------------------------------------------------------------------
   
       group : | 
-        group[${index}]${group.key}=${group.value}
+        group[${group.index}]${group.key}=${group.value}
+      param-header: |
+        --------------------------------------------------------------------------------
       param : | 
-        param[${index}]${param.key}=${param.value}
+        param[${param.index}]${param.key}=${param.value}
     
   - <<: *default-rule 
     name: "table"
@@ -58,30 +69,26 @@ regex-rules:
     
     replace-template:
       match: ${asign}("${id}");
-    #export-template: 
-    #  match: |
-    #    ${tag}${p1}width="${width}px"
     
   - <<: *default-rule 
     name: "select-styleid"
-    pattern: (?P<tag>\<html:select\s+)(?P<p1>[^\<\>]*)(?P<end>\\?\>)
+    pattern: (?P<tag>\<html:select\s+)(?P<p1>[^\<\>]*)(?P<property>property\s*=\s*["']?[^"']+["']?)(?P<p2>[^\<\>]*)(?P<end>\\?\>)
     param-patterns:
       init: 
         - styleId=
-        - property=
       match:  # get params from match.value
-        - property\s*=\s*(?P<property>["']?\w+["']?)
-        - styleId\s*=\s*(?P<styleId>["']?\w+["']?)
+        - property\s*=\s*(?P<propertyid>["']?[^"']+["']?)
+        - styleId\s*=\s*(?P<styleId>["']?[^"']+["']?)
 
     formulas:
     - do: skip1 = isEmpty(styleId)
     - do: skip2 = isEmpty(property)
     - do: skip3 = ! skip1
     - do: match.skip = skip3 || skip2
-    - do: styleId = property
+    - do: styleId = propertyid
 
     replace-template:
-      match: ${tag}${p1}styleId=${styleId}${end}
+      match: ${tag}${p1}${property} styleId=${styleId}${p2}${end}
     export-template: 
       match: |
         ${match.value}

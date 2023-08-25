@@ -23,3 +23,15 @@ redis:
   addr: "localhost:6379"
   password: ""
   db: 0
+
+const:
+  PATTERN_KEY          : (?P<key>[\w\.\-]+)
+  PATTERN_ANYKEY       : \$\{(?P<key>[\w\.\-]+)\}
+  PATTERN_REFKEY       : \$\{(?P<key>%s)\}
+  PATTERN_KIND_KEY     : kind:\s*(?P<key>[\w\.\-]+)
+  PATTERN_FORMULA_DO   : |-
+    [\$\{]?(?P<key>[\w\.\-]+)[\}]?\s*:\s*(?P<formula>.+)$
+  PATTERN_FORMULA_BOOL : is\w+\(|\|\||\&\&|\!
+  PATTERN_FORMULA_INT  : \s*[\+\-\*\/\%]\s*|len\(|len\w+\(
+  PATTERN_FORMULA_WORD : ^\s*(?P<key>[\w\.\-]+)\s*$ 
+  PATTERN_RESERVED_KEY : ^(match|group|param).\w+$

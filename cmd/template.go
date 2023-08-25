@@ -17,7 +17,7 @@ const (
 	PATTERN_KIND_KEY     = `kind:\s*` + PATTERN_KEY
 	PATTERN_FORMULA_DO   = `[\$\{]?` + PATTERN_KEY + `[\}]?` + `\s*=\s*(?P<formula>.+)$`
 	PATTERN_FORMULA_BOOL = `is\w+\(|\|\||\&\&|\!`
-	PATTERN_FORMULA_INT  = `\s*[\+\-\*\/\%]\s*`
+	PATTERN_FORMULA_INT  = `\s*[\+\-\*\/\%]\s*|len\(|len\w+\(`
 	PATTERN_FORMULA_WORD = `^\s*` + PATTERN_KEY + `\s*$`
 	PATTERN_RESERVED_KEY = `^(match|group|param).\w+$`
 )
@@ -155,20 +155,13 @@ func (t *StringTemplate) GetKey(pattern string) string {
 	return t.Template
 }
 func (t *StringTemplate) ResetParam(origin map[string]string) {
-	// ${key} = ${formula}
-	key, assign := t.ToKeyValue()
-	// isMatched, matches := NewRegexText(PATTERN_FORMULA_DO, t.Template).GetMatchResult(true)
-	// if !isMatched {
-	// 	return
-	// }
+	// skip if empty
+	if t.Template == "" {
+		return
+	}
 
-	// match := matches.FirstMatch()
-	// if match == nil {
-	// 	return
-	// }
-	// assign := match.Params["formula"]
+	key, assign := t.ToKeyValue()
 	evTemp, _ := NewTemplate(assign).ReplaceByMap(origin)
-	// key := FromParamKey(match.Params["key"])
 	if IsMatchString(PATTERN_FORMULA_BOOL, assign) {
 		i, err := NewTemplate(evTemp).EvalTrue(origin)
 		if err != nil {
@@ -186,7 +179,7 @@ func (t *StringTemplate) ResetParam(origin map[string]string) {
 			origin[key] = origin[assign]
 		}
 	} else {
-		fmt.Printf("nothing done about formula:%s", t.Template)
+		fmt.Printf("skip formula:%s, match.value:%v\n", t.Template, origin["match.value"])
 	}
 }
 func (t *StringTemplate) append(paramMap map[string]string) string {
