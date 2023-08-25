@@ -29,21 +29,13 @@ regex-rules:
         ${tag}${p1}${p2}${end}
     formulas:
     - do: match_skip= match(`\$\{[\w\.]+\}`, styleId) || !match_inrange
-    
   - <<: *default-rule 
-    name: "buttonwidth"
-    pattern: (?P<tag>\<html:button\s+)(?P<p1>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
+    name: "test"
+    #pattern: (?P<tag>\<html:button\s+)(?P<p1>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
+    pattern: |-
+      (?P<tag>\<html:button\s*)(?P<p1>[^\<\>]*)(?P<end>\>)
     #pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
-    formulas:
-    - do: minWidth=lenUTF8(value) * 10 + 20 
-    - if: minWidth < width
-      do: match_skip = minWidth < width
-    - if: minWidth > width
-      do: width = minWidth
-
-    replace-template:
-      match: |- 
-        ${tag}${p1}${wlabel}${width}${p3}value=${k2}${value}${k2}${p4}${end}
+    
     export-template: 
       match: |
         ${match.value}
@@ -57,11 +49,45 @@ regex-rules:
         param[${param_index}]${param_key}=${param_value}
     
   - <<: *default-rule 
-    name: "table"
-    pattern: (?P<tag>\<table\s+)(?P<p1>[^\<\>]*)width="(?P<width>\d+)px"(?P<p2>[^\<\>]*)(?P<end>\>)
+    name: "buttonwidth"
+    #pattern:  (?P<tag>\<html:button\s*)(?P<p1>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)(?P<end>\>)
+    pattern: (?P<tag>\<input\s*)(?P<p1>[^\<\>]*)(?P<k1>type=["']?button["']?)(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
+    formulas:
+    - do: minWidth=lenUTF8(value) * 10 + 20 
+    - if: minWidth < width
+      do: match_skip = minWidth < width
+    - if: minWidth > width
+      do: width = minWidth
 
     replace-template:
-      match: ${tag}${p1}width="${width}px"${p2}${end}
+      #match: ${tag}${p1}value=${k2}${value}${k2}${p2}${wlabel}${width}${p3}${end}
+      match: ${tag}${p1}${k1}${p2}${wlabel}${width}${p3}value=${k2}${value}${k2}${p4}${end}
+    export-template: 
+      match: |
+        ${match.value}
+        --------------------------------------------------------------------------------
+  
+      group : | 
+        group[${group_index}]${group_key}=${group_value}
+      param-header: |
+        --------------------------------------------------------------------------------
+      param : | 
+        param[${param_index}]${param_key}=${param_value}
+  - <<: *default-rule 
+    name: "div"
+    pattern: (?P<tag>\<div\s+)(?P<p1>[^\<\>]*)width:(?P<width>9\d{2})px"(?P<p2>[^\<\>]*)(?P<end>\>)
+    replace-template:
+      match: ${tag}${p1}width:1000px"${p2}${end}
+
+  - <<: *default-rule 
+    name: "table"
+    range-start: \<div(?P<div>[^\<\>]*)(width:\s*1000|width=\s*["']*1000)
+    range-end: \<\/div\>
+    pattern: (?P<tag>\<table\s+)(?P<p1>[^\<\>]*)width="(?P<width>9\d{2})px"(?P<p2>[^\<\>]*)(?P<end>\>)
+    formulas:
+    - do: match_skip= !match_inrange || width<960 
+    replace-template:
+      match: ${tag}${p1}width="100px"${p2}${end}
     export-template: 
       match: |
         ${match.value}

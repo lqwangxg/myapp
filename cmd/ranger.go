@@ -30,11 +30,18 @@ func GetMatchCaptures(pattern, input string, matchOnly bool) (bool, *RegexResult
 }
 
 func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
+	if rule.RangeStart == "" && rule.RangeEnd == "" {
+		return nil
+	}
 	startMatched, rsStart := GetMatchCaptures(rule.RangeStart, input, true)
 	endMatched, rsEnd := GetMatchCaptures(rule.RangeEnd, input, true)
+	rBounds := make([]Capture, 0)
+	if !startMatched && !endMatched {
+		return &rBounds
+	}
 	sBounds := &rsStart.Captures
 	eBounds := &rsEnd.Captures
-	rBounds := make([]Capture, 0)
+
 	if startMatched {
 		//==================================
 		// on matches rangeStart, len(*sBound)>1
