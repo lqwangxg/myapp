@@ -179,7 +179,7 @@ func (t *StringTemplate) ResetParam(origin map[string]string) {
 			origin[key] = origin[assign]
 		}
 	} else {
-		fmt.Printf("skip formula:%s, match.value:%v\n", t.Template, origin["match.value"])
+		fmt.Printf("skip formula:%s, match.value:%v\n", t.Template, origin["match_value"])
 	}
 }
 func (t *StringTemplate) append(paramMap map[string]string) string {

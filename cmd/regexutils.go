@@ -101,7 +101,7 @@ func (rs *Regex) Hashsum(input string) string {
 // 		for x := 0; x < len(rs.Result.GroupNames); x++ {
 // 			gname := rs.Result.GroupNames[x]
 // 			if x == 0 {
-// 				gname = "match.value"
+// 				gname = "match_value"
 // 			}
 // 			group := &Capture{Start: position[x*2+0], End: position[x*2+1]}
 // 			//group.SetValue(input)

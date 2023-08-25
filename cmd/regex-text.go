@@ -15,34 +15,17 @@ type RegexText struct {
 }
 
 func NewRegexText(pattern, content string) *RegexText {
-	rs := &RegexText{pattern, content, nil, nil}
-	return rs
+	return &RegexText{pattern, content, nil, nil}
 }
 func NewRegexTextByParent(parent *RegexFile, content string) *RegexText {
-	var rule *RegexRule
-	if parent != nil {
-		rule = parent.Rule
-	}
-	rs := &RegexText{
+	return &RegexText{
 		Pattern:   parent.Rule.Pattern,
 		Content:   content,
 		Parent:    parent,
-		RegexRule: rule}
-	return rs
+		RegexRule: parent.Rule,
+	}
 }
 
-// func (rs *RegexText) refreshRule(ruleName string) {
-
-//		if ruleName == "" {
-//			ruleName = "default"
-//		}
-//		rule := appContext.RegexRules.GetRule(ruleName)
-//		if rule == nil {
-//			log.Printf("Regex rule not found, Over :<. Rule name: %s", ruleName)
-//			return
-//		}
-//		rs.RegexRule = rule
-//	}
 func (rs *RegexText) Execute() {
 	isMatched, result := rs.Match()
 	if !isMatched {
@@ -75,6 +58,7 @@ func (rs *RegexText) GetMatchResult(matchOnly, detail bool) (bool, *RegexResult)
 		Params:     make(map[string]string),
 		Positions:  positions,
 	}
+
 	result.SplitBy(rs.Content, matchOnly)
 	result.FillParams(rs.Content, true)
 
@@ -93,9 +77,8 @@ func (rs *RegexText) GetMatchResult(matchOnly, detail bool) (bool, *RegexResult)
 		result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
 
 		rs.FillParams(result)
-		rs.EvalFormulas(result)
-		//reset params.count
 		result.RefreshParams()
+		rs.EvalFormulas(result)
 	}
 	return true, result
 }
@@ -104,6 +87,8 @@ func (rs *RegexText) FillParams(result *RegexResult) {
 	if rs.RegexRule == nil {
 		return
 	}
+	result.RangeCaptures = *rs.RegexRule.MergeRangeStartEnd(rs.Content)
+
 	initParams := make(map[string]string)
 	for _, pattern := range rs.RegexRule.ParamPatterns.Inits {
 		key, val := NewTemplate(pattern).ToKeyValue()

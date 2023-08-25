@@ -26,36 +26,19 @@ func (rs *Regex) IsMatchOK(match Capture, content string) bool {
 
 // check the given match[start,end] whether between the range of matches
 // by range-start and range-end
-func (rs *Regex) IsDestMatch(match Capture, content string) bool {
-	ranges := rs.Rule.MergeRangeStartEnd(content)
+func (rs *RegexText) IsDestMatch(match Capture) bool {
+	ranges := rs.RegexRule.MergeRangeStartEnd(rs.Content)
 	inRange := false
 	rangeValue := ""
 	for _, r := range *ranges {
 		if r.Start <= match.Start && match.End <= r.End {
 			inRange = true
-			rangeValue = content[r.Start:r.End]
+			rangeValue = rs.Content[r.Start:r.End]
 			break
 		}
 	}
 	log.Printf("rangeValue:%s", rangeValue)
 	return inRange
-	// // return false if not included in any range.
-	// if !inRange {
-	// 	return false
-	// }
-	// if rs.Rule.IsRangeSkip(rangeValue) {
-	// 	return false
-	// }
-	// if !rs.Rule.IsRangeDest(rangeValue) {
-	// 	return false
-	// }
-	// if rs.Rule.IsMatchSkip(match.Value) {
-	// 	return false
-	// }
-	// if !rs.Rule.IsMatchDest(match.Value) {
-	// 	return false
-	// }
-	//return true
 }
 
 // func (rule *RegexRule) IsRangeSkip(src string) bool {

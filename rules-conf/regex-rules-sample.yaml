@@ -27,15 +27,16 @@ regex-rules:
     replace-template:
       match: |- 
         ${tag}${p1}${p2}${end}
-    
-    
+    formulas:
+    - do: match_skip = !match_inrange
+
   - <<: *default-rule 
     name: "buttonwidth"
     pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
     formulas:
     - do: minWidth=lenUTF8(value) * 10 + 20 
     - if: minWidth < width
-      do: match.skip = minWidth < width
+      do: match_skip = minWidth < width
     - if: minWidth > width
       do: width = minWidth
 
@@ -48,11 +49,11 @@ regex-rules:
         --------------------------------------------------------------------------------
   
       group : | 
-        group[${group.index}]${group.key}=${group.value}
+        group[${group_index}]${group_key}=${group_value}
       param-header: |
         --------------------------------------------------------------------------------
       param : | 
-        param[${param.index}]${param.key}=${param.value}
+        param[${param_index}]${param_key}=${param_value}
     
   - <<: *default-rule 
     name: "table"
@@ -84,18 +85,18 @@ regex-rules:
     - do: skip1 = isEmpty(styleId)
     - do: skip2 = isEmpty(property)
     - do: skip3 = ! skip1
-    - do: match.skip = skip3 || skip2
+    - do: match_skip = skip3 || skip2
     - do: styleId = propertyid
 
     replace-template:
       match: ${tag}${p1}${property} styleId=${styleId}${p2}${end}
     export-template: 
       match: |
-        ${match.value}
+        ${match_value}
         --------------------------------------------------------------------------------
   
       group : | 
-        group[${index}]${group.key}=${group.value}
+        group[${group_index}]${group_key}=${group_value}
       param : | 
-        param[${index}]${param.key}=${param.value}
+        param[${group_index}]${param_key}=${param_value}
     

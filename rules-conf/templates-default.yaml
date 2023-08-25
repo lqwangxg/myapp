@@ -14,12 +14,12 @@ template-define: &default-template # define anchor for reference below by &ancho
   group-header: |
     -- groups.count: ${groups.count}, groups.keys: ${groups.keys}-----
   group : | 
-    group[${index}][${group.start}:${group.end},key=${group.key}]value=${group.value}
+    group[${index}][${group_start}:${group_end},key=${group_key}]value=${group_value}
   group-footer:
   param-header: |
     -- params.count: ${params.count}--------------
   param : | 
-    param[${index}]${param.key}=${param.value}
+    param[${index}]${param_key}=${param_value}
   param-footer: 
   footer: | 
     ===========================================================================================
@@ -34,8 +34,8 @@ templates:
   - <<: *default-template # name=default
   - <<: *default-replace-template
     name: delete.match # for delete all the match
-    match: ${match.delete}
+    match: ${match_delete}
   - <<: *default-replace-template
     name: delete.group # for delete all the group
-    group: ${group.delete}
+    group: ${param_delete}
     

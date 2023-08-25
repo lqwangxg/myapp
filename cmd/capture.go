@@ -45,7 +45,7 @@ func (rs *Capture) Skip() bool {
 	if !rs.IsMatch {
 		return true
 	}
-	if val, ok := rs.Params["match.skip"]; ok {
+	if val, ok := rs.Params["match_skip"]; ok {
 		if skip, err := strconv.ParseBool(val); err == nil {
 			return skip
 		}
