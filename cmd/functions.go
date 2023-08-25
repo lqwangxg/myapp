@@ -46,10 +46,11 @@ func EvalFuncs() EvalFunctions {
 			}
 			return false, nil
 		}
-		evalFuncs["not"] = func(args ...interface{}) (interface{}, error) {
-			p1 := args[0]
-			istrue := p1.(bool)
-			return !istrue, nil
+		evalFuncs["match"] = func(args ...interface{}) (interface{}, error) {
+			pattern := args[0].(string)
+			input := args[1].(string)
+			istrue := IsMatchString(pattern, input)
+			return istrue, nil
 		}
 	}
 	return evalFuncs

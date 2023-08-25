@@ -28,8 +28,8 @@ regex-rules:
       match: |- 
         ${tag}${p1}${p2}${end}
     formulas:
-    - do: match_skip = !match_inrange
-
+    - do: match_skip= match(`\$\{[\w\.]+\}`, styleId) || !match_inrange
+    
   - <<: *default-rule 
     name: "buttonwidth"
     pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
