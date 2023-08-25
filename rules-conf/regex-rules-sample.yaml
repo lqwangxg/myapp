@@ -2,7 +2,7 @@ kind: regex-rules
 regex-rule-define: &default-rule 
   name: "input"
   # regex pattern   
-  range-start: \<(?P<tag>(html:\w+|input))+)\s+
+  range-start: \<(html:\w+|input)\s+
   range-end: \/\>
   pattern: 
   param-patterns:  
@@ -32,7 +32,8 @@ regex-rules:
     
   - <<: *default-rule 
     name: "buttonwidth"
-    pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
+    pattern: (?P<tag>\<html:button\s+)(?P<p1>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
+    #pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)type=(?P<k1>["']?)button["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
     formulas:
     - do: minWidth=lenUTF8(value) * 10 + 20 
     - if: minWidth < width
@@ -42,7 +43,7 @@ regex-rules:
 
     replace-template:
       match: |- 
-        ${tag}${p1}type=${k1}button${k1}${p2}${wlabel}${width}${p3}value=${k2}${value}${k2}${p4}${end}
+        ${tag}${p1}${wlabel}${width}${p3}value=${k2}${value}${k2}${p4}${end}
     export-template: 
       match: |
         ${match.value}
