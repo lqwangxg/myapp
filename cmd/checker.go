@@ -9,15 +9,15 @@ import (
 
 // check whether the content is should be skiped by skip-pattern,
 // or is required by dest-pattern
-func (rs *Regex) IsFullOK(content string, rule *CheckRule) bool {
-	return rs.Rule.FullCheckRule.CanDo(content)
-}
-func (rs *Regex) IsRangeOK(match Capture, content string) bool {
-	return true
-}
-func (rs *Regex) IsMatchOK(match Capture, content string) bool {
-	return true
-}
+// func (rs *Regex) IsFullOK(content string, rule *CheckRule) bool {
+// 	return rs.Rule.FullCheckRule.CanDo(content)
+// }
+// func (rs *Regex) IsRangeOK(match Capture, content string) bool {
+// 	return true
+// }
+// func (rs *Regex) IsMatchOK(match Capture, content string) bool {
+// 	return true
+// }
 
 // func (rs *RegexText) MergeRangeStartEnd(content string) *[]Capture {
 // 	Rule := rs.RegexRule

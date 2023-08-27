@@ -17,12 +17,15 @@ params:
 
 indent: "  " #space(2)
 prefix: ""
-
+  
 redis:
   enable: true 
   addr: "localhost:6379"
   password: ""
   db: 0
+
+webserver:
+  port:  ":8080"
 
 const:
   PATTERN_KEY          : (?P<key>[\w\.\-]+)

@@ -1,9 +1,5 @@
 package cmd
 
-import (
-	"regexp"
-)
-
 type AppConfig struct {
 	EChars      map[string]string `yaml:"echars"`
 	RuleDir     string            `yaml:"ruledir"`
@@ -11,20 +7,24 @@ type AppConfig struct {
 	Indent      string            `yaml:"indent"`
 	Prefix      string            `yaml:"prefix"`
 	RedisOption RedisOption       `mapstructure:"redis"`
+	WebServer   WebServerOption   `yaml:"webserver"`
 }
 
-type Regex struct {
-	R           *regexp.Regexp
-	Result      RegexResult
-	Cache       bool
-	CacheKey    string
-	FromFile    string
-	ToFile      string
-	ExportFlag  bool
-	ReplaceFlag bool
-	Rule        *RegexRule
-}
+// type Regex struct {
+// 	R           *regexp.Regexp
+// 	Result      RegexResult
+// 	Cache       bool
+// 	CacheKey    string
+// 	FromFile    string
+// 	ToFile      string
+// 	ExportFlag  bool
+// 	ReplaceFlag bool
+// 	Rule        *RegexRule
+// }
 
+type WebServerOption struct {
+	Port string `yaml:"port"`
+}
 type RedisOption struct {
 	Enable   bool   `yaml:"enable"`
 	Addr     string `yaml:"addr"`
