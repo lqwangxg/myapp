@@ -207,6 +207,7 @@ func (rs *RegexResult) Contained(match *Capture) {
 	for _, r := range rs.RangeCaptures {
 		if r.Start <= match.Start && match.End <= r.End {
 			match.Params["match_inrange"] = strconv.FormatBool(true)
+			match.Params["range_value"] = r.Value
 			return
 		}
 	}

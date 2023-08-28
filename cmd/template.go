@@ -16,7 +16,7 @@ const (
 	PATTERN_REFKEY       = `\$\{(?P<key>%s)\}`
 	PATTERN_KIND_KEY     = `kind:\s*` + PATTERN_KEY
 	PATTERN_FORMULA_DO   = `[\$\{]?` + PATTERN_KEY + `[\}]?` + `\s*=\s*(?P<formula>.+)$`
-	PATTERN_FORMULA_BOOL = `is\w+\(|\|\||\&\&|\!`
+	PATTERN_FORMULA_BOOL = `is\w+\(|\|\||\&\&|\!|match\(`
 	PATTERN_FORMULA_INT  = `\s*[\+\-\*\/\%]\s*|len\(|len\w+\(`
 	PATTERN_FORMULA_WORD = `^\s*` + PATTERN_KEY + `\s*$`
 	PATTERN_RESERVED_KEY = `^(match|group|param).\w+$`

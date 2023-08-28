@@ -30,6 +30,29 @@ regex-rules:
     formulas:
     - do: match_skip= match(`\$\{[\w\.]+\}`, styleId) || !match_inrange
   - <<: *default-rule 
+    name: "input"
+    range-start: \<td
+    range-end: \<\/td\>
+    pattern: (?P<tag>\<html:(text|select)\s+)(?P<p1>[^\<\>]*)(?P<width>size\s*=\s*"\d+")(?P<p2>[^\<\>]*)(?P<end>\\?\>)
+    param-patterns:
+      range: 
+        - (?P<date>floatingCalendar)
+    formulas:
+    - do: match_skip= match(`floatingCalendar`, range_value)
+    - do: match_skip= match_skip || match(`html:(radio|select|button)|～|\>\s*\-|-\s*\<`, range_value)
+    
+    replace-template:
+      match: |- 
+        ${tag}${p1}width:95%${p2}${end}
+  
+  - <<: *default-rule 
+    name: "input95p"
+    pattern: (?P<tag>\<html:(text|select)\s+)(?P<p1>[^\<\>]*)(?P<width>width:\s*90%)(?P<p2>[^\<\>]*)(?P<end>\\?\>)
+    replace-template:
+      match: |- 
+        ${tag}${p1}width:95%${p2}${end}
+    
+  - <<: *default-rule 
     name: "test"
     #pattern: (?P<tag>\<html:button\s+)(?P<p1>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']*(?P<p4>[^\<\>]*)(?P<end>\>)
     pattern: |-
