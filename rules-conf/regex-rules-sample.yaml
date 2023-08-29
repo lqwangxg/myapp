@@ -97,6 +97,20 @@ regex-rules:
         --------------------------------------------------------------------------------
       param : | 
         param[${param_index}]${param_key}=${param_value}
+        
+  - <<: *default-rule 
+    name: "inputsize"
+    #pattern:  (?P<tag>\<html:button\s*)(?P<p1>[^\<\>]*)value=(?P<k2>["']?)(?P<value>[^'"]*)["']?(?P<p2>[^\<\>]*)(?P<wlabel>width:\s*)(?P<width>\d+)(?P<p3>[^\<\>]*)(?P<end>\>)
+    pattern: (?P<tag>\<(html:text|input)\s*)(?P<p1>[^\<\>]*)size\s*=(?P<s1>["']?)(?P<size>\d+)["']?(?P<p2>[^\<\>]*)maxlength\s*=(?P<m1>["']?)(?P<maxlength>[^'"]*)["']*(?P<p3>[^\<\>]*)(?P<end>\>)
+    
+    formulas:
+    - if: size > maxlength /2
+      do: size = maxlength /2
+
+    replace-template:
+      #match: ${tag}${p1}value=${k2}${value}${k2}${p2}${wlabel}${width}${p3}${end}
+      match: ${tag}${p1}size=${s1}${size}${s1}${p2}maxlength=${m1}${maxlength}${m1}${p3}${end}
+   
   - <<: *default-rule 
     name: "div"
     pattern: (?P<tag>\<div\s+)(?P<p1>[^\<\>]*)width:(?P<width>9\d{2})px"(?P<p2>[^\<\>]*)(?P<end>\>)

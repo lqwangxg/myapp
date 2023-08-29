@@ -21,7 +21,7 @@ regex-rules:
   - name: "addstyleid"
     range-start: \<logic:iterate[^\<\>]*\s+indexId\s*=\s*["']?(?P<indexId>\w+)["']?
     range-end: \<\/logic:iterate\>
-    pattern: (?P<tag>\<html:\w+\s+)(?P<p1>[^\<\>]*)(?P<property>property\s*=\s*["']?[^"']+["']?)(?P<p2>[^\<\>]*)(?P<end>\\?\>)
+    pattern: (?P<tag>\<html:(text|select)\s+)(?P<p1>[^\<\>]*)(?P<property>property\s*=\s*["']?[^"']+["']?)(?P<p2>[^\<\>]*)(?P<end>\\?\>)
     param-patterns:
       init:  
         - styleId=
