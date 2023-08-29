@@ -102,7 +102,7 @@ func (rs *RegexText) FromRanges(result *RegexResult) {
 			}
 		}
 	}
-	// match full content
+	// match Ranges content
 	for _, pattern := range rs.RegexRule.ParamPatterns.Ranges {
 		for x := 0; x < len(result.Captures); x++ {
 			match := &result.Captures[x]

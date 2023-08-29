@@ -3,16 +3,15 @@ package cmd
 // split input by pattern matches
 // if matchOnly=true, will get matches Capture[Start:End] only.
 func GetMatchCaptures(pattern, input string, matchOnly bool) (bool, *RegexResult) {
-	// return 0 ~ length when pattern is empty
-	result := &RegexResult{
-		Pattern:   pattern,
-		Positions: make([][]int, 0),
-		Captures:  make([]Capture, 0),
-	}
 	// return full text to capture.
 	if pattern == "" {
 		c := &Capture{Start: 0, End: len(input)}
 		c.Value = input[c.Start:c.End]
+		result := &RegexResult{
+			Pattern:   pattern,
+			Positions: make([][]int, 0),
+			Captures:  make([]Capture, 0),
+		}
 		result.Captures = append(result.Captures, *c)
 		return false, result
 	}
@@ -25,6 +24,11 @@ func GetMatchCaptures(pattern, input string, matchOnly bool) (bool, *RegexResult
 	if isMatched {
 		return true, rsMatched
 	} else {
+		result := &RegexResult{
+			Pattern:   pattern,
+			Positions: make([][]int, 0),
+			Captures:  make([]Capture, 0),
+		}
 		return false, result
 	}
 }
@@ -48,7 +52,7 @@ func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
 		sb := *sBounds
 		for i := 0; i < len(*sBounds); i++ {
 			s := sb[i]
-			c := &Capture{Start: s.Start, End: len(input)}
+			c := &Capture{Start: s.Start, End: len(input), IsMatch: true, Params: make(map[string]string)}
 			if i < len(*sBounds)-1 {
 				c.End = sb[i+1].Start
 			}
@@ -70,7 +74,7 @@ func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
 		// on matches rangeEnd, len(*eBound)=1
 		eb := *eBounds
 		for i := 0; i < len(*eBounds); i++ {
-			c := &Capture{Start: 0, End: eb[i].End}
+			c := &Capture{Start: 0, End: eb[i].End, IsMatch: true}
 			if i > 1 {
 				c.Start = eb[i-1].End
 				c.End = eb[i].End

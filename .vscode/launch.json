@@ -18,7 +18,7 @@
                 //"match",
                 //"replace",
                 "--action","replace", 
-                "--name","resetstyleid", 
+                "--name","addstyleid", 
                 //"-f","C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main\\public\\pages\\jsp\\d01\\D01W002I01.jsp",
                 "-f","C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main\\public\\pages\\jsp\\d01\\D01W004P01.jsp",
                 //"-f","C:\\work\\assessment\\recruit-co-jp\\emodule\\src\\main\\public\\pages\\jsp\\d01\\D01W013P00.jsp",

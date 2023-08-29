@@ -3,6 +3,7 @@ package cmd
 import (
 	"reflect"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/maja42/goval"
@@ -51,6 +52,17 @@ func EvalFuncs() EvalFunctions {
 			input := args[1].(string)
 			istrue := IsMatchString(pattern, input)
 			return istrue, nil
+		}
+		evalFuncs["strjoin"] = func(args ...interface{}) (interface{}, error) {
+
+			var buffer strings.Builder
+			for _, v := range args {
+				s := v.(string)
+				if s != "" {
+					buffer.WriteString(s)
+				}
+			}
+			return buffer.String(), nil
 		}
 	}
 	return evalFuncs

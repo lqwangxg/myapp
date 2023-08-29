@@ -18,6 +18,7 @@ const (
 	PATTERN_FORMULA_DO   = `[\$\{]?` + PATTERN_KEY + `[\}]?` + `\s*=\s*(?P<formula>.+)$`
 	PATTERN_FORMULA_BOOL = `is\w+\(|\|\||\&\&|\!|match\(`
 	PATTERN_FORMULA_INT  = `\s*[\+\-\*\/\%]\s*|len\(|len\w+\(`
+	PATTERN_FORMULA_STR  = `str\w+\(`
 	PATTERN_FORMULA_WORD = `^\s*` + PATTERN_KEY + `\s*$`
 	PATTERN_RESERVED_KEY = `^(match|group|param).\w+$`
 )
@@ -105,7 +106,14 @@ func (t *StringTemplate) EvalInt(p map[string]string) (int, error) {
 		return 0, err
 	}
 }
-
+func (t *StringTemplate) EvalString(p map[string]string) (string, error) {
+	v, err := t.Eval2(reflect.String, p)
+	if err == nil {
+		return v.Interface().(string), nil
+	} else {
+		return "", err
+	}
+}
 func (t *StringTemplate) Eval2(kind reflect.Kind, params map[string]string) (reflect.Value, error) {
 	variables := make(map[string]any)
 	for key, val := range params {
@@ -162,24 +170,31 @@ func (t *StringTemplate) ResetParam(origin map[string]string) {
 
 	key, assign := t.ToKeyValue()
 	evTemp, _ := NewTemplate(assign).ReplaceByMap(origin)
-	if IsMatchString(PATTERN_FORMULA_BOOL, assign) {
+	if IsMatchString(PATTERN_FORMULA_BOOL, evTemp) {
 		i, err := NewTemplate(evTemp).EvalTrue(origin)
 		if err != nil {
 			return
 		}
 		origin[key] = strconv.FormatBool(i)
-	} else if IsMatchString(PATTERN_FORMULA_INT, assign) {
+	} else if IsMatchString(PATTERN_FORMULA_INT, evTemp) {
 		i, err := NewTemplate(evTemp).EvalInt(origin)
 		if err != nil {
 			return
 		}
 		origin[key] = strconv.Itoa(i)
-	} else if IsMatchString(PATTERN_FORMULA_WORD, assign) {
-		if _, ok := origin[assign]; ok {
-			origin[key] = origin[assign]
+	} else if IsMatchString(PATTERN_FORMULA_STR, evTemp) {
+		i, err := NewTemplate(evTemp).EvalString(origin)
+		if err != nil {
+			return
+		}
+		origin[key] = i
+	} else if IsMatchString(PATTERN_FORMULA_WORD, evTemp) {
+		if _, ok := origin[evTemp]; ok {
+			origin[key] = origin[evTemp]
 		}
 	} else {
-		fmt.Printf("skip formula:%s, match.value:%v\n", t.Template, origin["match_value"])
+		origin[key] = evTemp
+		fmt.Printf("skip formula:%s, replaced:%s\n", t.Template, evTemp)
 	}
 }
 func (t *StringTemplate) append(paramMap map[string]string) string {
