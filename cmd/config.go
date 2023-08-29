@@ -23,13 +23,15 @@ func (appContext *AppContext) LoadFile(configFile string) bool {
 	loaded := false
 	switch kind {
 	case "app":
-		return ttManager.Execute(configFile, appContext.AppConfig)
+		return appContext.AppConfig.Load(configFile)
 	case "templates":
-		loaded = ttManager.Execute(configFile, appContext.RegexTemplates)
+		templates := &RegexTemplates{Templates: make([]RegexTemplate, 0)}
+		loaded = templates.Load(configFile)
+		appContext.RegexTemplates.Templates = append(appContext.RegexTemplates.Templates, templates.Templates...)
 	case "regex-rules":
-		loaded = ttManager.Execute(configFile, appContext.RegexRules)
-	case "check-rules":
-		loaded = ttManager.Execute(configFile, appContext.CheckRules)
+		rules := &RegexRules{Rules: make([]RegexRule, 0)}
+		loaded = rules.Load(configFile)
+		appContext.RegexRules.Rules = append(appContext.RegexRules.Rules, rules.Rules...)
 	}
 	return loaded
 }

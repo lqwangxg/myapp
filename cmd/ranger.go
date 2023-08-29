@@ -55,10 +55,12 @@ func (rule *RegexRule) MergeRangeStartEnd(input string) *[]Capture {
 			for _, e := range *eBounds {
 				if s.Start <= e.Start && e.End <= c.End {
 					c.End = e.End
+					c.MergeParams(&e)
 					break
 				}
 			}
 			c.Value = input[c.Start:c.End]
+			c.MergeParams(&s)
 			rBounds = append(rBounds, *c)
 		}
 		//last capture

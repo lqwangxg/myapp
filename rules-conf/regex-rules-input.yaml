@@ -1,0 +1,20 @@
+kind: regex-rules
+
+#=========================
+# write your custom rules below.
+#=========================
+regex-rules:
+  - name: "resetstyleid"
+    range-start: \<logic:iterate[^\<\>]*\s+indexId\s*=\s*["']?(?P<indexId>\w+)["']?
+    range-end: \<\/logic:iterate\>
+    pattern: (?P<tag>\<html:\w+\s+)(?P<p1>[^\<\>]*)\s*(?P<nameh>name\s*=\s*)(?P<namex>["']?)(?P<name>[^"']+)["']?(?P<p2>[^\<\>]*)\s*styleId\s*=\s*["']?(?P<styleId>\w+)["']?(?P<p3>[^\<\>]*)(?P<end>\\?\>)
+    param-patterns:  
+      range: 
+        - indexId\s*=\s*["']?(?P<indexId>\w+)["']?
+    
+    replace-template:
+      match: |- 
+        ${tag}${p1}${nameh}${namex}${name}${namex}${p2}styleId="${name}[${${indexId}}].${styleId}"${p3}${end}
+    formulas:
+    - do: match_skip= match(`\$\{[\w\.]+\}`, styleId) || !match_inrange
+    

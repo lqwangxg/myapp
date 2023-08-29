@@ -31,41 +31,41 @@ func (manager *TemplateManager) Execute(configFilePath string, hand IConfigLoade
 
 // Load kind=templates
 func (ts *AppConfig) Load(configFilePath string) bool {
-	return Load(ts, configFilePath)
+	return loadAny(ts, configFilePath)
 }
 
 // Load kind=templates
 func (ts *RegexTemplates) Load(configFilePath string) bool {
-	return Load(ts, configFilePath)
+	return loadAny(ts, configFilePath)
 }
 
 // Load kind=template
 func (ts *RegexTemplate) Load(configFilePath string) bool {
-	return Load(ts, configFilePath)
+	return loadAny(ts, configFilePath)
 }
 
 // Load kind=regex-rules
 func (ts *RegexRules) Load(configFilePath string) bool {
-	return Load(ts, configFilePath)
+	return loadAny(ts, configFilePath)
 }
 
 // Load kind=regex-rule
 func (ts *RegexRule) Load(configFilePath string) bool {
-	return Load(ts, configFilePath)
+	return loadAny(ts, configFilePath)
 }
 
 // Load kind=regex-rule
 func (ts *CheckRules) Load(configFilePath string) bool {
-	return Load(ts, configFilePath)
+	return loadAny(ts, configFilePath)
 }
 
 // Load kind=regex-rules
 func (ts *CheckRule) Load(configFilePath string) bool {
-	return Load(ts, configFilePath)
+	return loadAny(ts, configFilePath)
 }
 
-// Load kind=templates
-func Load(ts any, configFilePath string) bool {
+// loadAny kind=templates
+func loadAny(ts any, configFilePath string) bool {
 	viper.SetConfigFile(configFilePath)
 
 	if err := viper.ReadInConfig(); err == nil {

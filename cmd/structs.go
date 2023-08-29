@@ -79,9 +79,9 @@ type Formula struct {
 }
 
 type ParamPatterns struct {
-	Inits []string `mapstructure:"init"`
-	Fulls []string `mapstructure:"full"`
-	//Ranges  []string `mapstructure:"range"`
+	Inits   []string `mapstructure:"init"`
+	Fulls   []string `mapstructure:"full"`
+	Ranges  []string `mapstructure:"range"`
 	Matches []string `mapstructure:"match"`
 }
 type CheckRules struct {

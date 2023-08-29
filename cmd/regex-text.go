@@ -61,33 +61,31 @@ func (rs *RegexText) GetMatchResult(matchOnly, detail bool) (bool, *RegexResult)
 
 	result.SplitBy(rs.Content, matchOnly)
 	result.FillParams(rs.Content, true)
-
+	if rs.Parent != nil {
+		result.Params["from.file"] = rs.Parent.FromFile
+		result.Params["to.file"] = rs.Parent.ToFile
+	}
+	if rs.RegexRule != nil {
+		result.Params["rule.name"] = rs.RegexRule.Name
+	}
 	if detail {
-		if rs.Parent != nil {
-			result.Params["from.file"] = rs.Parent.FromFile
-			result.Params["to.file"] = rs.Parent.ToFile
-		}
-		if rs.RegexRule != nil {
-			result.Params["rule.name"] = rs.RegexRule.Name
-		}
-
 		result.Params["pattern"] = rs.Pattern
 		result.Params["matches.count"] = strconv.Itoa(0)
 		result.Params["groups.count"] = strconv.Itoa(len(result.GroupNames))
 		result.Params["groups.keys"] = strings.Join(result.GroupNames, ",")
 
-		rs.FillParams(result)
-		result.RefreshParams()
+		rs.FromRanges(result)
 		rs.EvalFormulas(result)
 	}
 	return true, result
 }
 
-func (rs *RegexText) FillParams(result *RegexResult) {
+func (rs *RegexText) FromRanges(result *RegexResult) {
 	if rs.RegexRule == nil {
 		return
 	}
 	result.RangeCaptures = *rs.RegexRule.MergeRangeStartEnd(rs.Content)
+	result.RefreshFromRanges()
 
 	initParams := make(map[string]string)
 	for _, pattern := range rs.RegexRule.ParamPatterns.Inits {
@@ -104,9 +102,23 @@ func (rs *RegexText) FillParams(result *RegexResult) {
 			}
 		}
 	}
-
-	//TODO: match range.value
-
+	// match full content
+	for _, pattern := range rs.RegexRule.ParamPatterns.Ranges {
+		for x := 0; x < len(result.Captures); x++ {
+			match := &result.Captures[x]
+			if !match.IsMatch {
+				continue
+			}
+			if range_value, ok := match.Params["range_value"]; ok {
+				tmpRT := NewRegexText(pattern, range_value)
+				if tmpOK, tmpRS := tmpRT.GetMatchResult(true, false); tmpOK {
+					for _, tm := range tmpRS.Captures {
+						result.Captures[x].MergeParams(&tm)
+					}
+				}
+			}
+		}
+	}
 	// match match.value
 	for _, pattern := range rs.RegexRule.ParamPatterns.Matches {
 		for x := 0; x < len(result.Captures); x++ {

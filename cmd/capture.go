@@ -15,6 +15,9 @@ func (rs *Capture) MergeParams(fromMatch *Capture) {
 	if !fromMatch.IsMatch {
 		return
 	}
+	if rs.Params == nil {
+		rs.Params = make(map[string]string)
+	}
 	for key, fromValue := range fromMatch.Params {
 		if _, ok := rs.Params[key]; ok {
 			// if not reserved key, can overwrite.
@@ -28,6 +31,9 @@ func (rs *Capture) MergeParams(fromMatch *Capture) {
 	}
 }
 
+// Merge fromParams to toParams map
+// fromParams, toParams: map[string]string
+// overwrite: bool
 func MergeMap(fromParams, toParams map[string]string, overwrite bool) {
 	for key, fromValue := range fromParams {
 		if _, ok := toParams[key]; ok {

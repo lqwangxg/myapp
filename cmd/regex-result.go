@@ -110,13 +110,6 @@ func (rs *RegexResult) MergeParams(fromMatch *Capture) {
 		}
 	}
 }
-func (rs *RegexResult) RefreshParams() {
-	for i := 0; i < len(rs.Captures); i++ {
-		if rs.Captures[i].IsMatch {
-			rs.Contained(&rs.Captures[i])
-		}
-	}
-}
 func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, bool) {
 	var sb strings.Builder
 	hasChanged := false
@@ -197,7 +190,13 @@ func (rs *RegexResult) Export(template *RegexTemplate, matchOnly bool) (string, 
 	//---------------------------------------
 	return sb.String(), hasChanged
 }
-
+func (rs *RegexResult) RefreshFromRanges() {
+	for i := 0; i < len(rs.Captures); i++ {
+		if rs.Captures[i].IsMatch {
+			rs.Contained(&rs.Captures[i])
+		}
+	}
+}
 func (rs *RegexResult) Contained(match *Capture) {
 	if rs.RangeCaptures == nil {
 		match.Params["match_inrange"] = strconv.FormatBool(true)
@@ -208,6 +207,7 @@ func (rs *RegexResult) Contained(match *Capture) {
 		if r.Start <= match.Start && match.End <= r.End {
 			match.Params["match_inrange"] = strconv.FormatBool(true)
 			match.Params["range_value"] = r.Value
+			match.MergeParams(&r)
 			return
 		}
 	}
