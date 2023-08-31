@@ -21,11 +21,13 @@ regex-rules:
   - name: "addstyleid"
     range-start: \<logic:iterate[^\<\>]*\s+indexId\s*=\s*["']?(?P<indexId>\w+)["']?
     range-end: \<\/logic:iterate\>
-    pattern: (?P<tag>\<html:(text|select)\s+)(?P<p1>[^\<\>]*)(?P<property>property\s*=\s*["']?[^"']+["']?)(?P<p2>[^\<\>]*)(?P<end>\\?\>)
+    pattern: (?P<tag>\<html:(text|select|checkbox|hidden)\s+)(?P<p1>[^\<\>]*)(?P<property>property\s*=\s*["']?[^"']+["']?)(?P<p2>[^\<\>]*)
     param-patterns:
       init:  
         - styleId=
         - indexId=
+      range:
+        - name\s*=\s*["']?(?P<name>[^"']+)["']?
       match:  # get params from match.value
         - property\s*=\s*(?P<ph>["']?)(?P<propertyid>[^"']+)["']?
         - styleId\s*=\s*["']?(?P<styleId>[^"']+)["']?
@@ -33,13 +35,14 @@ regex-rules:
         
     formulas:
     - do: skip1 = ! isEmpty(styleId)
-    - do: skip2 = isEmpty(property)
+    - do: skip2 = isEmpty(property) || match(`[\$\<\%]+`, property)
     - do: skip3 = isEmpty(indexId)
-    - do: match_skip = skip1 || skip2 || skip3
-    - do: styleId= strjoin(name,`[${`,indexId,`}].`,propertyid)
+    - do: match_skip = skip1 || skip2 || skip3 
+    - if: "! match_skip"
+      do: styleId= strjoin(name,`[${`,indexId,`}].`,propertyid)
     
     replace-template:
-      match: ${tag}${p1}${property} styleId=${ph}${styleId}${ph}${p2}${end}
+      match: ${tag}${p1}${property} styleId=${ph}${styleId}${ph}${p2}
     export-template: 
       match: |
         ${match_value}
@@ -48,5 +51,5 @@ regex-rules:
       group : | 
         group[${group_index}]${group_key}=${group_value}
       param : | 
-        param[${group_index}]${param_key}=${param_value}
+        param[${param_index}]${param_key}=${param_value}
     

@@ -162,30 +162,31 @@ func (t *StringTemplate) GetKey(pattern string) string {
 	}
 	return t.Template
 }
-func (t *StringTemplate) ResetParam(origin map[string]string) {
+func (t *StringTemplate) ResetParam(origin map[string]string) string {
 	// skip if empty
 	if t.Template == "" {
-		return
+		return ""
 	}
 
 	key, assign := t.ToKeyValue()
-	evTemp, _ := NewTemplate(assign).ReplaceByMap(origin)
+	evTemp := assign
+	//evTemp, _ := NewTemplate(assign).ReplaceByMap(origin)
 	if IsMatchString(PATTERN_FORMULA_BOOL, evTemp) {
 		i, err := NewTemplate(evTemp).EvalTrue(origin)
 		if err != nil {
-			return
+			return err.Error()
 		}
 		origin[key] = strconv.FormatBool(i)
 	} else if IsMatchString(PATTERN_FORMULA_INT, evTemp) {
 		i, err := NewTemplate(evTemp).EvalInt(origin)
 		if err != nil {
-			return
+			return err.Error()
 		}
 		origin[key] = strconv.Itoa(i)
 	} else if IsMatchString(PATTERN_FORMULA_STR, evTemp) {
 		i, err := NewTemplate(evTemp).EvalString(origin)
 		if err != nil {
-			return
+			return err.Error()
 		}
 		origin[key] = i
 	} else if IsMatchString(PATTERN_FORMULA_WORD, evTemp) {
@@ -196,6 +197,7 @@ func (t *StringTemplate) ResetParam(origin map[string]string) {
 		origin[key] = evTemp
 		fmt.Printf("skip formula:%s, replaced:%s\n", t.Template, evTemp)
 	}
+	return origin[key]
 }
 func (t *StringTemplate) append(paramMap map[string]string) string {
 	if t.Template == "" {

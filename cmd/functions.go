@@ -41,6 +41,9 @@ func EvalFuncs() EvalFunctions {
 		}
 		evalFuncs["isEmpty"] = func(args ...interface{}) (interface{}, error) {
 			p1 := args[0]
+			if reflect.ValueOf(p1).Kind() == reflect.Int {
+				return false, nil
+			}
 			str := p1.(string)
 			if str == "" {
 				return true, nil
@@ -57,9 +60,16 @@ func EvalFuncs() EvalFunctions {
 
 			var buffer strings.Builder
 			for _, v := range args {
-				s := v.(string)
-				if s != "" {
-					buffer.WriteString(s)
+				t := reflect.ValueOf(v)
+				if t.Kind() == reflect.Int {
+					buffer.WriteString(strconv.Itoa(v.(int)))
+				} else if t.Kind() == reflect.Bool {
+					buffer.WriteString(strconv.FormatBool(v.(bool)))
+				} else {
+					s := v.(string)
+					if s != "" {
+						buffer.WriteString(s)
+					}
 				}
 			}
 			return buffer.String(), nil

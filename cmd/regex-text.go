@@ -60,7 +60,7 @@ func (rs *RegexText) GetMatchResult(matchOnly, detail bool) (bool, *RegexResult)
 	}
 
 	result.SplitBy(rs.Content, matchOnly)
-	result.FillParams(rs.Content, true)
+	result.FillParams(rs.Content)
 	if rs.Parent != nil {
 		result.Params["from.file"] = rs.Parent.FromFile
 		result.Params["to.file"] = rs.Parent.ToFile
@@ -146,7 +146,9 @@ func (rs *RegexText) EvalFormulas(result *RegexResult) {
 			if !result.Captures[x].IsMatch {
 				continue
 			}
-			result.Captures[x].Eval(&formula)
+			msg := result.Captures[x].Eval(&formula)
+			log.Printf("formula:%s, eval:%s", formula, msg)
+			//log.Printf("formula:%s, eval:%s, match.value:%s", formula, msg, result.Captures[x].Value)
 		}
 	}
 }
