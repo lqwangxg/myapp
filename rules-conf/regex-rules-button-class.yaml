@@ -1,0 +1,22 @@
+kind: regex-rules
+#=========================
+# when match : <input type="button" 
+#     and not: class="button" 
+# replace: type="button" 
+#       => type="button" class="button"
+#=========================
+regex-rules:
+  - name: "buttonclass"
+    pattern: (?P<tag>\<input\s+)(?P<p1>[^\<\>]*)(?P<type>type="button")(?P<p2>[^\<\>]*)
+    param-patterns:
+      init:  
+        - class=
+      match:  # get params from match.value
+        - class\s*=\s*["']?(?P<class>[^"']+)["']?
+        
+    formulas:
+    - if: isEmpty(class)
+      do: type=strjoin(type,` class="button"`)
+    
+    replace-template:
+      match: ${tag}${p1}${type}${p2}
