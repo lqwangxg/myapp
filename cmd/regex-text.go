@@ -140,6 +140,10 @@ func (rs *RegexText) EvalFormulas(result *RegexResult) {
 	if rs.RegexRule == nil {
 		return
 	}
+	if rs.RegexRule.Formulas == nil {
+		return
+	}
+
 	for _, formula := range *rs.RegexRule.Formulas {
 		//result.Eval(&formula)
 		for x := 0; x < len(result.Captures); x++ {
