@@ -9,6 +9,15 @@ import (
 	"github.com/maja42/goval"
 )
 
+/*
+ * equal, not equal, not : ==, !=, !
+ * and/or: &&, ||
+ * ternary ?: example: true? 1:2
+ * Array in: "txt"/true/nil/2/[2,3] in ["txt", true, 2, [2,3]]
+ * substrings[a:b]: [0,len(str)]
+ * str function: len(str), contains(input, substr), match(input,pattern)
+ */
+
 type EvalFunctions map[string]goval.ExpressionFunction
 
 var evalFuncs EvalFunctions
@@ -51,8 +60,8 @@ func EvalFuncs() EvalFunctions {
 			return false, nil
 		}
 		evalFuncs["match"] = func(args ...interface{}) (interface{}, error) {
-			pattern := args[0].(string)
-			input := args[1].(string)
+			input := args[0].(string)
+			pattern := args[1].(string)
 			istrue := IsMatchString(pattern, input)
 			return istrue, nil
 		}

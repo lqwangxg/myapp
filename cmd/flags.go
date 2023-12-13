@@ -3,6 +3,7 @@ package cmd
 type FlagConfig struct {
 	Action          string
 	RuleName        string
+	RuleFile        string
 	ConfigFile      string
 	Pattern         string
 	ExportFlag      bool

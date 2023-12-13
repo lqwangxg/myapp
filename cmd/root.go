@@ -12,7 +12,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "myapp",
-	Short: "read params and flags in cui",
+	Short: "myapp match/replace files by rules.yaml. ",
+	Long:  "prepare rules.yaml first, then do command: myapp regex -a [match|replace] [-f file.txt | -d /destfolder] ",
 }
 
 var config AppConfig
@@ -52,6 +53,7 @@ func initConfig() {
 	// viper.AddConfigPath(home)
 	// viper.SetConfigType("yaml")
 	// viper.AutomaticEnv() // read in environment variables that match
-
-	appContext.LoadDirectory(appContext.AppConfig.RuleDir)
+	if appContext.AppConfig.RuleDir != "" {
+		appContext.LoadDirectory(appContext.AppConfig.RuleDir)
+	}
 }
