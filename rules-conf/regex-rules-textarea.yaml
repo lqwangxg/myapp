@@ -1,0 +1,44 @@
+kind: regex-rules
+#=========================
+# when match : <input type="button" 
+#     and not: class="button" 
+# replace: type="button" 
+#       => type="button" class="button"
+# example: 
+#  - <input type="button" value="udpate" class="width: 35px nomargin" onclick="sJ11R00203(this.form)">
+#  + <input type="button" value="udpate" class="width: 35px nomargin button" onclick="sJ11R00203(this.form)">
+#=========================
+regex-rules:
+  - name: "textarea"
+    pattern: (?P<tag>\<html:textarea\s*)(?P<p1>[^\<\>]*)(?P<props>property\s*=\s*["']?[^"']+["']?)(?P<s1>[^\<\>]*)(?P<styleh>style\s*=\s*["']?)(?P<style>[^"']+)(?P<stylef>["']?)
+    param-patterns:
+      init:  
+        - style=
+      match:  # get params from match.value
+        - style\s*=\s*["']?(?P<style>[^"']+)["']?
+        
+    formulas:
+    - if: "! match(style, `resize`) && ! isEmpty(style) && match(style, `\\}$`) " 
+      do: "style=strjoin(style,`,{resize: none;}`)"
+    - if: "! match(style, `resize`) && ! isEmpty(style) && match(style, `;$`) " 
+      do: "style=strjoin(style,` resize: none;`)"
+    - if: "! match(style, `resize`) && ! isEmpty(style) && ! match(style, `;$`) " 
+      do: "style=strjoin(style,`; resize: none;`)"
+
+    replace-template:
+      match: ${tag}${p1}${props}${s1}${styleh}${style}${stylef}
+
+  - name: "textarea2"
+    pattern: (?P<tag>\<html:textarea\s*)(?P<p1>[^\<\>]*)(?P<props>property\s*=\s*["']?[^"']+["']?)(?P<s1>[^\<\>]*)
+    param-patterns:
+      init:  
+        - style=
+      match:  # get params from match.value
+        - style\s*=\s*["']?(?P<style>[^"']+)["']?
+        
+    formulas:
+    - if: "isEmpty(style)" 
+      do: "props=strjoin(props,` style=\"resize: none;\"`)"
+    
+    replace-template:
+      match: ${tag}${p1}${props}${s1}
